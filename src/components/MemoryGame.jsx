@@ -59,7 +59,7 @@ export default function MemoryGame({ words, onComplete, onExit }) {
                 onComplete(score);
             }, 1000);
         }
-    }, [matched]);
+    }, [matched, cards.length, moves, onComplete]);
 
     return (
         <div className="p-4 max-w-4xl mx-auto">

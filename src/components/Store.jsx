@@ -36,19 +36,21 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
 
     const canAfford = (price) => coins >= price;
 
-    const handleBuy = (item, discountedPrice = null) => {
-        const price = discountedPrice || item.price;
-        if (canAfford(price) && !isOwned(item.id)) {
-            onBuy({ ...item, price });
+    const handleBuy = (item) => {
+        // item.price is always the actual purchase price
+        if (canAfford(item.price) && !isOwned(item.id)) {
+            onBuy(item);
         }
     };
 
-    const renderItemCard = (item, discountedPrice = null, size = 'normal') => {
+    const renderItemCard = (item, originalPrice = null, size = 'normal') => {
         const owned = isOwned(item.id);
         const ownedCount = getOwnedCount(item.id);
-        const price = discountedPrice || item.price;
-        const affordable = canAfford(price);
+        // item.price is always the actual purchase price (may be discounted)
+        // originalPrice is only passed for display (to show crossed out)
+        const affordable = canAfford(item.price);
         const rarity = RARITIES[item.rarity];
+        const hasDiscount = originalPrice && originalPrice > item.price;
 
         return (
             <motion.div
@@ -67,7 +69,7 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
                 <div className={`absolute top-2 right-2 w-2 h-2 rounded-full bg-gradient-to-r ${rarity.color}`} />
 
                 {/* Discount badge */}
-                {discountedPrice && (
+                {hasDiscount && (
                     <div className="absolute -top-2 -left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                         -30%
                     </div>
@@ -102,15 +104,15 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
                     </div>
                 ) : (
                     <div className="flex items-center gap-2 mt-1">
-                        {discountedPrice && (
+                        {hasDiscount && (
                             <span className="text-slate-400 line-through text-sm">
-                                {item.price}
+                                {originalPrice}
                             </span>
                         )}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleBuy(item, discountedPrice);
+                                handleBuy(item);
                             }}
                             disabled={!affordable}
                             className={`px-3 py-1.5 rounded-xl font-bold text-sm flex items-center gap-1 transition-colors ${
@@ -120,7 +122,7 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
                             }`}
                         >
                             <Star size={14} fill="currentColor" />
-                            {price}
+                            {item.price}
                         </button>
                     </div>
                 )}
@@ -279,7 +281,7 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
                                 </div>
                                 <div className="grid grid-cols-3 gap-4">
                                     {dailyDeals.map(item =>
-                                        renderItemCard(item, item.price)
+                                        renderItemCard(item, item.originalPrice)
                                     )}
                                 </div>
                             </div>
