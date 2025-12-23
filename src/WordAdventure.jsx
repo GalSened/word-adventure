@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Heart, Trophy, Star, ArrowRight, Zap, RefreshCw, Home, Mic, MicOff, ShoppingBag, Backpack, Calendar } from 'lucide-react';
+import { Volume2, Heart, Trophy, Star, ArrowRight, Zap, RefreshCw, Home, Mic, MicOff, ShoppingBag, Backpack, Calendar, BookOpen, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AvatarSelect from './components/AvatarSelect';
 import Leaderboard from './components/Leaderboard';
@@ -9,10 +9,21 @@ import Store from './components/Store';
 import Inventory from './components/Inventory';
 import DailyQuests from './components/DailyQuests';
 import WelcomeScreen from './components/WelcomeScreen';
-import PetWalkingGame from './components/PetWalkingGame'; // Add import
+import PetWalkingGame from './components/PetWalkingGame';
+import StoryDialogue from './components/StoryDialogue';
+import StoryPathChoice from './components/StoryPathChoice';
+import PetEvolution from './components/PetEvolution';
+import StoryIntro from './components/StoryIntro';
+import LetterPicker from './components/LetterPicker';
 import { calculateNextReview, getDueWords } from './utils/srs';
+import { hapticFeedback } from './utils/mobile';
 import { useVoiceRecognition } from './utils/voice';
 import { generateChallenge } from './utils/grammarEngine';
+import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './utils/storage';
+import { useStoryProgress } from './hooks/useStoryProgress';
+import { useItemEffects } from './hooks/useItemEffects';
+import { CHAPTERS, isChapterUnlocked } from './data/story';
+import { STORE_ITEMS } from './data/storeItems';
 
 // --- DATA ---
 const initialWordData = [
@@ -41,16 +52,25 @@ const storyChapters = {
 };
 
 export default function WordAdventure() {
-    // Persistent State
-    const [userProfile, setUserProfile] = useState(() => JSON.parse(localStorage.getItem('userProfile')) || null);
-    const [score, setScore] = useState(() => parseInt(localStorage.getItem('score')) || 0);
-    const [stars, setStars] = useState(() => parseInt(localStorage.getItem('stars')) || 0);
-    const [userProgress, setUserProgress] = useState(() => JSON.parse(localStorage.getItem('userProgress')) || {});
-    const [avatar, setAvatar] = useState(() => (JSON.parse(localStorage.getItem('userProfile')) || {}).avatar || localStorage.getItem('avatar') || '👸');
-    const [highScores, setHighScores] = useState(() => JSON.parse(localStorage.getItem('highScores')) || []);
-    const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('inventory')) || []);
-    const [dailyStats, setDailyStats] = useState(() => JSON.parse(localStorage.getItem('dailyStats')) || { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+    // Persistent State (using safe storage utilities)
+    const [userProfile, setUserProfile] = useState(() => safeGetJSON(STORAGE_KEYS.USER_PROFILE, null));
+    const [score, setScore] = useState(() => safeGetNumber(STORAGE_KEYS.SCORE, 0));
+    const [stars, setStars] = useState(() => safeGetNumber(STORAGE_KEYS.STARS, 0));
+    const [userProgress, setUserProgress] = useState(() => safeGetJSON(STORAGE_KEYS.USER_PROGRESS, {}));
+    const [avatar, setAvatar] = useState(() => {
+        const profile = safeGetJSON(STORAGE_KEYS.USER_PROFILE, {});
+        return profile.avatar || localStorage.getItem(STORAGE_KEYS.AVATAR) || '👸';
+    });
+    const [highScores, setHighScores] = useState(() => safeGetJSON(STORAGE_KEYS.HIGH_SCORES, []));
+    const [inventory, setInventory] = useState(() => safeGetJSON(STORAGE_KEYS.INVENTORY, []));
+    const [dailyStats, setDailyStats] = useState(() => safeGetJSON(STORAGE_KEYS.DAILY_STATS, {
+        date: new Date().toDateString(),
+        wordsPlayed: 0,
+        maxStreak: 0,
+        dailyScore: 0
+    }));
 
+    // Game State
     const [gameState, setGameState] = useState('start');
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [userInput, setUserInput] = useState('');
@@ -58,24 +78,36 @@ export default function WordAdventure() {
     const [feedback, setFeedback] = useState(null);
     const [activeWords, setActiveWords] = useState([]);
     const [gameMode, setGameMode] = useState('regular');
-    const [activePet, setActivePet] = useState(null); // Add state for active pet
+    const [activePet, setActivePet] = useState(null);
+    const [currentStreak, setCurrentStreak] = useState(0); // Track consecutive correct answers
 
     // Voice Hook
     const { isListening, transcript, startListening, stopListening, isSupported, setTranscript } = useVoiceRecognition();
 
-    // --- EFFECT: PERSISTENCE ---
-    useEffect(() => { localStorage.setItem('userProfile', JSON.stringify(userProfile)); }, [userProfile]);
-    useEffect(() => { localStorage.setItem('userProgress', JSON.stringify(userProgress)); }, [userProgress]);
-    useEffect(() => { localStorage.setItem('score', score); }, [score]);
-    useEffect(() => { localStorage.setItem('stars', stars); }, [stars]);
-    useEffect(() => { localStorage.setItem('inventory', JSON.stringify(inventory)); }, [inventory]);
+    // Story Progression Hook
+    const story = useStoryProgress(userProfile);
+    const [showStoryIntro, setShowStoryIntro] = useState(() =>
+        !safeGetJSON('hasSeenStoryIntro', false)
+    );
+    const [currentLevel, setCurrentLevel] = useState(null);
+
+    // Item Effects Hook
+    const itemEffects = useItemEffects(inventory);
+
+    // --- EFFECT: PERSISTENCE (using safe storage) ---
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROFILE, userProfile); }, [userProfile]);
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROGRESS, userProgress); }, [userProgress]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.SCORE, score); }, [score]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.STARS, stars); }, [stars]);
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.INVENTORY, inventory); }, [inventory]);
 
     // Daily Stats Reset Check
     useEffect(() => {
         if (dailyStats.date !== new Date().toDateString()) {
             setDailyStats({ date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+            setCurrentStreak(0); // Reset streak on new day
         } else {
-            localStorage.setItem('dailyStats', JSON.stringify(dailyStats));
+            safeSetJSON(STORAGE_KEYS.DAILY_STATS, dailyStats);
         }
     }, [dailyStats]);
 
@@ -94,12 +126,12 @@ export default function WordAdventure() {
     // GENDER HELPER
     const t = (male, female) => userProfile.gender === 'boy' ? male : female;
 
-    const updateDailyStats = (newWords = 0, newScore = 0, currentStreak = 0) => {
+    const updateDailyStats = (newWords = 0, newScore = 0, streak = 0) => {
         setDailyStats(prev => ({
             ...prev,
             wordsPlayed: prev.wordsPlayed + newWords,
             dailyScore: prev.dailyScore + newScore,
-            maxStreak: Math.max(prev.maxStreak, currentStreak)
+            maxStreak: Math.max(prev.maxStreak, streak)
         }));
     };
 
@@ -107,7 +139,7 @@ export default function WordAdventure() {
         const newScore = { points: finalScore, date: new Date().toLocaleDateString('he-IL'), avatar };
         const updatedScores = [...highScores, newScore].sort((a, b) => b.points - a.points).slice(0, 5);
         setHighScores(updatedScores);
-        localStorage.setItem('highScores', JSON.stringify(updatedScores));
+        safeSetJSON(STORAGE_KEYS.HIGH_SCORES, updatedScores);
     };
 
     const handleBuy = (item) => {
@@ -139,11 +171,18 @@ export default function WordAdventure() {
             wordsToPlay = initialWordData.filter(w => w.level === level);
             setGameMode('regular');
         }
+
+        // Start chapter in story system
+        setCurrentLevel(level);
+        story.startChapter(level);
+
         setActiveWords(wordsToPlay);
         setCurrentWordIndex(0);
-        setLives(3);
+        // Use item effects for starting lives (base 3 + bonuses)
+        setLives(itemEffects.getStartingLives(3));
         setUserInput('');
         setFeedback(null);
+        setCurrentStreak(0);
         setGameState('playing');
     };
 
@@ -187,13 +226,36 @@ export default function WordAdventure() {
                 setUserProgress(prev => ({ ...prev, [word.id]: newState }));
             }
 
-            const earnedScore = 150;
+            // Calculate score with item bonuses
+            const earnedScore = itemEffects.calculatePoints(150, currentStreak);
             setScore(s => s + earnedScore);
             setStars(s => s + 2);
-            updateDailyStats(1, earnedScore, 0);
+
+            // Update streak: increment and track max
+            const newStreak = currentStreak + 1;
+            setCurrentStreak(newStreak);
+            updateDailyStats(1, earnedScore, newStreak);
 
             confetti({ particleCount: 50, origin: { y: 0.7 } });
-            setFeedback({ type: 'success', message: 'מושלם! 🌟' });
+            hapticFeedback('success');
+
+            // Get contextual dialogue from story system
+            const dialogue = story.getDialogue('correct');
+            setFeedback({ type: 'success', message: dialogue?.text || 'מושלם! 🌟' });
+
+            // Record word learned for pet evolution
+            story.recordWordLearned();
+
+            // Check for streak milestones
+            if ([3, 5, 10, 15, 20].includes(newStreak)) {
+                const streakDialogue = story.getDialogue('streak', { streak: newStreak });
+                if (streakDialogue) {
+                    setTimeout(() => {
+                        setFeedback({ type: 'success', message: streakDialogue.text });
+                    }, 800);
+                }
+                story.recordStreak(newStreak);
+            }
 
             setTimeout(() => {
                 if (currentWordIndex < activeWords.length - 1) {
@@ -202,6 +264,12 @@ export default function WordAdventure() {
                     setTranscript('');
                     setFeedback(null);
                 } else {
+                    // Complete chapter in story system
+                    const wasPerfect = lives === 3;
+                    story.completeChapter(currentLevel, wasPerfect);
+                    if (wasPerfect && lives === 1) {
+                        story.recordComebackWin();
+                    }
                     setGameState('levelComplete');
                     saveHighScore(score + earnedScore);
                 }
@@ -212,11 +280,39 @@ export default function WordAdventure() {
                 setUserProgress(prev => ({ ...prev, [word.id]: newState }));
             }
 
+            // Check for streak protection from items
+            if (itemEffects.shouldProtectStreak() && currentStreak > 0) {
+                // Streak protected! Don't reset
+                setFeedback({ type: 'warning', message: '🛡️ המגן הציל את הרצף שלך!' });
+                setTimeout(() => setFeedback(null), 1500);
+                return; // Don't lose a life either
+            }
+
+            // Reset streak on wrong answer
+            setCurrentStreak(0);
+
             setLives(l => {
-                if (l - 1 <= 0) { setGameState('gameOver'); return 0; }
-                return l - 1;
+                const newLives = l - 1;
+                if (newLives <= 0) {
+                    setGameState('gameOver');
+                    return 0;
+                }
+                // Show low lives warning
+                if (newLives === 1) {
+                    const lowLivesDialogue = story.getDialogue('low_lives');
+                    if (lowLivesDialogue) {
+                        setTimeout(() => {
+                            setFeedback({ type: 'error', message: lowLivesDialogue.text });
+                        }, 1200);
+                    }
+                }
+                return newLives;
             });
-            setFeedback({ type: 'error', message: `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
+
+            // Get contextual dialogue from story system
+            const wrongDialogue = story.getDialogue('wrong');
+            setFeedback({ type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
+            hapticFeedback('error');
             setTimeout(() => setFeedback(null), 1000);
         }
     };
@@ -297,7 +393,45 @@ export default function WordAdventure() {
 
                     {gameState === 'inventory' && (
                         <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                            <Inventory inventory={inventory} onClose={handleInventoryClose} gender={userProfile.gender} />
+                            <Inventory
+                                inventory={inventory}
+                                equipped={itemEffects.equipped}
+                                onClose={handleInventoryClose}
+                                onEquip={itemEffects.equipItem}
+                                onUnequip={itemEffects.unequipItem}
+                                onUse={(item) => {
+                                    const effect = itemEffects.useConsumable(item, (itemId) => {
+                                        // Remove one instance of the item from inventory
+                                        setInventory(prev => {
+                                            const idx = prev.indexOf(itemId);
+                                            if (idx > -1) {
+                                                const newInv = [...prev];
+                                                newInv.splice(idx, 1);
+                                                return newInv;
+                                            }
+                                            return prev;
+                                        });
+                                    });
+                                    if (effect) {
+                                        // Apply immediate effects
+                                        const result = itemEffects.applyConsumableEffect(effect, { lives, hintsAvailable: 0, skipsAvailable: 0 });
+                                        if (result.lives !== undefined) setLives(result.lives);
+                                        if (result.bonusCoins) {
+                                            setScore(s => s + result.bonusCoins);
+                                            setFeedback({ type: 'success', message: `קיבלת ${result.bonusCoins} מטבעות! 🎉` });
+                                            setTimeout(() => setFeedback(null), 1500);
+                                        }
+                                    }
+                                }}
+                                onWalkPet={(petId) => {
+                                    const item = STORE_ITEMS[petId];
+                                    if (item) {
+                                        setActivePet({ name: item.name, icon: item.icon });
+                                        setGameState('petWalking');
+                                    }
+                                }}
+                                gender={userProfile.gender}
+                            />
                         </motion.div>
                     )}
 
@@ -319,15 +453,48 @@ export default function WordAdventure() {
                     {gameState === 'map' && (
                         <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-4">
                             <h2 className="text-3xl font-bold text-center mb-4">{t('בחר עולם', 'בחרי עולם')}</h2>
-                            {['easy', 'medium', 'hard', 'expert', 'master'].map(lvl => (
-                                <button key={lvl} onClick={() => startLevel(lvl)} className={`bg-gradient-to-r ${storyChapters[lvl].color} text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center`}>
-                                    <div>
-                                        <h3 className="text-2xl font-bold">{storyChapters[lvl].title}</h3>
-                                        <span className="text-4xl">{storyChapters[lvl].character}</span>
-                                    </div>
-                                    <ArrowRight size={24} />
-                                </button>
-                            ))}
+                            <p className="text-center text-purple-600 mb-2">
+                                📚 {story.progress.totalWordsLearned} מילים נלמדו
+                            </p>
+                            {['easy', 'medium', 'hard', 'expert', 'master'].map(lvl => {
+                                const chapter = CHAPTERS[lvl];
+                                const isUnlocked = isChapterUnlocked(lvl, story.progress.totalWordsLearned);
+                                const isCompleted = story.progress.completedChapters.includes(lvl);
+
+                                return (
+                                    <button
+                                        key={lvl}
+                                        onClick={() => isUnlocked && startLevel(lvl)}
+                                        disabled={!isUnlocked}
+                                        className={`relative bg-gradient-to-r ${chapter.color} text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all ${
+                                            !isUnlocked ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02] hover:shadow-xl'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-5xl">
+                                                {isCompleted ? '✅' : chapter.character}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold">{chapter.title}</h3>
+                                                <p className="text-sm opacity-80">
+                                                    {chapter.npc?.name && `עם ${chapter.npc.name}`}
+                                                </p>
+                                                {!isUnlocked && (
+                                                    <p className="text-xs mt-1 flex items-center gap-1">
+                                                        <Lock size={12} />
+                                                        צריך {chapter.unlockRequirement} מילים
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {isUnlocked ? (
+                                            <ArrowRight size={24} />
+                                        ) : (
+                                            <Lock size={24} />
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </motion.div>
                     )}
 
@@ -341,38 +508,33 @@ export default function WordAdventure() {
                                 <span className="text-slate-400 text-sm tracking-widest font-bold">{t('תרגם', 'תרגמי')} את ה{currentWord.type === 'sentence' ? 'משפט' : 'מילה'}</span>
                                 <h2 className="text-6xl font-black text-slate-800 my-6 leading-tight">{currentWord.hebrew}</h2>
 
-                                <div className="flex flex-wrap justify-center gap-3 mb-8 min-h-[60px]" dir="ltr">
-                                    {getScrambledContent(currentWord).map((fragment, idx) => (
-                                        <span key={idx} className={`flex items-center justify-center bg-yellow-50 border-2 border-yellow-200 rounded-xl font-bold text-yellow-700 font-mono shadow-sm ${currentWord.type === 'sentence' ? 'px-4 py-2 text-xl' : 'w-12 h-14 text-2xl'}`}>
-                                            {fragment}
-                                        </span>
-                                    ))}
-                                </div>
+                                {/* Touch-friendly letter picker */}
+                                <LetterPicker
+                                    letters={getScrambledContent(currentWord)}
+                                    currentInput={userInput}
+                                    setCurrentInput={setUserInput}
+                                    onCheck={handleCheck}
+                                    isWord={currentWord.type !== 'sentence'}
+                                    disabled={!!feedback}
+                                />
 
-                                <div className="relative mb-6">
-                                    <input
-                                        type="text"
-                                        value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value.toUpperCase())}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
-                                        placeholder={currentWord.type === 'sentence' ? t("כתוב את המשפט...", "כתבי את המשפט...") : t("כתוב כאן...", "כתבי כאן...")}
-                                        className={`w-full text-center font-mono p-4 rounded-xl border-4 border-slate-100 focus:border-purple-400 focus:outline-none ${currentWord.type === 'sentence' ? 'text-xl' : 'text-3xl'}`}
-                                        dir="ltr"
-                                        autoFocus
-                                    />
-                                    {isSupported && (
-                                        <button
-                                            onClick={isListening ? stopListening : startListening}
-                                            className={`absolute top-2 right-2 p-3 rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                                        >
-                                            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-                                        </button>
-                                    )}
-                                </div>
-
-                                <button onClick={handleCheck} className="w-full bg-purple-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-purple-700 shadow-lg transition-transform active:scale-95">
-                                    בדיקה
-                                </button>
+                                {/* Voice input button */}
+                                {isSupported && (
+                                    <button
+                                        onClick={() => {
+                                            hapticFeedback('medium');
+                                            isListening ? stopListening() : startListening();
+                                        }}
+                                        className={`mt-4 w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                                            isListening
+                                                ? 'bg-red-500 text-white animate-pulse'
+                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                                        {isListening ? 'עצור הקלטה' : 'דבר את התשובה'}
+                                    </button>
+                                )}
 
                                 <AnimatePresence>
                                     {feedback && (
@@ -409,12 +571,45 @@ export default function WordAdventure() {
                     {gameState === 'avatar' && (
                         <div className="bg-white rounded-3xl p-6 shadow-xl">
                             <h2 className="text-2xl font-bold text-center mb-6">{t('בחר דמות', 'בחרי דמות')}</h2>
-                            <AvatarSelect currentAvatar={avatar} onSelect={(icon) => { setAvatar(icon); localStorage.setItem('avatar', icon); setGameState('start'); }} />
+                            <AvatarSelect currentAvatar={avatar} onSelect={(icon) => { setAvatar(icon); localStorage.setItem(STORAGE_KEYS.AVATAR, icon); setGameState('start'); }} />
                             <button onClick={() => setGameState('start')} className="w-full mt-4 py-3 bg-slate-100 rounded-xl font-bold">חזרה</button>
                         </div>
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Story Intro - First time only */}
+            {showStoryIntro && userProfile && (
+                <StoryIntro
+                    gender={userProfile.gender}
+                    onComplete={() => {
+                        setShowStoryIntro(false);
+                        safeSetJSON('hasSeenStoryIntro', true);
+                    }}
+                />
+            )}
+
+            {/* Story Path Choice - If not chosen yet */}
+            {!story.progress.storyPath && !showStoryIntro && userProfile && (
+                <StoryPathChoice
+                    options={story.getStoryPathOptions()}
+                    onChoose={story.chooseStoryPath}
+                    playerName={userProfile.name}
+                    gender={userProfile.gender}
+                />
+            )}
+
+            {/* Story Dialogue Overlay */}
+            <StoryDialogue
+                dialogue={story.currentDialogue}
+                onDismiss={story.dismissDialogue}
+            />
+
+            {/* Pet Evolution Notification */}
+            <PetEvolution
+                evolution={story.evolutionNotification}
+                onDismiss={story.dismissEvolution}
+            />
         </div>
     );
 }
