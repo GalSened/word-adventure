@@ -9,6 +9,7 @@ const avatars = [
     { id: 'knight', icon: '🦸', name: 'אביר' },
     { id: 'alien', icon: '👽', name: 'חייזר' },
     { id: 'robot', icon: '🤖', name: 'רובוט' },
+    { id: 'cowboy', icon: '🤠', name: 'בוקר' },
     { id: 'cat', icon: '🐱', name: 'חתול' },
 ];
 
@@ -22,8 +23,8 @@ export default function AvatarSelect({ currentAvatar, onSelect }) {
                     whileTap={{ scale: 0.9 }}
                     onClick={() => onSelect(avatar.icon)}
                     className={`p-4 rounded-xl text-4xl flex flex-col items-center gap-2 transition-all ${currentAvatar === avatar.icon
-                            ? 'bg-purple-100 ring-4 ring-purple-400 shadow-lg'
-                            : 'bg-white hover:bg-slate-50 shadow-sm border border-slate-100'
+                        ? 'bg-purple-100 ring-4 ring-purple-400 shadow-lg'
+                        : 'bg-white hover:bg-slate-50 shadow-sm border border-slate-100'
                         }`}
                 >
                     <span>{avatar.icon}</span>

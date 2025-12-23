@@ -8,7 +8,8 @@ const items = [
     { id: 'glasses', name: 'משקפיים חכמים', icon: '👓', price: 300, type: 'head' },
     { id: 'cape', name: 'גלימת גיבורים', icon: '🧣', price: 800, type: 'body' },
     { id: 'dragon', name: 'דרקון מחמד', icon: '🐉', price: 5000, type: 'pet' },
-    { id: 'unicorn', name: 'חד קקרן', icon: '🦄', price: 5000, type: 'pet' },
+    { id: 'unicorn', name: 'חד קרן', icon: '🦄', price: 5000, type: 'pet' },
+    { id: 'dog', name: 'כלבלב חמוד', icon: '🐕', price: 200, type: 'pet' },
     { id: 'potion_health', name: 'שיקוי חיים', icon: '🧪', price: 200, type: 'consumable' },
 ];
 
@@ -47,8 +48,8 @@ export default function Store({ coins, inventory, onBuy, onClose }) {
                                     onClick={() => onBuy(item)}
                                     disabled={!canAfford}
                                     className={`w-full py-2 rounded-xl font-bold flex items-center justify-center gap-1 transition-colors ${canAfford
-                                            ? 'bg-purple-600 text-white hover:bg-purple-700'
-                                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                         }`}
                                 >
                                     <Star size={16} fill="currentColor" /> {item.price}

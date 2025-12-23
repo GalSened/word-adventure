@@ -1,41 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, CheckCircle, Circle } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { CheckCircle, Circle } from 'lucide-react';
 
-const QUESTS = [
-    { id: 'play_5', text: 'שחקי 5 מילים', target: 5, type: 'words' },
-    { id: 'streak_3', text: 'הגיעי לרצף של 3', target: 3, type: 'streak' },
-    { id: 'score_500', text: 'השיגי 500 נקודות', target: 500, type: 'score' },
-];
+export default function DailyQuests({ progress, gender = 'boy' }) {
+    const t = (male, female) => gender === 'boy' ? male : female;
 
-export default function DailyQuests({ progress }) {
-    // progress: { wordsPlayed: 0, maxStreak: 0, dailyScore: 0 }
+    const quests = [
+        {
+            id: 'words_10',
+            text: `${t('השלם', 'השלימי')} 10 מילים`,
+            target: 10,
+            current: progress.wordsPlayed,
+            reward: 50
+        },
+        {
+            id: 'score_1000',
+            text: `${t('הגע', 'הגיעי')} ל-1000 נקודות`,
+            target: 1000,
+            current: progress.dailyScore,
+            reward: 100
+        },
+        {
+            id: 'streak_5',
+            text: `${t('בצע', 'בצעי')} רצף של 5`,
+            target: 5,
+            current: progress.maxStreak,
+            reward: 75
+        }
+    ];
 
     return (
-        <div className="bg-white rounded-3xl p-6 shadow-lg border border-orange-100">
-            <div className="flex items-center gap-2 mb-4 text-orange-600 font-bold text-xl">
-                <Calendar /> משימות יומיות
-            </div>
-
-            <div className="space-y-3">
-                {QUESTS.map(quest => {
-                    let current = 0;
-                    if (quest.type === 'words') current = progress.wordsPlayed || 0;
-                    if (quest.type === 'streak') current = progress.maxStreak || 0;
-                    if (quest.type === 'score') current = progress.dailyScore || 0;
-
-                    const isComplete = current >= quest.target;
+        <div className="bg-white rounded-3xl p-6 shadow-lg border-2 border-orange-100">
+            <h3 className="text-2xl font-bold mb-4 text-orange-600">📜 {t('משימות יומיות', 'משימות יומיות')}</h3>
+            <div className="space-y-4">
+                {quests.map(quest => {
+                    const isCompleted = quest.current >= quest.target;
+                    const percentage = Math.min(100, (quest.current / quest.target) * 100);
 
                     return (
-                        <div key={quest.id} className={`flex items-center justify-between p-3 rounded-xl border ${isComplete ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-100'}`}>
-                            <div className="flex items-center gap-3">
-                                {isComplete ? <CheckCircle className="text-green-500" /> : <Circle className="text-slate-300" />}
-                                <span className={isComplete ? 'text-green-800 line-through opacity-70' : 'text-slate-700 font-bold'}>
+                        <div key={quest.id} className="relative">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className={`font-bold ${isCompleted ? 'text-green-600 line-through opacity-60' : 'text-slate-700'}`}>
                                     {quest.text}
                                 </span>
+                                <span className="text-sm font-mono bg-orange-100 text-orange-700 px-2 py-1 rounded-lg">
+                                    {quest.current}/{quest.target}
+                                </span>
                             </div>
-                            <div className="text-sm font-mono font-bold text-slate-400">
-                                {Math.min(current, quest.target)}/{quest.target}
+                            <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${percentage}%` }}
+                                    className={`h-full ${isCompleted ? 'bg-green-500' : 'bg-orange-400'}`}
+                                />
                             </div>
+                            {isCompleted && (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute -right-2 -top-2 bg-green-500 text-white rounded-full p-1 border-2 border-white shadow-sm"
+                                >
+                                    <CheckCircle size={14} />
+                                </motion.div>
+                            )}
                         </div>
                     );
                 })}

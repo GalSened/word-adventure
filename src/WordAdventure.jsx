@@ -8,24 +8,27 @@ import MemoryGame from './components/MemoryGame';
 import Store from './components/Store';
 import Inventory from './components/Inventory';
 import DailyQuests from './components/DailyQuests';
+import WelcomeScreen from './components/WelcomeScreen';
+import PetWalkingGame from './components/PetWalkingGame'; // Add import
 import { calculateNextReview, getDueWords } from './utils/srs';
 import { useVoiceRecognition } from './utils/voice';
+import { generateChallenge } from './utils/grammarEngine';
 
 // --- DATA ---
 const initialWordData = [
-    { id: 'cat', word: 'CAT', hint: '🐱 חיה שאוהבת חלב', hebrew: 'חתול', level: 'easy' },
-    { id: 'dog', word: 'DOG', hint: '🐕 החבר הכי טוב של האדם', hebrew: 'כלב', level: 'easy' },
-    { id: 'sun', word: 'SUN', hint: '☀️ מאיר בשמיים ביום', hebrew: 'שמש', level: 'easy' },
-    { id: 'book', word: 'BOOK', hint: '📚 קוראים אותו', hebrew: 'ספר', level: 'easy' },
-    { id: 'fish', word: 'FISH', hint: '🐟 שוחה במים', hebrew: 'דג', level: 'easy' },
-    { id: 'happy', word: 'HAPPY', hint: '😊 מרגישים ככה כשמקבלים מתנה', hebrew: 'שמח', level: 'medium' },
-    { id: 'water', word: 'WATER', hint: '💧 שותים אותו', hebrew: 'מים', level: 'medium' },
-    { id: 'flower', word: 'FLOWER', hint: '🌸 צומח בגינה ויפה', hebrew: 'פרח', level: 'medium' },
-    { id: 'butterfly', word: 'BUTTERFLY', hint: '🦋 חרק יפה עם כנפיים צבעוניות', hebrew: 'פרפר', level: 'hard' },
-    { id: 'adventure', word: 'ADVENTURE', hint: '🗺️ מסע מרגש עם הרפתקאות', hebrew: 'הרפתקה', level: 'hard' },
-    { id: 'treasure', word: 'TREASURE', hint: '💎 משהו יקר שמוצאים', hebrew: 'אוצר', level: 'hard' },
-    { id: 'mysterious', word: 'MYSTERIOUS', hint: '🕵️‍♀️ משהו לא ברור ומסקרן', hebrew: 'מסתורי', level: 'expert' },
-    { id: 'extraordinary', word: 'EXTRAORDINARY', hint: '🌟 משהו מאוד מיוחד ולא רגיל', hebrew: 'יוצא דופן', level: 'expert' },
+    { id: 'cat', word: 'CAT', hint: '🐱 חיה שאוהבת חלב', hebrew: 'חתול', level: 'easy', type: 'word' },
+    { id: 'dog', word: 'DOG', hint: '🐕 החבר הכי טוב של האדם', hebrew: 'כלב', level: 'easy', type: 'word' },
+    { id: 'sun', word: 'SUN', hint: '☀️ מאיר בשמיים ביום', hebrew: 'שמש', level: 'easy', type: 'word' },
+    { id: 'book', word: 'BOOK', hint: '📚 קוראים אותו', hebrew: 'ספר', level: 'easy', type: 'word' },
+    { id: 'fish', word: 'FISH', hint: '🐟 שוחה במים', hebrew: 'דג', level: 'easy', type: 'word' },
+    { id: 'happy', word: 'HAPPY', hint: '😊 מרגישים ככה כשמקבלים מתנה', hebrew: 'שמח', level: 'medium', type: 'word' },
+    { id: 'water', word: 'WATER', hint: '💧 שותים אותו', hebrew: 'מים', level: 'medium', type: 'word' },
+    { id: 'flower', word: 'FLOWER', hint: '🌸 צומח בגינה ויפה', hebrew: 'פרח', level: 'medium', type: 'word' },
+    { id: 'butterfly', word: 'BUTTERFLY', hint: '🦋 חרק יפה עם כנפיים צבעוניות', hebrew: 'פרפר', level: 'hard', type: 'word' },
+    { id: 'adventure', word: 'ADVENTURE', hint: '🗺️ מסע מרגש עם הרפתקאות', hebrew: 'הרפתקה', level: 'hard', type: 'word' },
+    { id: 'treasure', word: 'TREASURE', hint: '💎 משהו יקר שמוצאים', hebrew: 'אוצר', level: 'hard', type: 'word' },
+    { id: 'mysterious', word: 'MYSTERIOUS', hint: '🕵️‍♀️ משהו לא ברור ומסקרן', hebrew: 'מסתורי', level: 'expert', type: 'word' },
+    { id: 'extraordinary', word: 'EXTRAORDINARY', hint: '🌟 משהו מאוד מיוחד ולא רגיל', hebrew: 'יוצא דופן', level: 'expert', type: 'word' },
 ];
 
 const storyChapters = {
@@ -33,10 +36,21 @@ const storyChapters = {
     medium: { title: 'היער הקסום', color: 'from-blue-400 to-indigo-600', character: '🧚' },
     hard: { title: 'מגדל הקוסם', color: 'from-purple-500 to-fuchsia-600', character: '🧙' },
     expert: { title: 'היקום האינסופי', color: 'from-rose-500 to-pink-600', character: '👽' },
+    master: { title: 'היכל החכמים', color: 'from-amber-500 to-red-600', character: '🏛️' },
     review: { title: 'חזרות חכמות', color: 'from-yellow-400 to-orange-500', character: '🧠' }
 };
 
 export default function WordAdventure() {
+    // Persistent State
+    const [userProfile, setUserProfile] = useState(() => JSON.parse(localStorage.getItem('userProfile')) || null);
+    const [score, setScore] = useState(() => parseInt(localStorage.getItem('score')) || 0);
+    const [stars, setStars] = useState(() => parseInt(localStorage.getItem('stars')) || 0);
+    const [userProgress, setUserProgress] = useState(() => JSON.parse(localStorage.getItem('userProgress')) || {});
+    const [avatar, setAvatar] = useState(() => (JSON.parse(localStorage.getItem('userProfile')) || {}).avatar || localStorage.getItem('avatar') || '👸');
+    const [highScores, setHighScores] = useState(() => JSON.parse(localStorage.getItem('highScores')) || []);
+    const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('inventory')) || []);
+    const [dailyStats, setDailyStats] = useState(() => JSON.parse(localStorage.getItem('dailyStats')) || { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+
     const [gameState, setGameState] = useState('start');
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [userInput, setUserInput] = useState('');
@@ -44,20 +58,13 @@ export default function WordAdventure() {
     const [feedback, setFeedback] = useState(null);
     const [activeWords, setActiveWords] = useState([]);
     const [gameMode, setGameMode] = useState('regular');
-
-    // Persistent State
-    const [score, setScore] = useState(() => parseInt(localStorage.getItem('score')) || 0); // "Coins"
-    const [stars, setStars] = useState(() => parseInt(localStorage.getItem('stars')) || 0);
-    const [userProgress, setUserProgress] = useState(() => JSON.parse(localStorage.getItem('userProgress')) || {});
-    const [avatar, setAvatar] = useState(() => localStorage.getItem('avatar') || '👸');
-    const [highScores, setHighScores] = useState(() => JSON.parse(localStorage.getItem('highScores')) || []);
-    const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('inventory')) || []);
-    const [dailyStats, setDailyStats] = useState(() => JSON.parse(localStorage.getItem('dailyStats')) || { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+    const [activePet, setActivePet] = useState(null); // Add state for active pet
 
     // Voice Hook
     const { isListening, transcript, startListening, stopListening, isSupported, setTranscript } = useVoiceRecognition();
 
     // --- EFFECT: PERSISTENCE ---
+    useEffect(() => { localStorage.setItem('userProfile', JSON.stringify(userProfile)); }, [userProfile]);
     useEffect(() => { localStorage.setItem('userProgress', JSON.stringify(userProgress)); }, [userProgress]);
     useEffect(() => { localStorage.setItem('score', score); }, [score]);
     useEffect(() => { localStorage.setItem('stars', stars); }, [stars]);
@@ -75,9 +82,17 @@ export default function WordAdventure() {
     // Voice Transcript Update
     useEffect(() => {
         if (transcript) {
-            setUserInput(transcript.toUpperCase().replace('.', ''));
+            setUserInput(transcript.toUpperCase().replace('.', '').replace('?', '').trim());
         }
     }, [transcript]);
+
+    // If no user profile, show welcome screen
+    if (!userProfile) {
+        return <WelcomeScreen onComplete={(profile) => setUserProfile(profile)} />;
+    }
+
+    // GENDER HELPER
+    const t = (male, female) => userProfile.gender === 'boy' ? male : female;
 
     const updateDailyStats = (newWords = 0, newScore = 0, currentStreak = 0) => {
         setDailyStats(prev => ({
@@ -99,14 +114,20 @@ export default function WordAdventure() {
         if (score >= item.price) {
             setScore(s => s - item.price);
             setInventory(prev => [...prev, item.id]);
-            setFeedback({ type: 'success', message: `רכשת ${item.name}! 🎉` });
+            setFeedback({ type: 'success', message: `${t('רכשת', 'רכשת')} ${item.name}! 🎉` });
             setTimeout(() => setFeedback(null), 1500);
         }
     };
 
     const startLevel = (level) => {
         let wordsToPlay = [];
-        if (level === 'review') {
+
+        if (level === 'master') {
+            // PROCEDURAL GENERATION MODE
+            wordsToPlay = Array(5).fill(null).map(() => generateChallenge());
+            setGameMode('regular');
+        }
+        else if (level === 'review') {
             const allWordsWithState = initialWordData.map(w => ({ ...w, srs: userProgress[w.id] }));
             wordsToPlay = getDueWords(allWordsWithState).slice(0, 10);
             if (wordsToPlay.length === 0) {
@@ -126,19 +147,53 @@ export default function WordAdventure() {
         setGameState('playing');
     };
 
+    const handleInventoryClose = (petId) => {
+        if (petId) {
+            // Launch pet walking game
+            const petDetails = {
+                'dog': { name: 'כלבלב', icon: '🐕' },
+                'unicorn': { name: 'חד קרן', icon: '🦄' },
+                'dragon': { name: 'דרקון', icon: '🐉' }
+            };
+            setActivePet(petDetails[petId]);
+            setGameState('petWalking');
+        } else {
+            setGameState('map');
+        }
+    };
+
+    const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
+
+    const getScrambledContent = (item) => {
+        if (item.type === 'sentence') {
+            return shuffleArray(item.word.split(' '));
+        } else {
+            return shuffleArray(item.word.split(''));
+        }
+    };
+
     const processAnswer = (isCorrect) => {
         const word = activeWords[currentWordIndex];
         if (isCorrect) {
-            const newState = calculateNextReview(userProgress[word.id], 5);
-            setUserProgress(prev => ({ ...prev, [word.id]: newState }));
+            if (!word.id.startsWith('gen_')) {
+                const newState = calculateNextReview(userProgress[word.id], 5);
+                setUserProgress(prev => ({ ...prev, [word.id]: newState }));
+            }
 
-            const earnedScore = 100;
+            const earnedScore = 150;
             setScore(s => s + earnedScore);
-            setStars(s => s + 1);
-            updateDailyStats(1, earnedScore, 0); // Need to track streak properly in next iteration
+            setStars(s => s + 2);
+            updateDailyStats(1, earnedScore, 0);
 
             confetti({ particleCount: 50, origin: { y: 0.7 } });
-            setFeedback({ type: 'success', message: 'מעולה! 🎉' });
+            setFeedback({ type: 'success', message: 'מושלם! 🌟' });
 
             setTimeout(() => {
                 if (currentWordIndex < activeWords.length - 1) {
@@ -152,21 +207,25 @@ export default function WordAdventure() {
                 }
             }, 1500);
         } else {
-            const newState = calculateNextReview(userProgress[word.id], 0);
-            setUserProgress(prev => ({ ...prev, [word.id]: newState }));
+            if (!word.id.startsWith('gen_')) {
+                const newState = calculateNextReview(userProgress[word.id], 0);
+                setUserProgress(prev => ({ ...prev, [word.id]: newState }));
+            }
 
             setLives(l => {
                 if (l - 1 <= 0) { setGameState('gameOver'); return 0; }
                 return l - 1;
             });
-            setFeedback({ type: 'error', message: 'לא נורא, נסי שוב! 💪' });
+            setFeedback({ type: 'error', message: `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
             setTimeout(() => setFeedback(null), 1000);
         }
     };
 
     const handleCheck = () => {
-        const currentWord = activeWords[currentWordIndex];
-        if (userInput.trim().toUpperCase() === currentWord.word) {
+        const currentItem = activeWords[currentWordIndex];
+        const normalize = (str) => str.trim().toUpperCase().replace(/[.,?!]/g, '').replace(/\s+/g, ' ');
+
+        if (normalize(userInput) === normalize(currentItem.word)) {
             processAnswer(true);
         } else {
             processAnswer(false);
@@ -199,11 +258,12 @@ export default function WordAdventure() {
                 <AnimatePresence mode="wait">
                     {gameState === 'start' && (
                         <motion.div key="start" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-6">
-                            <h1 className="text-6xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">Word Adventure</h1>
+                            <h1 className="text-6xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">Word Adventure</h1>
+                            <h2 className="text-xl font-bold text-purple-400 mb-8">{t('שלום', 'שלום')} {userProfile.name}! {t('מוכן להרפתקה?', 'מוכנה להרפתקה?')}</h2>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-10">
                                 <div className="md:col-span-2">
-                                    <DailyQuests progress={dailyStats} />
+                                    <DailyQuests progress={dailyStats} gender={userProfile.gender} />
                                 </div>
 
                                 <button onClick={() => startLevel('review')} className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all">
@@ -214,7 +274,7 @@ export default function WordAdventure() {
                                 <button onClick={() => setGameState('map')} className="bg-gradient-to-r from-blue-400 to-indigo-500 text-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all">
                                     <div className="text-4xl mb-2">🗺️</div>
                                     <div className="text-2xl font-bold">מפת עולמות</div>
-                                    <div className="text-sm opacity-90">שחקי שלבים חדשים</div>
+                                    <div className="text-sm opacity-90">{t('שחק שלבים חדשים', 'שחקי שלבים חדשים')}</div>
                                 </button>
                                 <button onClick={() => setGameState('memory')} className="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all">
                                     <div className="text-4xl mb-2">🃏</div>
@@ -236,15 +296,30 @@ export default function WordAdventure() {
                     )}
 
                     {gameState === 'inventory' && (
-                        <motion.div key="inventory" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                            <Inventory inventory={inventory} onClose={() => setGameState('start')} />
+                        <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+                            <Inventory inventory={inventory} onClose={handleInventoryClose} gender={userProfile.gender} />
+                        </motion.div>
+                    )}
+
+                    {gameState === 'petWalking' && (
+                        <motion.div key="petWalking" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="absolute inset-0 z-50 bg-white">
+                            <PetWalkingGame
+                                pet={activePet}
+                                avatar={avatar}
+                                onExit={() => setGameState('map')}
+                                onComplete={(earnedScore) => {
+                                    setScore(s => s + earnedScore);
+                                    updateDailyStats(0, earnedScore, 0);
+                                    setGameState('map');
+                                }}
+                            />
                         </motion.div>
                     )}
 
                     {gameState === 'map' && (
                         <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-4">
-                            <h2 className="text-3xl font-bold text-center mb-4">בחרי עולם</h2>
-                            {['easy', 'medium', 'hard', 'expert'].map(lvl => (
+                            <h2 className="text-3xl font-bold text-center mb-4">{t('בחר עולם', 'בחרי עולם')}</h2>
+                            {['easy', 'medium', 'hard', 'expert', 'master'].map(lvl => (
                                 <button key={lvl} onClick={() => startLevel(lvl)} className={`bg-gradient-to-r ${storyChapters[lvl].color} text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center`}>
                                     <div>
                                         <h3 className="text-2xl font-bold">{storyChapters[lvl].title}</h3>
@@ -263,8 +338,16 @@ export default function WordAdventure() {
                             </div>
 
                             <div className="bg-white rounded-3xl p-8 shadow-2xl text-center border-b-8 border-purple-100 relative overflow-hidden">
-                                <span className="text-slate-400 text-sm tracking-widest font-bold">תרגמי את המילה</span>
-                                <h2 className="text-6xl font-black text-slate-800 my-6">{currentWord.hebrew}</h2>
+                                <span className="text-slate-400 text-sm tracking-widest font-bold">{t('תרגם', 'תרגמי')} את ה{currentWord.type === 'sentence' ? 'משפט' : 'מילה'}</span>
+                                <h2 className="text-6xl font-black text-slate-800 my-6 leading-tight">{currentWord.hebrew}</h2>
+
+                                <div className="flex flex-wrap justify-center gap-3 mb-8 min-h-[60px]" dir="ltr">
+                                    {getScrambledContent(currentWord).map((fragment, idx) => (
+                                        <span key={idx} className={`flex items-center justify-center bg-yellow-50 border-2 border-yellow-200 rounded-xl font-bold text-yellow-700 font-mono shadow-sm ${currentWord.type === 'sentence' ? 'px-4 py-2 text-xl' : 'w-12 h-14 text-2xl'}`}>
+                                            {fragment}
+                                        </span>
+                                    ))}
+                                </div>
 
                                 <div className="relative mb-6">
                                     <input
@@ -272,8 +355,8 @@ export default function WordAdventure() {
                                         value={userInput}
                                         onChange={(e) => setUserInput(e.target.value.toUpperCase())}
                                         onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
-                                        placeholder="כתבי כאן..."
-                                        className="w-full text-center text-3xl font-mono p-4 rounded-xl border-4 border-slate-100 focus:border-purple-400 focus:outline-none"
+                                        placeholder={currentWord.type === 'sentence' ? t("כתוב את המשפט...", "כתבי את המשפט...") : t("כתוב כאן...", "כתבי כאן...")}
+                                        className={`w-full text-center font-mono p-4 rounded-xl border-4 border-slate-100 focus:border-purple-400 focus:outline-none ${currentWord.type === 'sentence' ? 'text-xl' : 'text-3xl'}`}
                                         dir="ltr"
                                         autoFocus
                                     />
@@ -310,7 +393,7 @@ export default function WordAdventure() {
                             <h2 className="text-4xl font-bold mb-6">{gameState === 'levelComplete' ? 'Woohoo!' : 'אוי לא!'}</h2>
                             <div className="flex justify-center gap-4">
                                 <button onClick={() => setGameState('start')} className="px-6 py-3 bg-slate-100 rounded-xl font-bold">לתפריט</button>
-                                <button onClick={() => startLevel('review')} className="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold">שחקי שוב</button>
+                                <button onClick={() => startLevel('review')} className="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold">{t('שחק שוב', 'שחקי שוב')}</button>
                             </div>
                         </motion.div>
                     )}
@@ -325,7 +408,7 @@ export default function WordAdventure() {
 
                     {gameState === 'avatar' && (
                         <div className="bg-white rounded-3xl p-6 shadow-xl">
-                            <h2 className="text-2xl font-bold text-center mb-6">בחרי דמות</h2>
+                            <h2 className="text-2xl font-bold text-center mb-6">{t('בחר דמות', 'בחרי דמות')}</h2>
                             <AvatarSelect currentAvatar={avatar} onSelect={(icon) => { setAvatar(icon); localStorage.setItem('avatar', icon); setGameState('start'); }} />
                             <button onClick={() => setGameState('start')} className="w-full mt-4 py-3 bg-slate-100 rounded-xl font-bold">חזרה</button>
                         </div>
