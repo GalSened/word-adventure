@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, Heart, Trophy, Star, ArrowRight, Zap, RefreshCw, Home, Mic, MicOff, ShoppingBag, Backpack, Calendar, BookOpen, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -188,14 +188,14 @@ export default function WordAdventure() {
 
     const handleInventoryClose = (petId) => {
         if (petId) {
-            // Launch pet walking game
-            const petDetails = {
-                'dog': { name: 'כלבלב', icon: '🐕' },
-                'unicorn': { name: 'חד קרן', icon: '🦄' },
-                'dragon': { name: 'דרקון', icon: '🐉' }
-            };
-            setActivePet(petDetails[petId]);
-            setGameState('petWalking');
+            // Launch pet walking game using STORE_ITEMS data
+            const item = STORE_ITEMS[petId];
+            if (item && item.walkable) {
+                setActivePet({ name: item.name, icon: item.icon });
+                setGameState('petWalking');
+            } else {
+                setGameState('map');
+            }
         } else {
             setGameState('map');
         }
@@ -210,13 +210,15 @@ export default function WordAdventure() {
         return shuffled;
     };
 
-    const getScrambledContent = (item) => {
-        if (item.type === 'sentence') {
-            return shuffleArray(item.word.split(' '));
+    // Memoize scrambled content so it doesn't change on every render
+    const scrambledContent = useMemo(() => {
+        if (!currentWord) return [];
+        if (currentWord.type === 'sentence') {
+            return shuffleArray(currentWord.word.split(' '));
         } else {
-            return shuffleArray(item.word.split(''));
+            return shuffleArray(currentWord.word.split(''));
         }
-    };
+    }, [currentWord?.id]); // Only reshuffle when word changes
 
     const processAnswer = (isCorrect) => {
         const word = activeWords[currentWordIndex];
@@ -265,9 +267,11 @@ export default function WordAdventure() {
                     setFeedback(null);
                 } else {
                     // Complete chapter in story system
-                    const wasPerfect = lives === 3;
+                    const startingLives = itemEffects.getStartingLives(3);
+                    const wasPerfect = lives === startingLives;
                     story.completeChapter(currentLevel, wasPerfect);
-                    if (wasPerfect && lives === 1) {
+                    // Comeback win: finished with only 1 life remaining
+                    if (lives === 1) {
                         story.recordComebackWin();
                     }
                     setGameState('levelComplete');
@@ -501,7 +505,9 @@ export default function WordAdventure() {
                     {gameState === 'playing' && currentWord && (
                         <motion.div key="play" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-xl mx-auto">
                             <div className="flex justify-center gap-2 mb-6">
-                                {[1, 2, 3].map(i => <Heart key={i} fill={i <= lives ? "#ef4444" : "none"} className={i <= lives ? "text-red-500" : "text-slate-300"} />)}
+                                {Array.from({ length: itemEffects.getStartingLives(3) }, (_, i) => i + 1).map(i => (
+                                    <Heart key={i} fill={i <= lives ? "#ef4444" : "none"} className={i <= lives ? "text-red-500" : "text-slate-300"} />
+                                ))}
                             </div>
 
                             <div className="bg-white rounded-3xl p-8 shadow-2xl text-center border-b-8 border-purple-100 relative overflow-hidden">
@@ -510,7 +516,8 @@ export default function WordAdventure() {
 
                                 {/* Touch-friendly letter picker */}
                                 <LetterPicker
-                                    letters={getScrambledContent(currentWord)}
+                                    key={currentWord.id}
+                                    letters={scrambledContent}
                                     currentInput={userInput}
                                     setCurrentInput={setUserInput}
                                     onCheck={handleCheck}
@@ -539,7 +546,11 @@ export default function WordAdventure() {
                                 <AnimatePresence>
                                     {feedback && (
                                         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-md z-20`}>
-                                            <div className={`text-center font-bold text-3xl ${feedback.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                                            <div className={`text-center font-bold text-3xl ${
+                                                feedback.type === 'success' ? 'text-green-600' :
+                                                feedback.type === 'warning' ? 'text-amber-500' :
+                                                'text-red-500'
+                                            }`}>
                                                 {feedback.message}
                                             </div>
                                         </motion.div>

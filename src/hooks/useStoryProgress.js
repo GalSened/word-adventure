@@ -215,7 +215,7 @@ export function useStoryProgress(userProfile) {
             const currentStage = getPetEvolutionStage(progress.activePetId, progress.totalWordsLearned);
             const newStage = getPetEvolutionStage(progress.activePetId, newTotal);
 
-            if (newStage && newStage.level > currentStage.level) {
+            if (newStage && currentStage && newStage.level > currentStage.level) {
                 // Pet evolved!
                 const evolutionKey = `${progress.activePetId}_${newStage.level}`;
                 if (!progress.seenEvolutions.includes(evolutionKey)) {
