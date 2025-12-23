@@ -98,7 +98,12 @@ export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב
     // --- GAME LOOP ---
     useEffect(() => {
         let frameId;
+        let isActive = true; // Flag to prevent updates after unmount
+
         const animate = () => {
+            // Stop animation if component is unmounted
+            if (!isActive) return;
+
             if (gameState === 'walking') {
                 setSceneOffset(prev => prev + 6); // Scroll speed
 
@@ -121,11 +126,20 @@ export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב
                     return next;
                 });
             }
-            frameId = requestAnimationFrame(animate);
+
+            // Only continue loop if still active
+            if (isActive) {
+                frameId = requestAnimationFrame(animate);
+            }
         };
+
         frameId = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frameId);
-    }, [gameState, score]);
+
+        return () => {
+            isActive = false; // Prevent further updates
+            cancelAnimationFrame(frameId);
+        };
+    }, [gameState, score, onComplete]);
 
     const triggerFind = () => {
         setGameState('sniffing');

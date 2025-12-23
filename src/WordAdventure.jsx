@@ -13,6 +13,7 @@ import PetWalkingGame from './components/PetWalkingGame'; // Add import
 import { calculateNextReview, getDueWords } from './utils/srs';
 import { useVoiceRecognition } from './utils/voice';
 import { generateChallenge } from './utils/grammarEngine';
+import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './utils/storage';
 
 // --- DATA ---
 const initialWordData = [
@@ -41,16 +42,25 @@ const storyChapters = {
 };
 
 export default function WordAdventure() {
-    // Persistent State
-    const [userProfile, setUserProfile] = useState(() => JSON.parse(localStorage.getItem('userProfile')) || null);
-    const [score, setScore] = useState(() => parseInt(localStorage.getItem('score')) || 0);
-    const [stars, setStars] = useState(() => parseInt(localStorage.getItem('stars')) || 0);
-    const [userProgress, setUserProgress] = useState(() => JSON.parse(localStorage.getItem('userProgress')) || {});
-    const [avatar, setAvatar] = useState(() => (JSON.parse(localStorage.getItem('userProfile')) || {}).avatar || localStorage.getItem('avatar') || '👸');
-    const [highScores, setHighScores] = useState(() => JSON.parse(localStorage.getItem('highScores')) || []);
-    const [inventory, setInventory] = useState(() => JSON.parse(localStorage.getItem('inventory')) || []);
-    const [dailyStats, setDailyStats] = useState(() => JSON.parse(localStorage.getItem('dailyStats')) || { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+    // Persistent State (using safe storage utilities)
+    const [userProfile, setUserProfile] = useState(() => safeGetJSON(STORAGE_KEYS.USER_PROFILE, null));
+    const [score, setScore] = useState(() => safeGetNumber(STORAGE_KEYS.SCORE, 0));
+    const [stars, setStars] = useState(() => safeGetNumber(STORAGE_KEYS.STARS, 0));
+    const [userProgress, setUserProgress] = useState(() => safeGetJSON(STORAGE_KEYS.USER_PROGRESS, {}));
+    const [avatar, setAvatar] = useState(() => {
+        const profile = safeGetJSON(STORAGE_KEYS.USER_PROFILE, {});
+        return profile.avatar || localStorage.getItem(STORAGE_KEYS.AVATAR) || '👸';
+    });
+    const [highScores, setHighScores] = useState(() => safeGetJSON(STORAGE_KEYS.HIGH_SCORES, []));
+    const [inventory, setInventory] = useState(() => safeGetJSON(STORAGE_KEYS.INVENTORY, []));
+    const [dailyStats, setDailyStats] = useState(() => safeGetJSON(STORAGE_KEYS.DAILY_STATS, {
+        date: new Date().toDateString(),
+        wordsPlayed: 0,
+        maxStreak: 0,
+        dailyScore: 0
+    }));
 
+    // Game State
     const [gameState, setGameState] = useState('start');
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
     const [userInput, setUserInput] = useState('');
@@ -58,24 +68,26 @@ export default function WordAdventure() {
     const [feedback, setFeedback] = useState(null);
     const [activeWords, setActiveWords] = useState([]);
     const [gameMode, setGameMode] = useState('regular');
-    const [activePet, setActivePet] = useState(null); // Add state for active pet
+    const [activePet, setActivePet] = useState(null);
+    const [currentStreak, setCurrentStreak] = useState(0); // Track consecutive correct answers
 
     // Voice Hook
     const { isListening, transcript, startListening, stopListening, isSupported, setTranscript } = useVoiceRecognition();
 
-    // --- EFFECT: PERSISTENCE ---
-    useEffect(() => { localStorage.setItem('userProfile', JSON.stringify(userProfile)); }, [userProfile]);
-    useEffect(() => { localStorage.setItem('userProgress', JSON.stringify(userProgress)); }, [userProgress]);
-    useEffect(() => { localStorage.setItem('score', score); }, [score]);
-    useEffect(() => { localStorage.setItem('stars', stars); }, [stars]);
-    useEffect(() => { localStorage.setItem('inventory', JSON.stringify(inventory)); }, [inventory]);
+    // --- EFFECT: PERSISTENCE (using safe storage) ---
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROFILE, userProfile); }, [userProfile]);
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROGRESS, userProgress); }, [userProgress]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.SCORE, score); }, [score]);
+    useEffect(() => { localStorage.setItem(STORAGE_KEYS.STARS, stars); }, [stars]);
+    useEffect(() => { safeSetJSON(STORAGE_KEYS.INVENTORY, inventory); }, [inventory]);
 
     // Daily Stats Reset Check
     useEffect(() => {
         if (dailyStats.date !== new Date().toDateString()) {
             setDailyStats({ date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 });
+            setCurrentStreak(0); // Reset streak on new day
         } else {
-            localStorage.setItem('dailyStats', JSON.stringify(dailyStats));
+            safeSetJSON(STORAGE_KEYS.DAILY_STATS, dailyStats);
         }
     }, [dailyStats]);
 
@@ -94,12 +106,12 @@ export default function WordAdventure() {
     // GENDER HELPER
     const t = (male, female) => userProfile.gender === 'boy' ? male : female;
 
-    const updateDailyStats = (newWords = 0, newScore = 0, currentStreak = 0) => {
+    const updateDailyStats = (newWords = 0, newScore = 0, streak = 0) => {
         setDailyStats(prev => ({
             ...prev,
             wordsPlayed: prev.wordsPlayed + newWords,
             dailyScore: prev.dailyScore + newScore,
-            maxStreak: Math.max(prev.maxStreak, currentStreak)
+            maxStreak: Math.max(prev.maxStreak, streak)
         }));
     };
 
@@ -107,7 +119,7 @@ export default function WordAdventure() {
         const newScore = { points: finalScore, date: new Date().toLocaleDateString('he-IL'), avatar };
         const updatedScores = [...highScores, newScore].sort((a, b) => b.points - a.points).slice(0, 5);
         setHighScores(updatedScores);
-        localStorage.setItem('highScores', JSON.stringify(updatedScores));
+        safeSetJSON(STORAGE_KEYS.HIGH_SCORES, updatedScores);
     };
 
     const handleBuy = (item) => {
@@ -190,7 +202,11 @@ export default function WordAdventure() {
             const earnedScore = 150;
             setScore(s => s + earnedScore);
             setStars(s => s + 2);
-            updateDailyStats(1, earnedScore, 0);
+
+            // Update streak: increment and track max
+            const newStreak = currentStreak + 1;
+            setCurrentStreak(newStreak);
+            updateDailyStats(1, earnedScore, newStreak);
 
             confetti({ particleCount: 50, origin: { y: 0.7 } });
             setFeedback({ type: 'success', message: 'מושלם! 🌟' });
@@ -211,6 +227,9 @@ export default function WordAdventure() {
                 const newState = calculateNextReview(userProgress[word.id], 0);
                 setUserProgress(prev => ({ ...prev, [word.id]: newState }));
             }
+
+            // Reset streak on wrong answer
+            setCurrentStreak(0);
 
             setLives(l => {
                 if (l - 1 <= 0) { setGameState('gameOver'); return 0; }
@@ -409,7 +428,7 @@ export default function WordAdventure() {
                     {gameState === 'avatar' && (
                         <div className="bg-white rounded-3xl p-6 shadow-xl">
                             <h2 className="text-2xl font-bold text-center mb-6">{t('בחר דמות', 'בחרי דמות')}</h2>
-                            <AvatarSelect currentAvatar={avatar} onSelect={(icon) => { setAvatar(icon); localStorage.setItem('avatar', icon); setGameState('start'); }} />
+                            <AvatarSelect currentAvatar={avatar} onSelect={(icon) => { setAvatar(icon); localStorage.setItem(STORAGE_KEYS.AVATAR, icon); setGameState('start'); }} />
                             <button onClick={() => setGameState('start')} className="w-full mt-4 py-3 bg-slate-100 rounded-xl font-bold">חזרה</button>
                         </div>
                     )}
