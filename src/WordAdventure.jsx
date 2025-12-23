@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Heart, Trophy, Star, ArrowRight, Zap, RefreshCw, Home, Mic, MicOff, ShoppingBag, Backpack, Calendar } from 'lucide-react';
+import { Volume2, Heart, Trophy, Star, ArrowRight, Zap, RefreshCw, Home, Mic, MicOff, ShoppingBag, Backpack, Calendar, BookOpen, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AvatarSelect from './components/AvatarSelect';
 import Leaderboard from './components/Leaderboard';
@@ -9,11 +9,17 @@ import Store from './components/Store';
 import Inventory from './components/Inventory';
 import DailyQuests from './components/DailyQuests';
 import WelcomeScreen from './components/WelcomeScreen';
-import PetWalkingGame from './components/PetWalkingGame'; // Add import
+import PetWalkingGame from './components/PetWalkingGame';
+import StoryDialogue from './components/StoryDialogue';
+import StoryPathChoice from './components/StoryPathChoice';
+import PetEvolution from './components/PetEvolution';
+import StoryIntro from './components/StoryIntro';
 import { calculateNextReview, getDueWords } from './utils/srs';
 import { useVoiceRecognition } from './utils/voice';
 import { generateChallenge } from './utils/grammarEngine';
 import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './utils/storage';
+import { useStoryProgress } from './hooks/useStoryProgress';
+import { CHAPTERS, isChapterUnlocked } from './data/story';
 
 // --- DATA ---
 const initialWordData = [
@@ -73,6 +79,13 @@ export default function WordAdventure() {
 
     // Voice Hook
     const { isListening, transcript, startListening, stopListening, isSupported, setTranscript } = useVoiceRecognition();
+
+    // Story Progression Hook
+    const story = useStoryProgress(userProfile);
+    const [showStoryIntro, setShowStoryIntro] = useState(() =>
+        !safeGetJSON('hasSeenStoryIntro', false)
+    );
+    const [currentLevel, setCurrentLevel] = useState(null);
 
     // --- EFFECT: PERSISTENCE (using safe storage) ---
     useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROFILE, userProfile); }, [userProfile]);
@@ -151,11 +164,17 @@ export default function WordAdventure() {
             wordsToPlay = initialWordData.filter(w => w.level === level);
             setGameMode('regular');
         }
+
+        // Start chapter in story system
+        setCurrentLevel(level);
+        story.startChapter(level);
+
         setActiveWords(wordsToPlay);
         setCurrentWordIndex(0);
         setLives(3);
         setUserInput('');
         setFeedback(null);
+        setCurrentStreak(0);
         setGameState('playing');
     };
 
@@ -209,7 +228,24 @@ export default function WordAdventure() {
             updateDailyStats(1, earnedScore, newStreak);
 
             confetti({ particleCount: 50, origin: { y: 0.7 } });
-            setFeedback({ type: 'success', message: 'מושלם! 🌟' });
+
+            // Get contextual dialogue from story system
+            const dialogue = story.getDialogue('correct');
+            setFeedback({ type: 'success', message: dialogue?.text || 'מושלם! 🌟' });
+
+            // Record word learned for pet evolution
+            story.recordWordLearned();
+
+            // Check for streak milestones
+            if ([3, 5, 10, 15, 20].includes(newStreak)) {
+                const streakDialogue = story.getDialogue('streak', { streak: newStreak });
+                if (streakDialogue) {
+                    setTimeout(() => {
+                        setFeedback({ type: 'success', message: streakDialogue.text });
+                    }, 800);
+                }
+                story.recordStreak(newStreak);
+            }
 
             setTimeout(() => {
                 if (currentWordIndex < activeWords.length - 1) {
@@ -218,6 +254,12 @@ export default function WordAdventure() {
                     setTranscript('');
                     setFeedback(null);
                 } else {
+                    // Complete chapter in story system
+                    const wasPerfect = lives === 3;
+                    story.completeChapter(currentLevel, wasPerfect);
+                    if (wasPerfect && lives === 1) {
+                        story.recordComebackWin();
+                    }
                     setGameState('levelComplete');
                     saveHighScore(score + earnedScore);
                 }
@@ -232,10 +274,26 @@ export default function WordAdventure() {
             setCurrentStreak(0);
 
             setLives(l => {
-                if (l - 1 <= 0) { setGameState('gameOver'); return 0; }
-                return l - 1;
+                const newLives = l - 1;
+                if (newLives <= 0) {
+                    setGameState('gameOver');
+                    return 0;
+                }
+                // Show low lives warning
+                if (newLives === 1) {
+                    const lowLivesDialogue = story.getDialogue('low_lives');
+                    if (lowLivesDialogue) {
+                        setTimeout(() => {
+                            setFeedback({ type: 'error', message: lowLivesDialogue.text });
+                        }, 1200);
+                    }
+                }
+                return newLives;
             });
-            setFeedback({ type: 'error', message: `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
+
+            // Get contextual dialogue from story system
+            const wrongDialogue = story.getDialogue('wrong');
+            setFeedback({ type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
             setTimeout(() => setFeedback(null), 1000);
         }
     };
@@ -338,15 +396,48 @@ export default function WordAdventure() {
                     {gameState === 'map' && (
                         <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-4">
                             <h2 className="text-3xl font-bold text-center mb-4">{t('בחר עולם', 'בחרי עולם')}</h2>
-                            {['easy', 'medium', 'hard', 'expert', 'master'].map(lvl => (
-                                <button key={lvl} onClick={() => startLevel(lvl)} className={`bg-gradient-to-r ${storyChapters[lvl].color} text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center`}>
-                                    <div>
-                                        <h3 className="text-2xl font-bold">{storyChapters[lvl].title}</h3>
-                                        <span className="text-4xl">{storyChapters[lvl].character}</span>
-                                    </div>
-                                    <ArrowRight size={24} />
-                                </button>
-                            ))}
+                            <p className="text-center text-purple-600 mb-2">
+                                📚 {story.progress.totalWordsLearned} מילים נלמדו
+                            </p>
+                            {['easy', 'medium', 'hard', 'expert', 'master'].map(lvl => {
+                                const chapter = CHAPTERS[lvl];
+                                const isUnlocked = isChapterUnlocked(lvl, story.progress.totalWordsLearned);
+                                const isCompleted = story.progress.completedChapters.includes(lvl);
+
+                                return (
+                                    <button
+                                        key={lvl}
+                                        onClick={() => isUnlocked && startLevel(lvl)}
+                                        disabled={!isUnlocked}
+                                        className={`relative bg-gradient-to-r ${chapter.color} text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all ${
+                                            !isUnlocked ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02] hover:shadow-xl'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-5xl">
+                                                {isCompleted ? '✅' : chapter.character}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold">{chapter.title}</h3>
+                                                <p className="text-sm opacity-80">
+                                                    {chapter.npc?.name && `עם ${chapter.npc.name}`}
+                                                </p>
+                                                {!isUnlocked && (
+                                                    <p className="text-xs mt-1 flex items-center gap-1">
+                                                        <Lock size={12} />
+                                                        צריך {chapter.unlockRequirement} מילים
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {isUnlocked ? (
+                                            <ArrowRight size={24} />
+                                        ) : (
+                                            <Lock size={24} />
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </motion.div>
                     )}
 
@@ -434,6 +525,39 @@ export default function WordAdventure() {
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Story Intro - First time only */}
+            {showStoryIntro && userProfile && (
+                <StoryIntro
+                    gender={userProfile.gender}
+                    onComplete={() => {
+                        setShowStoryIntro(false);
+                        safeSetJSON('hasSeenStoryIntro', true);
+                    }}
+                />
+            )}
+
+            {/* Story Path Choice - If not chosen yet */}
+            {!story.progress.storyPath && !showStoryIntro && userProfile && (
+                <StoryPathChoice
+                    options={story.getStoryPathOptions()}
+                    onChoose={story.chooseStoryPath}
+                    playerName={userProfile.name}
+                    gender={userProfile.gender}
+                />
+            )}
+
+            {/* Story Dialogue Overlay */}
+            <StoryDialogue
+                dialogue={story.currentDialogue}
+                onDismiss={story.dismissDialogue}
+            />
+
+            {/* Pet Evolution Notification */}
+            <PetEvolution
+                evolution={story.evolutionNotification}
+                onDismiss={story.dismissEvolution}
+            />
         </div>
     );
 }
