@@ -33,6 +33,14 @@ export function useItemEffects(inventory = []) {
         safeSetJSON(STORAGE_KEY, newEquipped);
     }, []);
 
+    // Get slot for an item (defined before use to avoid hoisting issues)
+    const getItemSlot = useCallback((item) => {
+        if (item.category === 'boosters') return `booster_${item.id}`;
+        if (item.category === 'themes') return 'theme';
+        if (item.effect?.slot) return item.effect.slot;
+        return item.category;
+    }, []);
+
     // Equip an item
     const equipItem = useCallback((item) => {
         if (!item.equipable) return false;
@@ -44,7 +52,7 @@ export function useItemEffects(inventory = []) {
         };
         saveEquipped(newEquipped);
         return true;
-    }, [equipped, saveEquipped]);
+    }, [equipped, saveEquipped, getItemSlot]);
 
     // Unequip an item
     const unequipItem = useCallback((item) => {
@@ -53,7 +61,7 @@ export function useItemEffects(inventory = []) {
         delete newEquipped[slot];
         saveEquipped(newEquipped);
         return true;
-    }, [equipped, saveEquipped]);
+    }, [equipped, saveEquipped, getItemSlot]);
 
     // Use a consumable item (returns effect to apply)
     const useConsumable = useCallback((item, removeFromInventory) => {
@@ -68,14 +76,6 @@ export function useItemEffects(inventory = []) {
         // Return the effect to be applied
         return item.effect;
     }, [consumableCounts]);
-
-    // Get slot for an item
-    const getItemSlot = (item) => {
-        if (item.category === 'boosters') return `booster_${item.id}`;
-        if (item.category === 'themes') return 'theme';
-        if (item.effect?.slot) return item.effect.slot;
-        return item.category;
-    };
 
     // Calculate active bonuses from equipped items
     const activeBonuses = useMemo(() => {
