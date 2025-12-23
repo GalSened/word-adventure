@@ -19,7 +19,9 @@ import { useVoiceRecognition } from './utils/voice';
 import { generateChallenge } from './utils/grammarEngine';
 import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './utils/storage';
 import { useStoryProgress } from './hooks/useStoryProgress';
+import { useItemEffects } from './hooks/useItemEffects';
 import { CHAPTERS, isChapterUnlocked } from './data/story';
+import { STORE_ITEMS } from './data/storeItems';
 
 // --- DATA ---
 const initialWordData = [
@@ -86,6 +88,9 @@ export default function WordAdventure() {
         !safeGetJSON('hasSeenStoryIntro', false)
     );
     const [currentLevel, setCurrentLevel] = useState(null);
+
+    // Item Effects Hook
+    const itemEffects = useItemEffects(inventory);
 
     // --- EFFECT: PERSISTENCE (using safe storage) ---
     useEffect(() => { safeSetJSON(STORAGE_KEYS.USER_PROFILE, userProfile); }, [userProfile]);
@@ -171,7 +176,8 @@ export default function WordAdventure() {
 
         setActiveWords(wordsToPlay);
         setCurrentWordIndex(0);
-        setLives(3);
+        // Use item effects for starting lives (base 3 + bonuses)
+        setLives(itemEffects.getStartingLives(3));
         setUserInput('');
         setFeedback(null);
         setCurrentStreak(0);
@@ -218,7 +224,8 @@ export default function WordAdventure() {
                 setUserProgress(prev => ({ ...prev, [word.id]: newState }));
             }
 
-            const earnedScore = 150;
+            // Calculate score with item bonuses
+            const earnedScore = itemEffects.calculatePoints(150, currentStreak);
             setScore(s => s + earnedScore);
             setStars(s => s + 2);
 
@@ -268,6 +275,14 @@ export default function WordAdventure() {
             if (!word.id.startsWith('gen_')) {
                 const newState = calculateNextReview(userProgress[word.id], 0);
                 setUserProgress(prev => ({ ...prev, [word.id]: newState }));
+            }
+
+            // Check for streak protection from items
+            if (itemEffects.shouldProtectStreak() && currentStreak > 0) {
+                // Streak protected! Don't reset
+                setFeedback({ type: 'warning', message: '🛡️ המגן הציל את הרצף שלך!' });
+                setTimeout(() => setFeedback(null), 1500);
+                return; // Don't lose a life either
             }
 
             // Reset streak on wrong answer
@@ -374,7 +389,45 @@ export default function WordAdventure() {
 
                     {gameState === 'inventory' && (
                         <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                            <Inventory inventory={inventory} onClose={handleInventoryClose} gender={userProfile.gender} />
+                            <Inventory
+                                inventory={inventory}
+                                equipped={itemEffects.equipped}
+                                onClose={handleInventoryClose}
+                                onEquip={itemEffects.equipItem}
+                                onUnequip={itemEffects.unequipItem}
+                                onUse={(item) => {
+                                    const effect = itemEffects.useConsumable(item, (itemId) => {
+                                        // Remove one instance of the item from inventory
+                                        setInventory(prev => {
+                                            const idx = prev.indexOf(itemId);
+                                            if (idx > -1) {
+                                                const newInv = [...prev];
+                                                newInv.splice(idx, 1);
+                                                return newInv;
+                                            }
+                                            return prev;
+                                        });
+                                    });
+                                    if (effect) {
+                                        // Apply immediate effects
+                                        const result = itemEffects.applyConsumableEffect(effect, { lives, hintsAvailable: 0, skipsAvailable: 0 });
+                                        if (result.lives !== undefined) setLives(result.lives);
+                                        if (result.bonusCoins) {
+                                            setScore(s => s + result.bonusCoins);
+                                            setFeedback({ type: 'success', message: `קיבלת ${result.bonusCoins} מטבעות! 🎉` });
+                                            setTimeout(() => setFeedback(null), 1500);
+                                        }
+                                    }
+                                }}
+                                onWalkPet={(petId) => {
+                                    const item = STORE_ITEMS[petId];
+                                    if (item) {
+                                        setActivePet({ name: item.name, icon: item.icon });
+                                        setGameState('petWalking');
+                                    }
+                                }}
+                                gender={userProfile.gender}
+                            />
                         </motion.div>
                     )}
 
