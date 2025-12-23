@@ -14,7 +14,9 @@ import StoryDialogue from './components/StoryDialogue';
 import StoryPathChoice from './components/StoryPathChoice';
 import PetEvolution from './components/PetEvolution';
 import StoryIntro from './components/StoryIntro';
+import LetterPicker from './components/LetterPicker';
 import { calculateNextReview, getDueWords } from './utils/srs';
+import { hapticFeedback } from './utils/mobile';
 import { useVoiceRecognition } from './utils/voice';
 import { generateChallenge } from './utils/grammarEngine';
 import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './utils/storage';
@@ -235,6 +237,7 @@ export default function WordAdventure() {
             updateDailyStats(1, earnedScore, newStreak);
 
             confetti({ particleCount: 50, origin: { y: 0.7 } });
+            hapticFeedback('success');
 
             // Get contextual dialogue from story system
             const dialogue = story.getDialogue('correct');
@@ -309,6 +312,7 @@ export default function WordAdventure() {
             // Get contextual dialogue from story system
             const wrongDialogue = story.getDialogue('wrong');
             setFeedback({ type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
+            hapticFeedback('error');
             setTimeout(() => setFeedback(null), 1000);
         }
     };
@@ -504,38 +508,33 @@ export default function WordAdventure() {
                                 <span className="text-slate-400 text-sm tracking-widest font-bold">{t('תרגם', 'תרגמי')} את ה{currentWord.type === 'sentence' ? 'משפט' : 'מילה'}</span>
                                 <h2 className="text-6xl font-black text-slate-800 my-6 leading-tight">{currentWord.hebrew}</h2>
 
-                                <div className="flex flex-wrap justify-center gap-3 mb-8 min-h-[60px]" dir="ltr">
-                                    {getScrambledContent(currentWord).map((fragment, idx) => (
-                                        <span key={idx} className={`flex items-center justify-center bg-yellow-50 border-2 border-yellow-200 rounded-xl font-bold text-yellow-700 font-mono shadow-sm ${currentWord.type === 'sentence' ? 'px-4 py-2 text-xl' : 'w-12 h-14 text-2xl'}`}>
-                                            {fragment}
-                                        </span>
-                                    ))}
-                                </div>
+                                {/* Touch-friendly letter picker */}
+                                <LetterPicker
+                                    letters={getScrambledContent(currentWord)}
+                                    currentInput={userInput}
+                                    setCurrentInput={setUserInput}
+                                    onCheck={handleCheck}
+                                    isWord={currentWord.type !== 'sentence'}
+                                    disabled={!!feedback}
+                                />
 
-                                <div className="relative mb-6">
-                                    <input
-                                        type="text"
-                                        value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value.toUpperCase())}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
-                                        placeholder={currentWord.type === 'sentence' ? t("כתוב את המשפט...", "כתבי את המשפט...") : t("כתוב כאן...", "כתבי כאן...")}
-                                        className={`w-full text-center font-mono p-4 rounded-xl border-4 border-slate-100 focus:border-purple-400 focus:outline-none ${currentWord.type === 'sentence' ? 'text-xl' : 'text-3xl'}`}
-                                        dir="ltr"
-                                        autoFocus
-                                    />
-                                    {isSupported && (
-                                        <button
-                                            onClick={isListening ? stopListening : startListening}
-                                            className={`absolute top-2 right-2 p-3 rounded-full transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                                        >
-                                            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-                                        </button>
-                                    )}
-                                </div>
-
-                                <button onClick={handleCheck} className="w-full bg-purple-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-purple-700 shadow-lg transition-transform active:scale-95">
-                                    בדיקה
-                                </button>
+                                {/* Voice input button */}
+                                {isSupported && (
+                                    <button
+                                        onClick={() => {
+                                            hapticFeedback('medium');
+                                            isListening ? stopListening() : startListening();
+                                        }}
+                                        className={`mt-4 w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                                            isListening
+                                                ? 'bg-red-500 text-white animate-pulse'
+                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                                        {isListening ? 'עצור הקלטה' : 'דבר את התשובה'}
+                                    </button>
+                                )}
 
                                 <AnimatePresence>
                                     {feedback && (
