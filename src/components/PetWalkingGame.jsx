@@ -1,14 +1,8 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Star, Volume2, X } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import SpriteAnimator from './SpriteAnimator';
-
-// Import sprite assets directly so Vite bundles them
-// Assuming assets are in src/assets/sprites/
-import girlWalkSprite from '../assets/sprites/girl_walk.png';
-import boyWalkSprite from '../assets/sprites/boy_walk.png';
-import dogWalkSprite from '../assets/sprites/dog_walk.png';
+import { hapticFeedback } from '../utils/mobile';
 
 // --- VISUAL ASSETS ---
 const FLORA = ['🌳', '🌲', '🌿', '🌾', '🌷', '🌻', '🎍'];
@@ -39,39 +33,68 @@ const THEMES = [
     }
 ];
 
-export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב' }, avatar, userProfile, onExit, onComplete }) {
-    // Determine Sprite based on Avatar
-    // WordAdventure passes 'avatar' as emoji (e.g. 👸) and userProfile object.
+// Pet emoji representations with walking animation
+const PET_EMOJIS = {
+    dog: { idle: '🐕', walk: ['🐕', '🐕‍🦺', '🐕'], sniff: '🐶' },
+    unicorn: { idle: '🦄', walk: ['🦄', '🐴', '🦄'], sniff: '🦄' },
+    dragon: { idle: '🐉', walk: ['🐉', '🐲', '🐉'], sniff: '🐉' }
+};
+
+// Avatar emoji with walking animation
+const AVATAR_WALK_FRAMES = {
+    girl: ['👸', '🚶‍♀️', '👸'],
+    boy: ['🤴', '🚶‍♂️', '🤴']
+};
+
+export default function PetWalkingGame({
+    pet = { icon: '🐕', name: 'כלבלב' },
+    avatar,
+    userProfile,
+    onExit,
+    onComplete
+}) {
     const isGirl = (userProfile?.gender === 'girl') || (avatar === '👸') || (userProfile?.avatar === '👸');
-    const playerSprite = isGirl ? girlWalkSprite : boyWalkSprite;
-    const petSprite = dogWalkSprite; // Helper for now, we can add more pets later
+
+    // Determine pet type from icon
+    const petType = pet.icon.includes('🐕') ? 'dog'
+                  : pet.icon.includes('🦄') ? 'unicorn'
+                  : pet.icon.includes('🐉') ? 'dragon'
+                  : 'dog';
 
     // --- STATE ---
     const [gameState, setGameState] = useState('walking');
     const [progress, setProgress] = useState(0);
     const [score, setScore] = useState(0);
     const [themeIndex, setThemeIndex] = useState(0);
+    const [walkFrame, setWalkFrame] = useState(0);
 
-    // Physics & Interaction
-    const [sceneOffset, setSceneOffset] = useState(0);
+    // Scene scroll offset
+    const sceneOffsetRef = useRef(0);
+    const [sceneRenderTrigger, setSceneRenderTrigger] = useState(0);
 
-    // Positions (Relative to screen)
-    const [petPos, setPetPos] = useState({ x: 400, y: 0 }); // Pet is ahead
-    const [avatarPos, setAvatarPos] = useState({ x: 100, y: 0 });
+    // Positions (relative to viewport)
+    const petPosRef = useRef({ x: 400, y: 0, bobOffset: 0 });
+    const avatarPosRef = useRef({ x: 100, y: 0 });
 
     // Question Logic
     const [currentWord, setCurrentWord] = useState(null);
     const [options, setOptions] = useState([]);
 
+    // Animation frame reference
+    const animationFrameRef = useRef(null);
+    const lastFrameTimeRef = useRef(performance.now());
+
     // --- PROCEDURAL GENERATION ---
     const worldObjects = useMemo(() => {
         return Array.from({ length: 40 }).map((_, i) => ({
             id: i,
-            icon: Math.random() > 0.8 ? FAUNA[Math.floor(Math.random() * FAUNA.length)] : FLORA[Math.floor(Math.random() * FLORA.length)],
+            icon: Math.random() > 0.8
+                ? FAUNA[Math.floor(Math.random() * FAUNA.length)]
+                : FLORA[Math.floor(Math.random() * FLORA.length)],
             x: i * 150 + Math.random() * 50,
             y: Math.random() * 20,
             scale: 0.5 + Math.random() * 1.5,
-            depth: Math.random() // Used for parallax speed
+            depth: Math.random()
         }));
     }, []);
 
@@ -95,121 +118,171 @@ export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב
         { en: 'OCEAN', he: 'אוקיינוס', icon: '🌊' }
     ], []);
 
-    // --- GAME LOOP ---
+    // --- OPTIMIZED GAME LOOP ---
     useEffect(() => {
-        let frameId;
-        let isActive = true; // Flag to prevent updates after unmount
+        let isActive = true;
+        let frameCount = 0;
 
-        const animate = () => {
-            // Stop animation if component is unmounted
+        const animate = (currentTime) => {
             if (!isActive) return;
 
+            lastFrameTimeRef.current = currentTime;
+
             if (gameState === 'walking') {
-                setSceneOffset(prev => prev + 6); // Scroll speed
+                // Scroll scene
+                sceneOffsetRef.current += 6;
 
-                // Pet "Running Ahead" Breath
-                setPetPos(prev => ({
-                    ...prev,
-                    x: 400 + Math.sin(Date.now() / 500) * 50 // Moves back and forth slightly
-                }));
+                // Pet "bouncing" animation (smooth sine wave)
+                const petBobSpeed = 0.003;
+                petPosRef.current.bobOffset = Math.sin(currentTime * petBobSpeed) * 15;
 
+                // Pet horizontal sway (running ahead/catching up)
+                const petSwaySpeed = 0.001;
+                const petSwayAmount = 30;
+                petPosRef.current.x = 400 + Math.sin(currentTime * petSwaySpeed) * petSwayAmount;
+
+                // Update progress
                 setProgress(prev => {
-                    const next = prev + 0.05; // Slow progress
+                    const next = prev + 0.05;
                     if (next >= 100) {
+                        isActive = false;
                         onComplete(score);
                         return 100;
                     }
-                    // Random encounter
-                    if (Math.random() < 0.005 && next < 95 && next > 2) {
+
+                    // Random encounter (less frequent, more controlled)
+                    if (Math.random() < 0.003 && next < 95 && next > 5) {
                         triggerFind();
                     }
                     return next;
                 });
+
+                // Update walk animation frame (every 5 frames)
+                frameCount++;
+                if (frameCount % 5 === 0) {
+                    setWalkFrame(prev => (prev + 1) % 3);
+                }
+
+                // Trigger re-render for smooth animation (throttled)
+                if (frameCount % 2 === 0) {
+                    setSceneRenderTrigger(prev => prev + 1);
+                }
             }
 
-            // Only continue loop if still active
-            if (isActive) {
-                frameId = requestAnimationFrame(animate);
-            }
+            animationFrameRef.current = requestAnimationFrame(animate);
         };
 
-        frameId = requestAnimationFrame(animate);
+        animationFrameRef.current = requestAnimationFrame(animate);
 
         return () => {
-            isActive = false; // Prevent further updates
-            cancelAnimationFrame(frameId);
+            isActive = false;
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
         };
     }, [gameState, score, onComplete]);
 
-    const triggerFind = () => {
+    const triggerFind = useCallback(() => {
         setGameState('sniffing');
-        // Pet stops
+        hapticFeedback('medium');
+
         setTimeout(() => {
             setGameState('found');
             const word = quests[Math.floor(Math.random() * quests.length)];
             setCurrentWord(word);
-            const distractors = quests.filter(w => w.en !== word.en).sort(() => 0.5 - Math.random()).slice(0, 2);
+            const distractors = quests
+                .filter(w => w.en !== word.en)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 2);
             setOptions([word, ...distractors].sort(() => 0.5 - Math.random()));
         }, 1200);
-    };
+    }, [quests]);
 
-    const handleAnswer = (selected) => {
+    const handleAnswer = useCallback((selected) => {
         if (selected.en === currentWord.en) {
             setGameState('correct');
             setScore(s => s + 50);
+            hapticFeedback('success');
+
             confetti({
                 particleCount: 150,
                 spread: 100,
                 origin: { y: 0.6 },
                 colors: ['#FFD700', '#FFA500', '#FFFFFF']
             });
+
             setTimeout(() => {
                 setGameState('walking');
-                // Change theme occasionally
-                if (Math.random() > 0.6) setThemeIndex(prev => (prev + 1) % THEMES.length);
+                if (Math.random() > 0.6) {
+                    setThemeIndex(prev => (prev + 1) % THEMES.length);
+                }
             }, 2500);
         } else {
             setGameState('wrong');
+            hapticFeedback('error');
             setTimeout(() => setGameState('found'), 1000);
         }
-    };
+    }, [currentWord]);
 
-    // --- LEASH PHYSICS ---
-    // Calculates a bezier curve between the Avatar's hand and Pet's collar
-    const getLeashPath = () => {
-        // Avatar hand position (approximate based on sprite)
-        const handX = avatarPos.x + 130;
-        const handY = 550; // Fixed height relative to ground/screen? adjusting below
+    // --- LEASH PHYSICS (IMPROVED) ---
+    const getLeashPath = useCallback(() => {
+        const handX = avatarPosRef.current.x + 100;
+        const handY = 520;
 
-        // Pet collar position
-        const collarX = petPos.x + 30;
-        const collarY = 620;
+        const collarX = petPosRef.current.x + 40;
+        const collarY = 580 + petPosRef.current.bobOffset;
 
-        // Curve control point (sag)
+        // Natural catenary curve (hanging rope)
+        const distance = Math.abs(collarX - handX);
         const midX = (handX + collarX) / 2;
-        const sag = Math.abs(collarX - handX) * 0.5 + (gameState === 'walking' ? Math.sin(Date.now() / 200) * 10 : 20);
+        const sag = distance * 0.4 + (gameState === 'walking' ? Math.sin(Date.now() / 300) * 8 : 15);
         const midY = Math.max(handY, collarY) + sag;
 
         return `M ${handX} ${handY} Q ${midX} ${midY} ${collarX} ${collarY}`;
-    };
+    }, [gameState, sceneRenderTrigger]);
 
     const currentTheme = THEMES[themeIndex];
 
-    return (
-        <div className="fixed inset-0 overflow-hidden font-sans select-none" style={{ filter: currentTheme.filter }}>
-            {/* Dynamic Sky */}
-            <div className={`absolute inset-0 bg-gradient-to-b ${currentTheme.sky} transition-colors duration-2000`}></div>
+    // Get current pet emoji based on state
+    const getCurrentPetEmoji = () => {
+        const petEmoji = PET_EMOJIS[petType];
+        if (gameState === 'sniffing') return petEmoji.sniff;
+        if (gameState === 'walking') return petEmoji.walk[walkFrame];
+        return petEmoji.idle;
+    };
 
-            {/* Clouds */}
+    // Get current avatar emoji based on state
+    const getCurrentAvatarEmoji = () => {
+        const avatarFrames = AVATAR_WALK_FRAMES[isGirl ? 'girl' : 'boy'];
+        if (gameState === 'walking') return avatarFrames[walkFrame];
+        return isGirl ? '👸' : '🤴';
+    };
+
+    return (
+        <div
+            className="fixed inset-0 overflow-hidden font-sans select-none"
+            style={{ filter: currentTheme.filter }}
+            role="application"
+            aria-label="Pet walking adventure game"
+        >
+            {/* Dynamic Sky */}
+            <div className={`absolute inset-0 bg-gradient-to-b ${currentTheme.sky} transition-all duration-[3000ms]`} />
+
+            {/* Clouds (optimized with transform) */}
             {clouds.map(c => {
-                const x = (c.x - sceneOffset * c.speed * 0.2) % window.innerWidth;
+                const x = (c.x - sceneOffsetRef.current * c.speed * 0.2) % window.innerWidth;
                 const finalX = x < -200 ? x + window.innerWidth + 200 : x;
                 return (
-                    <div key={c.id} className="absolute transition-transform will-change-transform"
+                    <div
+                        key={c.id}
+                        className="absolute will-change-transform"
                         style={{
                             transform: `translate3d(${finalX}px, ${c.y}%, 0)`,
-                            fontSize: '5rem', opacity: 0.6
-                        }}>
+                            fontSize: '5rem',
+                            opacity: 0.6
+                        }}
+                        aria-hidden="true"
+                    >
                         {c.icon}
                     </div>
                 );
@@ -217,39 +290,56 @@ export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב
 
             {/* UI HUD */}
             <div className="absolute top-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
-                <button onClick={onExit} className="pointer-events-auto bg-white/20 backdrop-blur-md p-3 rounded-full border-2 border-white/50 text-white shadow-xl hover:scale-110 transition-transform">
+                <button
+                    onClick={onExit}
+                    className="pointer-events-auto bg-white/20 backdrop-blur-md p-3 rounded-full border-2 border-white/50 text-white shadow-xl hover:scale-110 active:scale-95 transition-transform"
+                    aria-label="Exit pet walking game"
+                >
                     <ArrowLeft size={32} />
                 </button>
 
                 <div className="flex flex-col items-center">
-                    <div className="bg-black/30 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 text-white font-bold text-xl shadow-lg flex items-center gap-2">
+                    <div
+                        className="bg-black/30 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 text-white font-bold text-xl shadow-lg flex items-center gap-2"
+                        role="status"
+                        aria-label={`Score: ${score}`}
+                    >
                         <Star className="text-yellow-400 fill-yellow-400" /> {score}
                     </div>
-                    <div className="w-64 h-3 bg-black/30 rounded-full mt-2 overflow-hidden border border-white/10">
+                    <div
+                        className="w-64 h-3 bg-black/30 rounded-full mt-2 overflow-hidden border border-white/10"
+                        role="progressbar"
+                        aria-valuenow={Math.round(progress)}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-label="Adventure progress"
+                    >
                         <motion.div
                             className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 shadow-[0_0_10px_rgba(255,200,0,0.5)]"
-                            style={{ width: `${progress}%` }}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ type: "spring", stiffness: 50 }}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Ground Layers */}
-            <div className="absolute bottom-0 w-[200%] h-[60vh] opacity-40 origin-bottom skew-y-3 pointer-events-none"
+            {/* Ground Layers (optimized) */}
+            <div
+                className="absolute bottom-0 w-[200%] h-[60vh] opacity-40 origin-bottom pointer-events-none will-change-transform"
                 style={{
                     background: `linear-gradient(to top, ${currentTheme.ground.split(' ')[1]}, transparent)`,
-                    transform: `translateX(${-((sceneOffset * 0.2) % 50)}%) skewY(-2deg)`
-                }}>
-            </div>
+                    transform: `translateX(${-((sceneOffsetRef.current * 0.2) % 50)}%) skewY(-2deg)`
+                }}
+                aria-hidden="true"
+            />
 
-            <div className={`absolute bottom-0 w-full h-[35vh] bg-gradient-to-t ${currentTheme.ground} skew-x-12 origin-bottom scale-110 shadow-[0_-20px_40px_rgba(0,0,0,0.2)]`}></div>
+            <div className={`absolute bottom-0 w-full h-[35vh] bg-gradient-to-t ${currentTheme.ground} origin-bottom shadow-[0_-20px_40px_rgba(0,0,0,0.2)]`} aria-hidden="true" />
 
-            {/* Decor Objects (Trees/Rocks) */}
-            <div className="absolute inset-0 pointer-events-none">
+            {/* Decor Objects (optimized with GPU acceleration) */}
+            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
                 {worldObjects.map(obj => {
-                    // Parallax Scroll Calculation
-                    const realX = obj.x - sceneOffset * (obj.depth > 0.5 ? 1.2 : 0.8);
-                    // Wrap around logic
+                    const realX = obj.x - sceneOffsetRef.current * (obj.depth > 0.5 ? 1.2 : 0.8);
                     const wrapWidth = 3000;
                     const loopX = ((realX % wrapWidth) + wrapWidth) % wrapWidth - 200;
 
@@ -258,117 +348,166 @@ export default function PetWalkingGame({ pet = { icon: '🐕', name: 'כלבלב
                     const opacity = isFront ? 1 : 0.7;
 
                     return (
-                        <div key={obj.id}
-                            className="absolute bottom-[20vh] transition-transform will-change-transform flex items-end justify-center"
+                        <div
+                            key={obj.id}
+                            className="absolute bottom-[20vh] will-change-transform flex items-end justify-center"
                             style={{
                                 transform: `translate3d(${loopX}px, ${obj.y}px, 0) scale(${obj.scale})`,
                                 zIndex: isFront ? 30 : 10,
                                 filter: `blur(${blur})`
-                            }}>
-                            <span className="text-[8rem] leading-none drop-shadow-lg" style={{ opacity }}>{obj.icon}</span>
+                            }}
+                        >
+                            <span className="text-[8rem] leading-none drop-shadow-lg" style={{ opacity }}>
+                                {obj.icon}
+                            </span>
                         </div>
                     );
                 })}
             </div>
 
-            {/* --- CHARACTERS & ACTION --- */}
+            {/* Characters & Action */}
             <div className="absolute inset-0 z-40 pointer-events-none">
-
-                {/* SVG Leash */}
-                <svg className="absolute inset-0 w-full h-full overflow-visible drop-shadow-md z-50">
-                    <path d={getLeashPath()} fill="none" stroke="#5D4037" strokeWidth="6" strokeLinecap="round" />
-                    <path d={getLeashPath()} fill="none" stroke="#8D6E63" strokeWidth="3" strokeLinecap="round" strokeDasharray="5,5" />
+                {/* SVG Leash (improved rendering) */}
+                <svg className="absolute inset-0 w-full h-full overflow-visible drop-shadow-md z-50" aria-hidden="true">
+                    <path
+                        d={getLeashPath()}
+                        fill="none"
+                        stroke="#5D4037"
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                    />
+                    <path
+                        d={getLeashPath()}
+                        fill="none"
+                        stroke="#8D6E63"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeDasharray="5,5"
+                    />
                 </svg>
 
-                {/* Avatar Sprite */}
-                {/* Positioned fixed on left screen usually, ground is moving */}
-                <div
-                    className="absolute bottom-[25vh] z-40 transition-transform"
+                {/* Avatar Emoji with Animation */}
+                <motion.div
+                    className="absolute bottom-[25vh] z-40"
                     style={{
-                        left: avatarPos.x,
-                        width: '200px',
-                        height: '200px',
-                        transform: 'scaleX(1)' // Facing right
+                        left: avatarPosRef.current.x,
+                        fontSize: '8rem'
                     }}
+                    animate={{
+                        y: gameState === 'walking' ? [0, -5, 0] : 0
+                    }}
+                    transition={{
+                        duration: 0.4,
+                        repeat: gameState === 'walking' ? Infinity : 0,
+                        ease: "easeInOut"
+                    }}
+                    role="img"
+                    aria-label="Your character"
                 >
-                    <SpriteAnimator
-                        spriteSheet={playerSprite}
-                        frames={6} // Our sprite sheets have 6 frames usually
-                        fps={gameState === 'walking' ? 12 : 0} // Stop animation if not walking
-                        scale={1}
-                    />
-                </div>
+                    {getCurrentAvatarEmoji()}
+                </motion.div>
 
-                {/* Pet Sprite */}
-                <div
-                    className="absolute bottom-[23vh] z-40 transition-transform"
+                {/* Pet Emoji with Animation */}
+                <motion.div
+                    className="absolute bottom-[23vh] z-40"
                     style={{
-                        left: petPos.x,
-                        width: '150px',
-                        height: '150px',
-                        transform: 'scaleX(1)'
+                        left: petPosRef.current.x,
+                        fontSize: '7rem'
                     }}
+                    animate={{
+                        y: gameState === 'walking' ? petPosRef.current.bobOffset : 0,
+                        rotate: gameState === 'sniffing' ? [0, -5, 5, 0] : 0
+                    }}
+                    transition={{
+                        y: { type: "spring", stiffness: 200, damping: 10 },
+                        rotate: { duration: 0.5, repeat: gameState === 'sniffing' ? Infinity : 0 }
+                    }}
+                    role="img"
+                    aria-label={pet.name}
                 >
-                    <SpriteAnimator
-                        spriteSheet={petSprite}
-                        frames={6}
-                        fps={gameState !== 'found' ? 14 : 0} // Run normally, stop when found
-                        scale={1}
-                    />
+                    {getCurrentPetEmoji()}
                     {gameState === 'sniffing' && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-12 left-8 text-7xl filter drop-shadow-lg">🧐</motion.div>
+                        <motion.div
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="absolute -top-12 left-8 text-5xl filter drop-shadow-lg"
+                        >
+                            🔍
+                        </motion.div>
                     )}
-                </div>
-
+                </motion.div>
             </div>
 
             {/* Interaction Layer (Questions) */}
             <AnimatePresence>
                 {(gameState === 'found' || gameState === 'correct' || gameState === 'wrong') && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm pointer-events-auto">
+                    <motion.div
+                        className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm pointer-events-auto"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
                         <motion.div
                             initial={{ scale: 0.5, y: 100, opacity: 0 }}
-                            animate={{ scale: 1, y: 0, opacity: 1, rotate: [-1, 1, 0] }}
+                            animate={{
+                                scale: 1,
+                                y: 0,
+                                opacity: 1,
+                                rotate: [0, -1, 1, 0]
+                            }}
                             exit={{ scale: 0.8, opacity: 0 }}
-                            className="bg-white/90 backdrop-blur-xl rounded-[3rem] p-8 max-w-2xl w-full border-[6px] border-white shadow-2xl relative overflow-hidden"
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="bg-white/95 backdrop-blur-xl rounded-[3rem] p-8 max-w-2xl w-full border-[6px] border-white shadow-2xl relative overflow-hidden"
+                            role="dialog"
+                            aria-labelledby="question-title"
                         >
-                            <div className={`absolute top-0 left-0 w-full h-2 rounded-t-full bg-gradient-to-r ${currentTheme.accent}`}></div>
+                            <div className={`absolute top-0 left-0 w-full h-2 rounded-t-full bg-gradient-to-r ${currentTheme.accent}`} />
 
                             <div className="flex flex-col items-center">
                                 <motion.div
-                                    animate={{ y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 2 }}
+                                    animate={{ y: [0, -20, 0] }}
+                                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                                     className="text-[8rem] mb-4 filter drop-shadow-2xl"
+                                    role="img"
+                                    aria-label={currentWord?.he}
                                 >
                                     {currentWord?.icon}
                                 </motion.div>
 
-                                <h2 className="text-4xl font-black text-slate-800 mb-2 drop-shadow-sm text-center">
+                                <h2
+                                    id="question-title"
+                                    className="text-4xl font-black text-slate-800 mb-2 drop-shadow-sm text-center"
+                                >
                                     {pet.name} מצא <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">{currentWord?.he}</span>!
                                 </h2>
                                 <p className="text-xl text-slate-500 font-bold mb-8">איך קוראים לזה באנגלית?</p>
 
-                                <div className="grid grid-cols-1 gap-4 w-full">
+                                <div className="grid grid-cols-1 gap-4 w-full" role="group" aria-label="Answer options">
                                     {options.map((opt) => (
-                                        <button
+                                        <motion.button
                                             key={opt.en}
                                             onClick={() => handleAnswer(opt)}
-                                            className={`p-6 rounded-2xl text-3xl font-black transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg border-b-8 pointer-events-auto ${gameState === 'correct' && opt.en === currentWord.en
-                                                ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white border-green-700'
-                                                : gameState === 'wrong' && opt.en !== currentWord.en
-                                                    ? 'bg-slate-200 text-slate-400 border-slate-300'
-                                                    : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300 hover:text-purple-600'
-                                                }`}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className={`p-6 rounded-2xl text-3xl font-black transition-all shadow-lg border-b-8 pointer-events-auto ${
+                                                gameState === 'correct' && opt.en === currentWord.en
+                                                    ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white border-green-700'
+                                                    : gameState === 'wrong' && opt.en !== currentWord.en
+                                                        ? 'bg-slate-200 text-slate-400 border-slate-300'
+                                                        : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300 hover:text-purple-600'
+                                            }`}
+                                            disabled={gameState === 'correct' || gameState === 'wrong'}
+                                            aria-label={`Option: ${opt.en}`}
                                         >
                                             {opt.en}
-                                        </button>
+                                        </motion.button>
                                     ))}
                                 </div>
                             </div>
                         </motion.div>
-                    </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
-
         </div>
     );
 }
