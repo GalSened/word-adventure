@@ -69,17 +69,48 @@ export function useStoryProgress(userProfile) {
         safeSetJSON(STORAGE_KEY, progress);
     }, [progress]);
 
-    // Check for time-based secrets
+    // Check for time-based secrets (runs once on mount)
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 7 && !progress.playedBefore7am) {
-            updateProgress({ playedBefore7am: true });
-            unlockSecret('early_bird');
-        }
-        if (hour >= 22 && !progress.playedAfter10pm) {
-            updateProgress({ playedAfter10pm: true });
-            unlockSecret('night_owl');
-        }
+
+        // Use setProgress directly to avoid stale closure issues
+        setProgress(prev => {
+            const updates = {};
+            let shouldUnlockEarlyBird = false;
+            let shouldUnlockNightOwl = false;
+
+            if (hour < 7 && !prev.playedBefore7am) {
+                updates.playedBefore7am = true;
+                shouldUnlockEarlyBird = true;
+            }
+            if (hour >= 22 && !prev.playedAfter10pm) {
+                updates.playedAfter10pm = true;
+                shouldUnlockNightOwl = true;
+            }
+
+            // Queue secret unlocks after state update
+            if (shouldUnlockEarlyBird) {
+                setTimeout(() => {
+                    const secret = MYSTERIES.secrets.find(s => s.id === 'early_bird');
+                    if (secret) {
+                        setCurrentDialogue({ type: 'achievement', achievement: secret });
+                    }
+                }, 100);
+            }
+            if (shouldUnlockNightOwl) {
+                setTimeout(() => {
+                    const secret = MYSTERIES.secrets.find(s => s.id === 'night_owl');
+                    if (secret) {
+                        setCurrentDialogue({ type: 'achievement', achievement: secret });
+                    }
+                }, 100);
+            }
+
+            if (Object.keys(updates).length > 0) {
+                return { ...prev, ...updates };
+            }
+            return prev;
+        });
     }, []);
 
     /**
