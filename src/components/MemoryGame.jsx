@@ -21,7 +21,12 @@ export default function MemoryGame({ words, onComplete, onExit }) {
         ];
 
         setCards(gameCards.sort(() => 0.5 - Math.random()));
-    }, []);
+        // Reset game state when words change
+        setFlipped([]);
+        setMatched([]);
+        setMoves(0);
+        setIsLocked(false);
+    }, [words]);
 
     const handleCardClick = (index) => {
         if (isLocked || flipped.includes(index) || matched.includes(cards[index].pairId)) return;

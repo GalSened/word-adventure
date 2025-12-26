@@ -210,6 +210,9 @@ export default function WordAdventure() {
         return shuffled;
     };
 
+    // Define currentWord before useMemo that depends on it
+    const currentWord = activeWords[currentWordIndex];
+
     // Memoize scrambled content so it doesn't change on every render
     const scrambledContent = useMemo(() => {
         if (!currentWord) return [];
@@ -331,8 +334,6 @@ export default function WordAdventure() {
             processAnswer(false);
         }
     };
-
-    const currentWord = activeWords[currentWordIndex];
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-800 relative" dir="rtl">
