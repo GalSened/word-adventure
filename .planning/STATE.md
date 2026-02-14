@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 2 of 6 (Architecture Refactoring)
-Plan: 0 of 4 in current phase
-Status: Ready to plan
-Last activity: 2026-02-14 — Phase 1 complete (51 tests, verified)
+Plan: 1 of 4 in current phase
+Status: Executing
+Last activity: 2026-02-14 — Completed 02-01 (Zustand store foundation)
 
-Progress: [██░░░░░░░░] 17%
+Progress: [███░░░░░░░] 21%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 3.5 min
-- Total execution time: 0.12 hours
+- Total plans completed: 3
+- Average duration: 3 min
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
+| 02-architecture-refactoring | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (4 min)
-- Trend: Stable
+- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -52,6 +53,10 @@ Recent decisions affecting current work:
 - [01-02]: Pre-seeded storyProgress with seenIntros for all chapters to suppress StoryDialogue overlays during tests
 - [01-02]: Mocked STORE_ITEMS as empty object since snapshot tests focus on game state rendering
 - [01-02]: Used DOM button querying with fireEvent.click for LetterPicker interaction in snapshot tests
+- [02-01]: Debounced localStorage writes at 300ms to prevent serialization per keystroke
+- [02-01]: Legacy keys NOT deleted during migration -- old code still reads them until 02-02 rewires hooks
+- [02-01]: Story slice kept minimal (hasSeenStoryIntro + storyPath only) -- complex story logic stays in hook
+- [02-01]: Ephemeral game state excluded from persist via partialize
 
 ### Pending Todos
 
@@ -64,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Phase 1 complete, ready for Phase 2 planning
+Stopped at: Completed 02-01-PLAN.md (Zustand store foundation)
 Resume file: None
