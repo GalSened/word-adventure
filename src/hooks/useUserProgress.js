@@ -1,149 +1,85 @@
-import { useState, useEffect, useCallback } from 'react';
-import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from '../utils/storage';
+import { useCallback } from 'react';
+import { useGameStore } from '../store/gameStore';
 
 /**
  * Custom hook for managing user progress and persistent data
- * Handles profile, scores, inventory, and SRS progress
+ * Thin wrapper around useGameStore — delegates all state to Zustand
  */
 export function useUserProgress() {
-    // User profile
-    const [userProfile, setUserProfile] = useState(() =>
-        safeGetJSON(STORAGE_KEYS.USER_PROFILE, null)
-    );
+    // Select state from Zustand store
+    const userProfile = useGameStore((s) => s.userProfile);
+    const score = useGameStore((s) => s.score);
+    const stars = useGameStore((s) => s.stars);
+    const userProgress = useGameStore((s) => s.userProgress);
+    const avatar = useGameStore((s) => s.avatar);
+    const highScores = useGameStore((s) => s.highScores);
+    const inventory = useGameStore((s) => s.inventory);
 
-    // Scores and stars
-    const [score, setScore] = useState(() =>
-        safeGetNumber(STORAGE_KEYS.SCORE, 0)
-    );
-    const [stars, setStars] = useState(() =>
-        safeGetNumber(STORAGE_KEYS.STARS, 0)
-    );
-
-    // SRS progress for each word
-    const [userProgress, setUserProgress] = useState(() =>
-        safeGetJSON(STORAGE_KEYS.USER_PROGRESS, {})
-    );
-
-    // Avatar (can be in profile or separate)
-    const [avatar, setAvatar] = useState(() => {
-        const profile = safeGetJSON(STORAGE_KEYS.USER_PROFILE, {});
-        return profile.avatar || localStorage.getItem(STORAGE_KEYS.AVATAR) || '👸';
-    });
-
-    // High scores leaderboard
-    const [highScores, setHighScores] = useState(() =>
-        safeGetJSON(STORAGE_KEYS.HIGH_SCORES, [])
-    );
-
-    // Inventory of purchased items
-    const [inventory, setInventory] = useState(() =>
-        safeGetJSON(STORAGE_KEYS.INVENTORY, [])
-    );
-
-    // Persist user profile
-    useEffect(() => {
-        if (userProfile) {
-            safeSetJSON(STORAGE_KEYS.USER_PROFILE, userProfile);
-        }
-    }, [userProfile]);
-
-    // Persist SRS progress
-    useEffect(() => {
-        safeSetJSON(STORAGE_KEYS.USER_PROGRESS, userProgress);
-    }, [userProgress]);
-
-    // Persist score
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.SCORE, score);
-    }, [score]);
-
-    // Persist stars
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEYS.STARS, stars);
-    }, [stars]);
-
-    // Persist inventory
-    useEffect(() => {
-        safeSetJSON(STORAGE_KEYS.INVENTORY, inventory);
-    }, [inventory]);
+    // Select setters from Zustand store
+    const setUserProfile = useGameStore((s) => s.setUserProfile);
 
     /**
      * Add points to the score
      */
     const addScore = useCallback((points) => {
-        setScore(s => s + points);
+        useGameStore.getState().addScore(points);
     }, []);
 
     /**
      * Subtract points from the score
      */
     const subtractScore = useCallback((points) => {
-        setScore(s => Math.max(0, s - points));
+        useGameStore.getState().subtractScore(points);
     }, []);
 
     /**
      * Add stars
      */
     const addStars = useCallback((count) => {
-        setStars(s => s + count);
+        useGameStore.getState().addStars(count);
     }, []);
 
     /**
      * Update SRS progress for a word
      */
     const updateWordProgress = useCallback((wordId, srsState) => {
-        setUserProgress(prev => ({
-            ...prev,
-            [wordId]: srsState
-        }));
+        useGameStore.getState().updateWordProgress(wordId, srsState);
     }, []);
 
     /**
      * Save a high score entry
      */
     const saveHighScore = useCallback((points) => {
-        const newScore = {
-            points,
-            date: new Date().toLocaleDateString('he-IL'),
-            avatar
-        };
-        const updatedScores = [...highScores, newScore]
-            .sort((a, b) => b.points - a.points)
-            .slice(0, 5);
-        setHighScores(updatedScores);
-        safeSetJSON(STORAGE_KEYS.HIGH_SCORES, updatedScores);
-    }, [highScores, avatar]);
+        useGameStore.getState().saveHighScore(points);
+    }, []);
 
     /**
      * Add an item to inventory
      */
     const addToInventory = useCallback((itemId) => {
-        if (!inventory.includes(itemId)) {
-            setInventory(prev => [...prev, itemId]);
-        }
-    }, [inventory]);
+        useGameStore.getState().addToInventory(itemId);
+    }, []);
 
     /**
      * Check if user owns an item
      */
     const hasItem = useCallback((itemId) => {
-        return inventory.includes(itemId);
-    }, [inventory]);
+        return useGameStore.getState().inventory.includes(itemId);
+    }, []);
 
     /**
      * Update avatar
      */
     const updateAvatar = useCallback((newAvatar) => {
-        setAvatar(newAvatar);
-        localStorage.setItem(STORAGE_KEYS.AVATAR, newAvatar);
+        useGameStore.getState().updateAvatar(newAvatar);
     }, []);
 
     /**
      * Gender helper for localized text
      */
     const t = useCallback((male, female) => {
-        return userProfile?.gender === 'boy' ? male : female;
-    }, [userProfile]);
+        return useGameStore.getState().userProfile?.gender === 'boy' ? male : female;
+    }, []);
 
     return {
         // State

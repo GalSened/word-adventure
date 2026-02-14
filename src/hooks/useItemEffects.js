@@ -1,19 +1,14 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { STORE_ITEMS } from '../data/storeItems';
-import { safeGetJSON, safeSetJSON } from '../utils/storage';
-
-const STORAGE_KEY = 'word_adventure_equipped';
-const CONSUMABLES_KEY = 'word_adventure_consumable_counts';
+import { useGameStore } from '../store/gameStore';
 
 /**
  * Hook for managing item effects in gameplay
- * Handles equipping, using items, and applying their effects
+ * Thin wrapper around useGameStore for equipped state — keeps all computation logic
  */
 export function useItemEffects(inventory = []) {
-    // Equipped items state (persisted)
-    const [equipped, setEquipped] = useState(() =>
-        safeGetJSON(STORAGE_KEY, {})
-    );
+    // Equipped items state from Zustand store
+    const equipped = useGameStore((s) => s.equipped);
 
     // Track consumable counts from inventory
     const consumableCounts = useMemo(() => {
@@ -27,10 +22,9 @@ export function useItemEffects(inventory = []) {
         return counts;
     }, [inventory]);
 
-    // Save equipped items to storage
+    // Save equipped items to store
     const saveEquipped = useCallback((newEquipped) => {
-        setEquipped(newEquipped);
-        safeSetJSON(STORAGE_KEY, newEquipped);
+        useGameStore.getState().setEquipped(newEquipped);
     }, []);
 
     // Get slot for an item (defined before use to avoid hoisting issues)
@@ -46,22 +40,24 @@ export function useItemEffects(inventory = []) {
         if (!item.equipable) return false;
 
         const slot = getItemSlot(item);
+        const currentEquipped = useGameStore.getState().equipped;
         const newEquipped = {
-            ...equipped,
+            ...currentEquipped,
             [slot]: item.id
         };
         saveEquipped(newEquipped);
         return true;
-    }, [equipped, saveEquipped, getItemSlot]);
+    }, [saveEquipped, getItemSlot]);
 
     // Unequip an item
     const unequipItem = useCallback((item) => {
         const slot = getItemSlot(item);
-        const newEquipped = { ...equipped };
+        const currentEquipped = useGameStore.getState().equipped;
+        const newEquipped = { ...currentEquipped };
         delete newEquipped[slot];
         saveEquipped(newEquipped);
         return true;
-    }, [equipped, saveEquipped, getItemSlot]);
+    }, [saveEquipped, getItemSlot]);
 
     // Use a consumable item (returns effect to apply)
     const useConsumable = useCallback((item, removeFromInventory) => {

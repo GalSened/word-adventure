@@ -1,72 +1,89 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useGameStore } from '../store/gameStore';
 import { GAME_CONFIG } from '../config/constants';
 
 /**
  * Custom hook for managing game state
- * Handles game screens, word progression, lives, and feedback
+ * Thin wrapper around useGameStore — delegates all state to Zustand
  */
 export function useGameState() {
-    const [gameState, setGameState] = useState('start');
-    const [currentWordIndex, setCurrentWordIndex] = useState(0);
-    const [userInput, setUserInput] = useState('');
-    const [lives, setLives] = useState(GAME_CONFIG.INITIAL_LIVES);
-    const [feedback, setFeedback] = useState(null);
-    const [activeWords, setActiveWords] = useState([]);
-    const [gameMode, setGameMode] = useState('regular');
-    const [activePet, setActivePet] = useState(null);
+    // Select state from Zustand store
+    const gameState = useGameStore((s) => s.gameState);
+    const currentWordIndex = useGameStore((s) => s.currentWordIndex);
+    const userInput = useGameStore((s) => s.userInput);
+    const lives = useGameStore((s) => s.lives);
+    const feedback = useGameStore((s) => s.feedback);
+    const activeWords = useGameStore((s) => s.activeWords);
+    const gameMode = useGameStore((s) => s.gameMode);
+    const activePet = useGameStore((s) => s.activePet);
+
+    // Select setters from Zustand store
+    const setGameState = useGameStore((s) => s.setGameState);
+    const setUserInput = useGameStore((s) => s.setUserInput);
+    const setActivePet = useGameStore((s) => s.setActivePet);
 
     /**
      * Reset game state for a new round
      */
     const resetGame = useCallback(() => {
-        setCurrentWordIndex(0);
-        setLives(GAME_CONFIG.INITIAL_LIVES);
-        setUserInput('');
-        setFeedback(null);
+        const store = useGameStore.getState();
+        store.setCurrentWordIndex(0);
+        store.setLives(GAME_CONFIG.INITIAL_LIVES);
+        store.setUserInput('');
+        store.setFeedback(null);
     }, []);
 
     /**
      * Start a new level with the given words
      */
     const startLevel = useCallback((words, mode = 'regular') => {
-        setActiveWords(words);
-        setGameMode(mode);
-        resetGame();
-        setGameState('playing');
-    }, [resetGame]);
+        const store = useGameStore.getState();
+        store.setActiveWords(words);
+        store.setGameMode(mode);
+        // Inline reset
+        store.setCurrentWordIndex(0);
+        store.setLives(GAME_CONFIG.INITIAL_LIVES);
+        store.setUserInput('');
+        store.setFeedback(null);
+        // Transition to playing
+        store.setGameState('playing');
+    }, []);
 
     /**
      * Move to the next word
      */
     const nextWord = useCallback(() => {
-        if (currentWordIndex < activeWords.length - 1) {
-            setCurrentWordIndex(i => i + 1);
-            setUserInput('');
-            setFeedback(null);
+        const store = useGameStore.getState();
+        if (store.currentWordIndex < store.activeWords.length - 1) {
+            store.setCurrentWordIndex(store.currentWordIndex + 1);
+            store.setUserInput('');
+            store.setFeedback(null);
         } else {
-            setGameState('levelComplete');
+            store.setGameState('levelComplete');
         }
-    }, [currentWordIndex, activeWords.length]);
+    }, []);
 
     /**
      * Lose a life, trigger game over if no lives left
      */
     const loseLife = useCallback(() => {
-        setLives(l => {
-            if (l - 1 <= 0) {
-                setGameState('gameOver');
-                return 0;
-            }
-            return l - 1;
-        });
+        const store = useGameStore.getState();
+        const newLives = store.lives - 1;
+        if (newLives <= 0) {
+            store.setLives(0);
+            store.setGameState('gameOver');
+        } else {
+            store.setLives(newLives);
+        }
     }, []);
 
     /**
      * Show feedback message
      */
     const showFeedback = useCallback((type, message, duration = GAME_CONFIG.FEEDBACK_DURATION) => {
-        setFeedback({ type, message });
-        setTimeout(() => setFeedback(null), duration);
+        const store = useGameStore.getState();
+        store.setFeedback({ type, message });
+        setTimeout(() => useGameStore.getState().setFeedback(null), duration);
     }, []);
 
     /**

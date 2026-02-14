@@ -1,66 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-import { safeGetJSON, safeSetJSON, STORAGE_KEYS } from '../utils/storage';
+import { useEffect, useCallback } from 'react';
+import { useGameStore } from '../store/gameStore';
 import { DAILY_QUEST_CONFIG } from '../config/constants';
 
 /**
- * Get initial daily stats object
- */
-const getInitialDailyStats = () => ({
-    date: new Date().toDateString(),
-    wordsPlayed: 0,
-    maxStreak: 0,
-    dailyScore: 0
-});
-
-/**
  * Custom hook for managing daily stats and streak tracking
- * Handles daily quests progress and streak calculations
+ * Thin wrapper around useGameStore — delegates all state to Zustand
  */
 export function useDailyStats() {
-    const [dailyStats, setDailyStats] = useState(() =>
-        safeGetJSON(STORAGE_KEYS.DAILY_STATS, getInitialDailyStats())
-    );
-
-    // Track current consecutive correct answers
-    const [currentStreak, setCurrentStreak] = useState(0);
+    // Select state from Zustand store
+    const dailyStats = useGameStore((s) => s.dailyStats);
+    const currentStreak = useGameStore((s) => s.currentStreak);
 
     // Check for daily reset
     useEffect(() => {
         const today = new Date().toDateString();
         if (dailyStats.date !== today) {
             // New day - reset stats
-            const freshStats = getInitialDailyStats();
-            setDailyStats(freshStats);
-            setCurrentStreak(0);
-            safeSetJSON(STORAGE_KEYS.DAILY_STATS, freshStats);
-        } else {
-            // Same day - persist changes
-            safeSetJSON(STORAGE_KEYS.DAILY_STATS, dailyStats);
+            useGameStore.getState().resetDailyStats();
+            useGameStore.getState().setCurrentStreak(0);
         }
-    }, [dailyStats]);
+    }, [dailyStats.date]);
 
     /**
      * Record a correct answer
      * Increments streak and updates max streak
      */
     const recordCorrectAnswer = useCallback((earnedScore = 0) => {
-        const newStreak = currentStreak + 1;
-        setCurrentStreak(newStreak);
+        const store = useGameStore.getState();
+        const newStreak = store.currentStreak + 1;
+        store.setCurrentStreak(newStreak);
 
-        setDailyStats(prev => ({
-            ...prev,
-            wordsPlayed: prev.wordsPlayed + 1,
-            dailyScore: prev.dailyScore + earnedScore,
-            maxStreak: Math.max(prev.maxStreak, newStreak)
-        }));
-    }, [currentStreak]);
+        store.updateDailyStats({
+            wordsPlayed: store.dailyStats.wordsPlayed + 1,
+            dailyScore: store.dailyStats.dailyScore + earnedScore,
+            maxStreak: Math.max(store.dailyStats.maxStreak, newStreak),
+        });
+    }, []);
 
     /**
      * Record an incorrect answer
      * Resets the current streak
      */
     const recordIncorrectAnswer = useCallback(() => {
-        setCurrentStreak(0);
+        useGameStore.getState().setCurrentStreak(0);
     }, []);
 
     /**
@@ -68,70 +50,75 @@ export function useDailyStats() {
      * Used for mini-games like pet walking
      */
     const addDailyScore = useCallback((points) => {
-        setDailyStats(prev => ({
-            ...prev,
-            dailyScore: prev.dailyScore + points
-        }));
+        const store = useGameStore.getState();
+        store.updateDailyStats({
+            dailyScore: store.dailyStats.dailyScore + points,
+        });
     }, []);
 
     /**
      * Check if a quest is completed
      */
     const isQuestCompleted = useCallback((questId) => {
+        const stats = useGameStore.getState().dailyStats;
         switch (questId) {
             case 'words_10':
-                return dailyStats.wordsPlayed >= DAILY_QUEST_CONFIG.WORDS_TARGET;
+                return stats.wordsPlayed >= DAILY_QUEST_CONFIG.WORDS_TARGET;
             case 'score_1000':
-                return dailyStats.dailyScore >= DAILY_QUEST_CONFIG.SCORE_TARGET;
+                return stats.dailyScore >= DAILY_QUEST_CONFIG.SCORE_TARGET;
             case 'streak_5':
-                return dailyStats.maxStreak >= DAILY_QUEST_CONFIG.STREAK_TARGET;
+                return stats.maxStreak >= DAILY_QUEST_CONFIG.STREAK_TARGET;
             default:
                 return false;
         }
-    }, [dailyStats]);
+    }, []);
 
     /**
      * Get progress percentage for a quest
      */
     const getQuestProgress = useCallback((questId) => {
+        const stats = useGameStore.getState().dailyStats;
         switch (questId) {
             case 'words_10':
-                return Math.min(100, (dailyStats.wordsPlayed / DAILY_QUEST_CONFIG.WORDS_TARGET) * 100);
+                return Math.min(100, (stats.wordsPlayed / DAILY_QUEST_CONFIG.WORDS_TARGET) * 100);
             case 'score_1000':
-                return Math.min(100, (dailyStats.dailyScore / DAILY_QUEST_CONFIG.SCORE_TARGET) * 100);
+                return Math.min(100, (stats.dailyScore / DAILY_QUEST_CONFIG.SCORE_TARGET) * 100);
             case 'streak_5':
-                return Math.min(100, (dailyStats.maxStreak / DAILY_QUEST_CONFIG.STREAK_TARGET) * 100);
+                return Math.min(100, (stats.maxStreak / DAILY_QUEST_CONFIG.STREAK_TARGET) * 100);
             default:
                 return 0;
         }
-    }, [dailyStats]);
+    }, []);
 
     /**
      * Get all quests status
      */
-    const getQuestsStatus = useCallback(() => [
-        {
-            id: 'words_10',
-            target: DAILY_QUEST_CONFIG.WORDS_TARGET,
-            current: dailyStats.wordsPlayed,
-            reward: DAILY_QUEST_CONFIG.WORDS_REWARD,
-            completed: dailyStats.wordsPlayed >= DAILY_QUEST_CONFIG.WORDS_TARGET
-        },
-        {
-            id: 'score_1000',
-            target: DAILY_QUEST_CONFIG.SCORE_TARGET,
-            current: dailyStats.dailyScore,
-            reward: DAILY_QUEST_CONFIG.SCORE_REWARD,
-            completed: dailyStats.dailyScore >= DAILY_QUEST_CONFIG.SCORE_TARGET
-        },
-        {
-            id: 'streak_5',
-            target: DAILY_QUEST_CONFIG.STREAK_TARGET,
-            current: dailyStats.maxStreak,
-            reward: DAILY_QUEST_CONFIG.STREAK_REWARD,
-            completed: dailyStats.maxStreak >= DAILY_QUEST_CONFIG.STREAK_TARGET
-        }
-    ], [dailyStats]);
+    const getQuestsStatus = useCallback(() => {
+        const stats = useGameStore.getState().dailyStats;
+        return [
+            {
+                id: 'words_10',
+                target: DAILY_QUEST_CONFIG.WORDS_TARGET,
+                current: stats.wordsPlayed,
+                reward: DAILY_QUEST_CONFIG.WORDS_REWARD,
+                completed: stats.wordsPlayed >= DAILY_QUEST_CONFIG.WORDS_TARGET,
+            },
+            {
+                id: 'score_1000',
+                target: DAILY_QUEST_CONFIG.SCORE_TARGET,
+                current: stats.dailyScore,
+                reward: DAILY_QUEST_CONFIG.SCORE_REWARD,
+                completed: stats.dailyScore >= DAILY_QUEST_CONFIG.SCORE_TARGET,
+            },
+            {
+                id: 'streak_5',
+                target: DAILY_QUEST_CONFIG.STREAK_TARGET,
+                current: stats.maxStreak,
+                reward: DAILY_QUEST_CONFIG.STREAK_REWARD,
+                completed: stats.maxStreak >= DAILY_QUEST_CONFIG.STREAK_TARGET,
+            },
+        ];
+    }, []);
 
     return {
         // State
