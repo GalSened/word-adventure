@@ -12,7 +12,7 @@ This milestone transforms Word Adventure from a 13-word prototype with one chall
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Test Safety Net** - Vitest configured with unit and snapshot tests covering core utilities before any refactoring begins
+- [x] **Phase 1: Test Safety Net** - Vitest configured with unit and snapshot tests covering core utilities before any refactoring begins (completed 2026-02-14)
 - [ ] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed
 - [ ] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale
 - [ ] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming
@@ -34,8 +34,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Vitest setup and pure utility tests (srs.js, grammarEngine.js, storage.js)
-- [ ] 01-02-PLAN.md — Component snapshot tests for WordAdventure gameState values
+- [x] 01-01-PLAN.md — Vitest setup and pure utility tests (srs.js, grammarEngine.js, storage.js)
+- [x] 01-02-PLAN.md — Component snapshot tests for WordAdventure gameState values
 
 ### Phase 2: Architecture Refactoring
 **Goal**: The codebase has a clean component architecture, centralized state, a validated word schema, and a single gender source of truth — ready for content at scale
@@ -132,7 +132,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Test Safety Net | 0/2 | Not started | - |
+| 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
 | 2. Architecture Refactoring | 0/4 | Not started | - |
 | 3. Word Bank and SRS Foundation | 0/4 | Not started | - |
 | 4. Challenge Types and Levels | 0/4 | Not started | - |
