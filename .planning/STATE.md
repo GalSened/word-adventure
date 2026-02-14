@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 2 of 6 (Architecture Refactoring)
-Plan: 4 of 4 in current phase
-Status: Executing
-Last activity: 2026-02-14 — Completed 02-04 (Word schema and data enrichment)
+Plan: 4 of 4 in current phase (all complete)
+Status: Phase Complete
+Last activity: 2026-02-14 — Completed 02-03 (WordAdventure decomposition and ScreenRouter)
 
-Progress: [████░░░░░░] 36%
+Progress: [████░░░░░░] 43%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 3 min
-- Total execution time: 0.22 hours
+- Total execution time: 0.28 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
-| 02-architecture-refactoring | 3 | 6 min | 2 min |
+| 02-architecture-refactoring | 4 | 10 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min), 02-02 (2 min), 02-04 (2 min)
+- Last 5 plans: 01-02 (4 min), 02-01 (2 min), 02-02 (2 min), 02-04 (2 min), 02-03 (4 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -64,6 +64,10 @@ Recent decisions affecting current work:
 - [02-04]: All 10 word fields required (no optional) to enforce data completeness for Phase 3 content expansion
 - [02-04]: Validation runs at module import time (fail-fast) rather than lazily at runtime
 - [02-04]: Hebrew grammatical gender uses 'm', 'f', 'n' enum values matching grammarEngine convention
+- [02-03]: Game logic extracted into useGameLogic hook -- WordAdventure at 106 lines (not 80) due to 20 irreducible useState declarations
+- [02-03]: ScreenRouter uses switch/case with explicit prop mapping per screen for visibility
+- [02-03]: New screen components use prop drilling (not useGame context) to preserve snapshot test compatibility
+- [02-03]: PetWalkingGame gender simplified to userProfile.gender only -- avatar emoji inference removed (ARCH-06)
 
 ### Pending Todos
 
@@ -76,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 02-04-PLAN.md (Word schema and data enrichment)
+Stopped at: Completed 02-03-PLAN.md (WordAdventure decomposition) -- Phase 2 all 4 plans complete
 Resume file: None
