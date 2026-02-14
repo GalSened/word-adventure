@@ -47,13 +47,13 @@ Plans:
   3. All localStorage persistence flows through Zustand with persist middleware — no direct safeGetJSON/safeSetJSON calls remain in components
   4. A Zod schema validates every word entry at build/load time, and adding a word with a missing required field (id, word, hebrew, hint, category, emoji, level, type, gender, exampleSentence) produces a clear validation error
   5. Player gender is read from exactly one source (userProfile.gender) everywhere in the app — PetWalkingGame no longer infers gender from avatar emoji
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Decompose WordAdventure.jsx — ScreenRouter, screen components, thin orchestrator
-- [ ] 02-02: GameContext provider composing existing hooks
-- [ ] 02-03: Zustand store with persist middleware replacing scattered localStorage
-- [ ] 02-04: Unified word schema (Zod validation, nanoid IDs, gender source of truth, Challenge Interface Contract, debounced writes)
+- [ ] 02-01-PLAN.md — Install deps (zustand, zod, nanoid), create Zustand store with persist middleware and localStorage migration
+- [ ] 02-02-PLAN.md — GameContext provider wrapping Zustand store, rewire 4 hooks as thin wrappers
+- [ ] 02-03-PLAN.md — Decompose WordAdventure.jsx into ScreenRouter + 5 new screen components, fix gender inference, remove duplicate word data
+- [ ] 02-04-PLAN.md — Zod word schema, enrich 13 words, nanoid IDs in grammarEngine
 
 ### Phase 3: Word Bank and SRS Foundation
 **Goal**: The game has 200+ validated words across themed categories with audio, gender-aware hints, and an SRS system that correctly manages review scheduling at scale
@@ -133,7 +133,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
-| 2. Architecture Refactoring | 0/4 | Not started | - |
+| 2. Architecture Refactoring | 0/4 | Planned | - |
 | 3. Word Bank and SRS Foundation | 0/4 | Not started | - |
 | 4. Challenge Types and Levels | 0/4 | Not started | - |
 | 5. Adventure Game | 0/3 | Not started | - |
