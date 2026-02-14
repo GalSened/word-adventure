@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 1 of 6 (Test Safety Net)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-14 — Completed 01-01-PLAN.md (test infrastructure + 45 unit tests)
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase Complete
+Last activity: 2026-02-14 — Completed 01-02-PLAN.md (6 snapshot tests for all WordAdventure states)
 
-Progress: [█░░░░░░░░░] 8%
+Progress: [██░░░░░░░░] 17%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3 min
-- Total execution time: 0.05 hours
+- Total plans completed: 2
+- Average duration: 3.5 min
+- Total execution time: 0.12 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-test-safety-net | 1 | 3 min | 3 min |
+| 01-test-safety-net | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min)
-- Trend: Starting
+- Last 5 plans: 01-01 (3 min), 01-02 (4 min)
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -48,6 +48,10 @@ Recent decisions affecting current work:
 - [01-01]: Used vi.useFakeTimers with vi.setSystemTime for deterministic SRS date tests
 - [01-01]: Used spy.mockRestore() for localStorage mocks to prevent cross-test leakage in happy-dom
 - [01-01]: Used mockReturnValueOnce sequences for deterministic grammar engine template testing
+- [01-02]: Used Proxy-based vi.mock for framer-motion to strip all animation props and render plain HTML elements
+- [01-02]: Pre-seeded storyProgress with seenIntros for all chapters to suppress StoryDialogue overlays during tests
+- [01-02]: Mocked STORE_ITEMS as empty object since snapshot tests focus on game state rendering
+- [01-02]: Used DOM button querying with fireEvent.click for LetterPicker interaction in snapshot tests
 
 ### Pending Todos
 
@@ -60,5 +64,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 01-01-PLAN.md
+Stopped at: Completed 01-02-PLAN.md (Phase 01 complete)
 Resume file: None
