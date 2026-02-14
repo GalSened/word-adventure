@@ -3,6 +3,8 @@
  * Generates infinite sentence variations with proper Hebrew gender agreement.
  */
 
+import { nanoid } from 'nanoid';
+
 const VOCAB = {
     nouns: [
         { en: 'CAT', he: 'חתול', gender: 'm', emoji: '🐱' },
@@ -109,7 +111,7 @@ export const generateChallenge = () => {
     const content = template.generate();
 
     return {
-        id: `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `gen_${nanoid()}`,
         word: content.word,
         hebrew: content.hebrew,
         hint: content.hint,
