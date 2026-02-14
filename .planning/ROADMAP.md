@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Grammar engine tests verify that sentence generation, gender agreement, and verb conjugation produce correct Hebrew output
   4. Storage utility tests verify that safeGetJSON/safeSetJSON handle missing keys, corrupted JSON, and quota errors gracefully
   5. Snapshot tests capture the rendered output of WordAdventure for each gameState value (start, welcome, map, playing, levelComplete, gameOver)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Vitest setup and pure utility tests (srs.js, grammarEngine.js, storage.js)
-- [ ] 01-02: Component snapshot tests for WordAdventure gameState values
+- [ ] 01-01-PLAN.md — Vitest setup and pure utility tests (srs.js, grammarEngine.js, storage.js)
+- [ ] 01-02-PLAN.md — Component snapshot tests for WordAdventure gameState values
 
 ### Phase 2: Architecture Refactoring
 **Goal**: The codebase has a clean component architecture, centralized state, a validated word schema, and a single gender source of truth — ready for content at scale
