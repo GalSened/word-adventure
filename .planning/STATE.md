@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 2 of 6 (Architecture Refactoring)
-Plan: 1 of 4 in current phase
+Plan: 4 of 4 in current phase
 Status: Executing
-Last activity: 2026-02-14 — Completed 02-01 (Zustand store foundation)
+Last activity: 2026-02-14 — Completed 02-04 (Word schema and data enrichment)
 
-Progress: [███░░░░░░░] 21%
+Progress: [████░░░░░░] 36%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 3 min
-- Total execution time: 0.15 hours
+- Total execution time: 0.18 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
-| 02-architecture-refactoring | 1 | 2 min | 2 min |
+| 02-architecture-refactoring | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min)
+- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min), 02-04 (2 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -57,6 +57,9 @@ Recent decisions affecting current work:
 - [02-01]: Legacy keys NOT deleted during migration -- old code still reads them until 02-02 rewires hooks
 - [02-01]: Story slice kept minimal (hasSeenStoryIntro + storyPath only) -- complex story logic stays in hook
 - [02-01]: Ephemeral game state excluded from persist via partialize
+- [02-04]: All 10 word fields required (no optional) to enforce data completeness for Phase 3 content expansion
+- [02-04]: Validation runs at module import time (fail-fast) rather than lazily at runtime
+- [02-04]: Hebrew grammatical gender uses 'm', 'f', 'n' enum values matching grammarEngine convention
 
 ### Pending Todos
 
@@ -69,5 +72,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 02-01-PLAN.md (Zustand store foundation)
+Stopped at: Completed 02-04-PLAN.md (Word schema and data enrichment)
 Resume file: None
