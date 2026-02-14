@@ -1,30 +1,179 @@
 /**
  * Word data for Word Adventure
  * Contains all vocabulary words organized by difficulty level
+ * Validated at module load time via Zod schema
  */
 
-export const initialWordData = [
+import { validateWords } from './wordSchema';
+
+const rawWordData = [
     // Easy Level - Simple 3-4 letter words
-    { id: 'cat', word: 'CAT', hint: '🐱 חיה שאוהבת חלב', hebrew: 'חתול', level: 'easy', type: 'word' },
-    { id: 'dog', word: 'DOG', hint: '🐕 החבר הכי טוב של האדם', hebrew: 'כלב', level: 'easy', type: 'word' },
-    { id: 'sun', word: 'SUN', hint: '☀️ מאיר בשמיים ביום', hebrew: 'שמש', level: 'easy', type: 'word' },
-    { id: 'book', word: 'BOOK', hint: '📚 קוראים אותו', hebrew: 'ספר', level: 'easy', type: 'word' },
-    { id: 'fish', word: 'FISH', hint: '🐟 שוחה במים', hebrew: 'דג', level: 'easy', type: 'word' },
+    {
+        id: 'cat',
+        word: 'CAT',
+        hebrew: 'חתול',
+        hint: '🐱 חיה שאוהבת חלב',
+        category: 'animals',
+        emoji: '🐱',
+        level: 'easy',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The cat sleeps on the sofa.',
+    },
+    {
+        id: 'dog',
+        word: 'DOG',
+        hebrew: 'כלב',
+        hint: '🐕 החבר הכי טוב של האדם',
+        category: 'animals',
+        emoji: '🐕',
+        level: 'easy',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The dog plays in the park.',
+    },
+    {
+        id: 'sun',
+        word: 'SUN',
+        hebrew: 'שמש',
+        hint: '☀️ מאיר בשמיים ביום',
+        category: 'nature',
+        emoji: '☀️',
+        level: 'easy',
+        type: 'word',
+        gender: 'f',
+        exampleSentence: 'The sun shines in the sky.',
+    },
+    {
+        id: 'book',
+        word: 'BOOK',
+        hebrew: 'ספר',
+        hint: '📚 קוראים אותו',
+        category: 'objects',
+        emoji: '📚',
+        level: 'easy',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'I love to read a good book.',
+    },
+    {
+        id: 'fish',
+        word: 'FISH',
+        hebrew: 'דג',
+        hint: '🐟 שוחה במים',
+        category: 'animals',
+        emoji: '🐟',
+        level: 'easy',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The fish swims in the sea.',
+    },
 
     // Medium Level - 5-6 letter words
-    { id: 'happy', word: 'HAPPY', hint: '😊 מרגישים ככה כשמקבלים מתנה', hebrew: 'שמח', level: 'medium', type: 'word' },
-    { id: 'water', word: 'WATER', hint: '💧 שותים אותו', hebrew: 'מים', level: 'medium', type: 'word' },
-    { id: 'flower', word: 'FLOWER', hint: '🌸 צומח בגינה ויפה', hebrew: 'פרח', level: 'medium', type: 'word' },
+    {
+        id: 'happy',
+        word: 'HAPPY',
+        hebrew: 'שמח',
+        hint: '😊 מרגישים ככה כשמקבלים מתנה',
+        category: 'emotions',
+        emoji: '😊',
+        level: 'medium',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'I feel happy today.',
+    },
+    {
+        id: 'water',
+        word: 'WATER',
+        hebrew: 'מים',
+        hint: '💧 שותים אותו',
+        category: 'nature',
+        emoji: '💧',
+        level: 'medium',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'Please give me a glass of water.',
+    },
+    {
+        id: 'flower',
+        word: 'FLOWER',
+        hebrew: 'פרח',
+        hint: '🌸 צומח בגינה ויפה',
+        category: 'nature',
+        emoji: '🌸',
+        level: 'medium',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The flower grows in the garden.',
+    },
 
     // Hard Level - Complex words
-    { id: 'butterfly', word: 'BUTTERFLY', hint: '🦋 חרק יפה עם כנפיים צבעוניות', hebrew: 'פרפר', level: 'hard', type: 'word' },
-    { id: 'adventure', word: 'ADVENTURE', hint: '🗺️ מסע מרגש עם הרפתקאות', hebrew: 'הרפתקה', level: 'hard', type: 'word' },
-    { id: 'treasure', word: 'TREASURE', hint: '💎 משהו יקר שמוצאים', hebrew: 'אוצר', level: 'hard', type: 'word' },
+    {
+        id: 'butterfly',
+        word: 'BUTTERFLY',
+        hebrew: 'פרפר',
+        hint: '🦋 חרק יפה עם כנפיים צבעוניות',
+        category: 'animals',
+        emoji: '🦋',
+        level: 'hard',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The butterfly has colorful wings.',
+    },
+    {
+        id: 'adventure',
+        word: 'ADVENTURE',
+        hebrew: 'הרפתקה',
+        hint: '🗺️ מסע מרגש עם הרפתקאות',
+        category: 'emotions',
+        emoji: '🗺️',
+        level: 'hard',
+        type: 'word',
+        gender: 'f',
+        exampleSentence: 'Every day is a new adventure.',
+    },
+    {
+        id: 'treasure',
+        word: 'TREASURE',
+        hebrew: 'אוצר',
+        hint: '💎 משהו יקר שמוצאים',
+        category: 'objects',
+        emoji: '💎',
+        level: 'hard',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The pirate found a hidden treasure.',
+    },
 
     // Expert Level - Advanced vocabulary
-    { id: 'mysterious', word: 'MYSTERIOUS', hint: '🕵️‍♀️ משהו לא ברור ומסקרן', hebrew: 'מסתורי', level: 'expert', type: 'word' },
-    { id: 'extraordinary', word: 'EXTRAORDINARY', hint: '🌟 משהו מאוד מיוחד ולא רגיל', hebrew: 'יוצא דופן', level: 'expert', type: 'word' },
+    {
+        id: 'mysterious',
+        word: 'MYSTERIOUS',
+        hebrew: 'מסתורי',
+        hint: '🕵️‍♀️ משהו לא ברור ומסקרן',
+        category: 'emotions',
+        emoji: '🕵️',
+        level: 'expert',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'The old house looks mysterious.',
+    },
+    {
+        id: 'extraordinary',
+        word: 'EXTRAORDINARY',
+        hebrew: 'יוצא דופן',
+        hint: '🌟 משהו מאוד מיוחד ולא רגיל',
+        category: 'emotions',
+        emoji: '🌟',
+        level: 'expert',
+        type: 'word',
+        gender: 'm',
+        exampleSentence: 'She has an extraordinary talent.',
+    },
 ];
+
+// Validate at module load time — will throw if any word is invalid
+export const initialWordData = validateWords(rawWordData);
 
 /**
  * Get words filtered by difficulty level
