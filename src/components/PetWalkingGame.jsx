@@ -53,7 +53,7 @@ export default function PetWalkingGame({
     onExit,
     onComplete
 }) {
-    const isGirl = (userProfile?.gender === 'girl') || (avatar === '👸') || (userProfile?.avatar === '👸');
+    const isGirl = userProfile?.gender === 'girl';
 
     // Determine pet type from icon
     const petType = pet.icon.includes('🐕') ? 'dog'

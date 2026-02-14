@@ -163,7 +163,7 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
           class="flex justify-center gap-2 mb-6"
         >
           <svg
-            aria-hidden="true"
+            aria-label="חיה פעילה"
             class="lucide lucide-heart text-red-500"
             fill="#ef4444"
             height="24"
@@ -180,7 +180,7 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
             />
           </svg>
           <svg
-            aria-hidden="true"
+            aria-label="חיה אבודה"
             class="lucide lucide-heart text-slate-300"
             fill="none"
             height="24"
@@ -197,7 +197,7 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
             />
           </svg>
           <svg
-            aria-hidden="true"
+            aria-label="חיה אבודה"
             class="lucide lucide-heart text-slate-300"
             fill="none"
             height="24"
@@ -339,7 +339,9 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
             </button>
           </div>
           <div
+            aria-live="assertive"
             class="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-md z-20"
+            role="alert"
           >
             <div
               class="text-center font-bold text-3xl text-red-500"
@@ -514,7 +516,9 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
         class="text-center py-10 bg-white rounded-3xl shadow-xl"
       >
         <div
+          aria-label="Success"
           class="text-8xl mb-4"
+          role="img"
         >
           🏆
         </div>
@@ -527,12 +531,14 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
           class="flex justify-center gap-4"
         >
           <button
-            class="px-6 py-3 bg-slate-100 rounded-xl font-bold"
+            aria-label="Go to main menu"
+            class="px-6 py-3 bg-slate-100 rounded-xl font-bold hover:bg-slate-200 transition-colors"
           >
             לתפריט
           </button>
           <button
-            class="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold"
+            aria-label="Play again"
+            class="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors"
           >
             שחק שוב
           </button>
@@ -845,13 +851,16 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
            מילים נלמדו
         </p>
         <button
+          aria-label="הממלכה הקסומה - זמין"
           class="relative bg-gradient-to-r from-green-400 to-emerald-600 text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all hover:scale-[1.02] hover:shadow-xl"
         >
           <div
             class="flex items-center gap-4"
           >
             <div
+              aria-hidden="true"
               class="text-5xl"
+              role="img"
             >
               👸
             </div>
@@ -890,6 +899,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
           </svg>
         </button>
         <button
+          aria-label="היער הקסום - נעול"
           class="relative bg-gradient-to-r from-blue-400 to-indigo-600 text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-50 cursor-not-allowed grayscale"
           disabled=""
         >
@@ -897,7 +907,9 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             class="flex items-center gap-4"
           >
             <div
+              aria-hidden="true"
               class="text-5xl"
+              role="img"
             >
               🧚
             </div>
@@ -947,7 +959,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </div>
           <svg
-            aria-hidden="true"
+            aria-label="נעול"
             class="lucide lucide-lock"
             fill="none"
             height="24"
@@ -973,6 +985,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
           </svg>
         </button>
         <button
+          aria-label="מגדל הקוסם - נעול"
           class="relative bg-gradient-to-r from-purple-500 to-fuchsia-600 text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-50 cursor-not-allowed grayscale"
           disabled=""
         >
@@ -980,7 +993,9 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             class="flex items-center gap-4"
           >
             <div
+              aria-hidden="true"
               class="text-5xl"
+              role="img"
             >
               🧙
             </div>
@@ -1030,7 +1045,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </div>
           <svg
-            aria-hidden="true"
+            aria-label="נעול"
             class="lucide lucide-lock"
             fill="none"
             height="24"
@@ -1056,6 +1071,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
           </svg>
         </button>
         <button
+          aria-label="היקום האינסופי - נעול"
           class="relative bg-gradient-to-r from-rose-500 to-pink-600 text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-50 cursor-not-allowed grayscale"
           disabled=""
         >
@@ -1063,7 +1079,9 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             class="flex items-center gap-4"
           >
             <div
+              aria-hidden="true"
               class="text-5xl"
+              role="img"
             >
               👽
             </div>
@@ -1113,7 +1131,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </div>
           <svg
-            aria-hidden="true"
+            aria-label="נעול"
             class="lucide lucide-lock"
             fill="none"
             height="24"
@@ -1139,6 +1157,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
           </svg>
         </button>
         <button
+          aria-label="היכל החכמים - נעול"
           class="relative bg-gradient-to-r from-amber-500 to-red-600 text-white p-6 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-50 cursor-not-allowed grayscale"
           disabled=""
         >
@@ -1146,7 +1165,9 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             class="flex items-center gap-4"
           >
             <div
+              aria-hidden="true"
               class="text-5xl"
+              role="img"
             >
               🏛️
             </div>
@@ -1196,7 +1217,7 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </div>
           <svg
-            aria-hidden="true"
+            aria-label="נעול"
             class="lucide lucide-lock"
             fill="none"
             height="24"
@@ -1390,7 +1411,7 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
           class="flex justify-center gap-2 mb-6"
         >
           <svg
-            aria-hidden="true"
+            aria-label="חיה פעילה"
             class="lucide lucide-heart text-red-500"
             fill="#ef4444"
             height="24"
@@ -1407,7 +1428,7 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
             />
           </svg>
           <svg
-            aria-hidden="true"
+            aria-label="חיה פעילה"
             class="lucide lucide-heart text-red-500"
             fill="#ef4444"
             height="24"
@@ -1424,7 +1445,7 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
             />
           </svg>
           <svg
-            aria-hidden="true"
+            aria-label="חיה פעילה"
             class="lucide lucide-heart text-red-500"
             fill="#ef4444"
             height="24"
