@@ -19,19 +19,19 @@ Progress: [████░░░░░░] 36%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3 min
-- Total execution time: 0.18 hours
+- Total execution time: 0.22 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
-| 02-architecture-refactoring | 2 | 4 min | 2 min |
+| 02-architecture-refactoring | 3 | 6 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min), 02-04 (2 min)
+- Last 5 plans: 01-01 (3 min), 01-02 (4 min), 02-01 (2 min), 02-02 (2 min), 02-04 (2 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -57,6 +57,10 @@ Recent decisions affecting current work:
 - [02-01]: Legacy keys NOT deleted during migration -- old code still reads them until 02-02 rewires hooks
 - [02-01]: Story slice kept minimal (hasSeenStoryIntro + storyPath only) -- complex story logic stays in hook
 - [02-01]: Ephemeral game state excluded from persist via partialize
+- [02-02]: Hooks use useGameStore(selector) directly rather than useGame() context for provider-independent usage
+- [02-02]: Composite actions use useGameStore.getState() for multi-step mutations to avoid stale closures
+- [02-02]: useStoryProgress intentionally unchanged -- 472 lines of complex dialogue/pet/choice logic stays in hook
+- [02-02]: useItemEffects keeps inventory parameter for backward compatibility
 - [02-04]: All 10 word fields required (no optional) to enforce data completeness for Phase 3 content expansion
 - [02-04]: Validation runs at module import time (fail-fast) rather than lazily at runtime
 - [02-04]: Hebrew grammatical gender uses 'm', 'f', 'n' enum values matching grammarEngine convention
