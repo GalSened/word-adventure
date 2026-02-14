@@ -121,13 +121,63 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 1 | Pending |
+| TEST-03 | Phase 1 | Pending |
+| TEST-04 | Phase 1 | Pending |
+| TEST-05 | Phase 1 | Pending |
+| ARCH-01 | Phase 2 | Pending |
+| ARCH-02 | Phase 2 | Pending |
+| ARCH-03 | Phase 2 | Pending |
+| ARCH-04 | Phase 2 | Pending |
+| ARCH-05 | Phase 2 | Pending |
+| ARCH-06 | Phase 2 | Pending |
+| ARCH-07 | Phase 2 | Pending |
+| ARCH-08 | Phase 2 | Pending |
+| ARCH-09 | Phase 2 | Pending |
+| CONT-01 | Phase 3 | Pending |
+| CONT-02 | Phase 3 | Pending |
+| CONT-03 | Phase 3 | Pending |
+| CONT-04 | Phase 3 | Pending |
+| CONT-05 | Phase 3 | Pending |
+| CONT-06 | Phase 3 | Pending |
+| CONT-07 | Phase 6 | Pending |
+| CONT-08 | Phase 3 | Pending |
+| CONT-09 | Phase 3 | Pending |
+| CONT-10 | Phase 2 | Pending |
+| CHAL-01 | Phase 4 | Pending |
+| CHAL-02 | Phase 4 | Pending |
+| CHAL-03 | Phase 4 | Pending |
+| CHAL-04 | Phase 4 | Pending |
+| CHAL-05 | Phase 4 | Pending |
+| CHAL-06 | Phase 4 | Pending |
+| CHAL-07 | Phase 4 | Pending |
+| CHAL-08 | Phase 4 | Pending |
+| CHAL-09 | Phase 4 | Pending |
+| CHAL-10 | Phase 4 | Pending |
+| ADVN-01 | Phase 5 | Pending |
+| ADVN-02 | Phase 5 | Pending |
+| ADVN-03 | Phase 5 | Pending |
+| ADVN-04 | Phase 5 | Pending |
+| ADVN-05 | Phase 5 | Pending |
+| ADVN-06 | Phase 5 | Pending |
+| ADVN-07 | Phase 5 | Pending |
+| ADVN-08 | Phase 5 | Pending |
+| PROG-01 | Phase 3 | Pending |
+| PROG-02 | Phase 3 | Pending |
+| PROG-03 | Phase 3 | Pending |
+| PROG-04 | Phase 3 | Pending |
+| PROG-05 | Phase 6 | Pending |
+| PROG-06 | Phase 6 | Pending |
+| PROG-07 | Phase 6 | Pending |
+| PROG-08 | Phase 6 | Pending |
+| PROG-09 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 43 total
-- Mapped to phases: 0
-- Unmapped: 43 ⚠️
+- v1 requirements: 51 total
+- Mapped to phases: 51
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-14*
-*Last updated: 2026-02-14 after initial definition*
+*Last updated: 2026-02-14 after roadmap creation — traceability complete*
