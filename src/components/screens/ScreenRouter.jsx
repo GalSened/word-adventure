@@ -56,6 +56,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         isListening={props.isListening}
                         startListening={props.startListening}
                         stopListening={props.stopListening}
+                        playerGender={props.userProfile?.gender || 'boy'}
                         t={props.t}
                     />
                 );
