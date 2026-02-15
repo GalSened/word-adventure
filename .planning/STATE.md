@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 6 of 6 (Polish and Integration)
-Plan: 1 of 3 in current phase (IN PROGRESS)
-Status: Executing — Plan 06-01 complete
-Last activity: 2026-02-15 — Completed 06-01 (Word Book and Progress Tracker)
+Plan: 2 of 3 in current phase (IN PROGRESS)
+Status: Executing — Plan 06-02 complete
+Last activity: 2026-02-15 — Completed 06-02 (Progression Recalibration and Onboarding)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 4 min
-- Total execution time: 1.23 hours
+- Total execution time: 1.30 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [█████████░] 93%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 | 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
 | 05-adventure-game | 2 | 7 min | 3.5 min |
-| 06-polish-and-integration | 1 | 2 min | 2.0 min |
+| 06-polish-and-integration | 2 | 6 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (2 min), 04-04 (6 min), 05-01 (3 min), 05-02 (4 min), 06-01 (2 min)
+- Last 5 plans: 04-04 (6 min), 05-01 (3 min), 05-02 (4 min), 06-01 (2 min), 06-02 (4 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -117,6 +117,9 @@ Recent decisions affecting current work:
 - [06-01]: Progress tracker uses SRS userProgress (repetition >= 6 = mastered) as single source of truth, not totalWordsLearned counter
 - [06-01]: Mastery band thresholds recreated locally in WordBookScreen (getMasteryBand not exported from challengeSelector)
 - [06-01]: framer-motion AnimatePresence used only on category container transitions, not individual cards (performance)
+- [06-02]: Onboarding completes on first level finish (not step-based mid-level tracking) for simplicity and reliability
+- [06-02]: StoryIntro.jsx file preserved for potential reuse; only removed from render
+- [06-02]: StoryPathChoice deferred to after hasCompletedOnboarding instead of hasSeenStoryIntro
 
 ### Pending Todos
 
@@ -129,5 +132,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 06-01-PLAN.md (Word Book and Progress Tracker)
+Stopped at: Completed 06-02-PLAN.md (Progression Recalibration and Onboarding)
 Resume file: None
