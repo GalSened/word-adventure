@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Players learn English vocabulary through genuinely fun, varied gameplay that feels like an adventure — not a flashcard app.
-**Current focus:** Phase 5 — Adventure Game
+**Current focus:** Phase 6 — Polish and Integration
 
 ## Current Position
 
-Phase: 5 of 6 (Adventure Game) -- COMPLETE
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: Phase 5 complete -- ready for Phase 6
-Last activity: 2026-02-15 — Completed 05-02 encounter system and app integration
+Phase: 6 of 6 (Polish and Integration)
+Plan: 1 of 3 in current phase (IN PROGRESS)
+Status: Executing — Plan 06-01 complete
+Last activity: 2026-02-15 — Completed 06-01 (Word Book and Progress Tracker)
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 4 min
-- Total execution time: 1.20 hours
+- Total execution time: 1.23 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [█████████░] 91%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 | 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
 | 05-adventure-game | 2 | 7 min | 3.5 min |
+| 06-polish-and-integration | 1 | 2 min | 2.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (2 min), 04-03 (2 min), 04-04 (6 min), 05-01 (3 min), 05-02 (4 min)
+- Last 5 plans: 04-03 (2 min), 04-04 (6 min), 05-01 (3 min), 05-02 (4 min), 06-01 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -113,6 +114,9 @@ Recent decisions affecting current work:
 - [05-02]: SRS updates in AdventureGame directly (not via useGameLogic.processAnswer) to avoid advancing main word index
 - [05-02]: Default pet { name: Buddy, icon: dog } provided when no activePet for store-free adventure access
 - [05-02]: World Map emoji changed from map to globe to differentiate from Adventure button
+- [06-01]: Progress tracker uses SRS userProgress (repetition >= 6 = mastered) as single source of truth, not totalWordsLearned counter
+- [06-01]: Mastery band thresholds recreated locally in WordBookScreen (getMasteryBand not exported from challengeSelector)
+- [06-01]: framer-motion AnimatePresence used only on category container transitions, not individual cards (performance)
 
 ### Pending Todos
 
@@ -125,5 +129,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 05-02-PLAN.md (encounter system, app integration, Phase 5 complete)
+Stopped at: Completed 06-01-PLAN.md (Word Book and Progress Tracker)
 Resume file: None
