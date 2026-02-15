@@ -10,6 +10,7 @@ import MemoryScreen from './MemoryScreen';
 import PetWalkingScreen from './PetWalkingScreen';
 import AvatarScreen from './AvatarScreen';
 import AdventureScreen from './AdventureScreen';
+import WordBookScreen from './WordBookScreen';
 
 /**
  * ScreenRouter component - Maps gameState to the correct screen component
@@ -150,6 +151,14 @@ export default function ScreenRouter({ gameState, ...props }) {
                         userProfile={props.userProfile}
                         onExit={() => props.setGameState('start')}
                         onComplete={props.handleAdventureComplete}
+                    />
+                );
+
+            case 'wordBook':
+                return (
+                    <WordBookScreen
+                        key="wordBook"
+                        onClose={() => props.setGameState('start')}
                     />
                 );
 

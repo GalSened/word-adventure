@@ -12,4 +12,5 @@ export { default as InventoryScreen } from './InventoryScreen';
 export { default as MemoryScreen } from './MemoryScreen';
 export { default as PetWalkingScreen } from './PetWalkingScreen';
 export { default as AvatarScreen } from './AvatarScreen';
+export { default as WordBookScreen } from './WordBookScreen';
 export { default as ScreenRouter } from './ScreenRouter';

@@ -1677,6 +1677,34 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
           מוכן להרפתקה?
         </h2>
         <div
+          class="bg-white/80 rounded-2xl p-4 text-center shadow-sm mb-4 max-w-4xl mx-auto"
+        >
+          <div
+            class="text-2xl font-bold text-purple-600"
+          >
+            0
+            /
+            201
+             
+            מילים נשלטו
+          </div>
+          <div
+            class="text-sm text-slate-500"
+          >
+            0
+             
+            מילים בתהליך
+          </div>
+          <div
+            class="w-full bg-gray-200 rounded-full h-3 mt-2"
+          >
+            <div
+              class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
+              style="width: 0%;"
+            />
+          </div>
+        </div>
+        <div
           class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-10"
         >
           <div
@@ -1852,6 +1880,25 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
               class="text-sm opacity-90"
             >
               צא להרפתקה בעולמות קסומים!
+            </div>
+          </button>
+          <button
+            class="bg-gradient-to-r from-cyan-400 to-blue-500 text-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all"
+          >
+            <div
+              class="text-4xl mb-2"
+            >
+              📖
+            </div>
+            <div
+              class="text-2xl font-bold"
+            >
+              מילון
+            </div>
+            <div
+              class="text-sm opacity-90"
+            >
+              עיין במילים שלמדת
             </div>
           </button>
           <button
