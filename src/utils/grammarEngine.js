@@ -1,23 +1,30 @@
 /**
  * Procedural Grammar Engine for Word Adventure
  * Generates infinite sentence variations with proper Hebrew gender agreement.
+ * Nouns are derived from the unified word bank; adjectives/verbs kept separate
+ * because they require he_m/he_f gender-agreement forms not in the word schema.
  */
 
 import { nanoid } from 'nanoid';
+import { initialWordData } from '../data/words';
+
+/** Categories whose words make sense as sentence subjects ("The X is big") */
+const NOUN_CATEGORIES = ['animals', 'family', 'professions'];
+
+/**
+ * Build the noun list from the unified word bank.
+ * Filters for categories that work as sentence subjects and maps to
+ * the grammar engine's { en, he, gender, emoji } format.
+ * Only includes masculine ('m') and feminine ('f') nouns -- neutral ('n')
+ * would break gender agreement and none currently exist.
+ */
+export const buildNounsFromWordBank = () =>
+    initialWordData
+        .filter(w => NOUN_CATEGORIES.includes(w.category) && (w.gender === 'm' || w.gender === 'f'))
+        .map(w => ({ en: w.word, he: w.hebrew, gender: w.gender, emoji: w.emoji }));
 
 const VOCAB = {
-    nouns: [
-        { en: 'CAT', he: 'חתול', gender: 'm', emoji: '🐱' },
-        { en: 'DOG', he: 'כלב', gender: 'm', emoji: '🐕' },
-        { en: 'KING', he: 'מלך', gender: 'm', emoji: '👑' },
-        { en: 'BOY', he: 'ילד', gender: 'm', emoji: '👦' },
-        { en: 'LION', he: 'אריה', gender: 'm', emoji: '🦁' },
-        { en: 'PRINCESS', he: 'נסיכה', gender: 'f', emoji: '👸' },
-        { en: 'QUEEN', he: 'מלכה', gender: 'f', emoji: '👑' },
-        { en: 'GIRL', he: 'ילדה', gender: 'f', emoji: '👧' },
-        { en: 'BIRD', he: 'ציפור', gender: 'f', emoji: '🐦' },
-        { en: 'COW', he: 'פרה', gender: 'f', emoji: '🐮' },
-    ],
+    nouns: buildNounsFromWordBank(),
     adjectives: [
         { en: 'BIG', he_m: 'גדול', he_f: 'גדולה' },
         { en: 'SMALL', he_m: 'קטן', he_f: 'קטנה' },
