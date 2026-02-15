@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 4 of 6 (Challenge Types and Levels)
-Plan: 2 of 4 in current phase (04-01, 04-02 complete)
+Plan: 3 of 4 in current phase (04-01, 04-02, 04-03 complete)
 Status: Executing
-Last activity: 2026-02-15 — Completed 04-01 (challenge infrastructure and dispatcher)
+Last activity: 2026-02-15 — Completed 04-03 (challenge system integration)
 
-Progress: [██████░░░░] 68%
+Progress: [███████░░░] 74%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 4 min
-- Total execution time: 0.75 hours
+- Total execution time: 0.78 hours
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: [██████░░░░] 68%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (8 min), 03-02 (3 min), 03-04 (4 min), 04-02 (2 min), 04-01 (2 min)
+- Last 5 plans: 03-02 (3 min), 03-04 (4 min), 04-02 (2 min), 04-01 (2 min), 04-03 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -94,6 +94,10 @@ Recent decisions affecting current work:
 - [04-02]: GrammarChallenge generates distractors via grammarEngine.generateChallenge() (not word bank) since grammar sentences are procedural
 - [04-02]: SpellingChallenge receives extended props (scrambledContent, userInput, setUserInput, onCheck) beyond standard challenge interface
 - [04-02]: Reorder items use {id, text} objects with unique IDs to handle duplicate words in sentences
+- [04-03]: Snapshot tests mock selectChallengeType to 'spelling' for deterministic LetterPicker-based test flow
+- [04-03]: ChallengeDispatcher default fallback changed from MultipleChoice to Spelling for behavior preservation
+- [04-03]: recentChallengeTypes tracked as useRef (last 3) to prevent repetitive challenge sequences
+- [04-03]: Voice input removed from PlayingScreen (can be re-added per-challenge in Phase 6)
 
 ### Pending Todos
 
@@ -106,5 +110,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
