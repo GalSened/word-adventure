@@ -12,9 +12,10 @@ import { useStoryProgress } from './hooks/useStoryProgress';
 import { useItemEffects } from './hooks/useItemEffects';
 import { useGameLogic } from './hooks/useGameLogic';
 import { initialWordData } from './data/words';
+import { getMemoryGameWords } from './utils/memoryGameWords';
 
 export default function WordAdventure() {
-    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels } = useGameStore();
+    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels, userProgress } = useGameStore();
     const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, activeWords, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding, setHasCompletedOnboarding } = useGameStore();
 
     const voice = useVoiceRecognition();
@@ -57,7 +58,7 @@ export default function WordAdventure() {
         handleAvatarSelect: logic.handleAvatarSelect, handleAdventureComplete: logic.handleAdventureComplete, t: logic.t,
         equipped: itemEffects.equipped, equipItem: itemEffects.equipItem, unequipItem: itemEffects.unequipItem,
         completedLevels: completedLevels || [],
-        gender: userProfile.gender, memoryWords: activeWords.length > 0 ? activeWords : initialWordData.slice(0, 12),
+        gender: userProfile.gender, memoryWords: getMemoryGameWords(initialWordData, userProgress),
     };
 
     return (
