@@ -29,6 +29,7 @@ export const STORY_INTRO = {
 
 // ============================================
 // CHAPTER STORYLINES
+// Thresholds recalibrated for 200-word scale (Phase 6)
 // ============================================
 
 export const CHAPTERS = {
@@ -81,7 +82,7 @@ export const CHAPTERS = {
         subtitle: 'The Magical Forest',
         character: '🧚',
         color: 'from-blue-400 to-indigo-600',
-        unlockRequirement: 5, // words learned
+        unlockRequirement: 15, // words learned
 
         intro: {
             boy: `היער הקסום מלא בפיות ויצורים מופלאים.
@@ -124,7 +125,7 @@ export const CHAPTERS = {
         subtitle: "The Wizard's Tower",
         character: '🧙',
         color: 'from-purple-500 to-fuchsia-600',
-        unlockRequirement: 10,
+        unlockRequirement: 40,
 
         intro: {
             boy: `מגדל הקוסם מתנשא מעל העננים.
@@ -167,7 +168,7 @@ export const CHAPTERS = {
         subtitle: 'The Infinite Universe',
         character: '👽',
         color: 'from-rose-500 to-pink-600',
-        unlockRequirement: 15,
+        unlockRequirement: 80,
 
         intro: {
             boy: `ברוך הבא ליקום האינסופי!
@@ -210,7 +211,7 @@ export const CHAPTERS = {
         subtitle: 'The Hall of Sages',
         character: '🏛️',
         color: 'from-amber-500 to-red-600',
-        unlockRequirement: 20,
+        unlockRequirement: 130,
 
         intro: {
             boy: `הגעת להיכל החכמים - המקום הכי קדוש בממלכה!
@@ -689,6 +690,7 @@ export const LEVEL_CHAPTERS = {
 
 // ============================================
 // PET EVOLUTION SYSTEM
+// Thresholds recalibrated for 200-word scale (Phase 6)
 // ============================================
 
 export const PET_EVOLUTION = {
@@ -708,7 +710,7 @@ export const PET_EVOLUTION = {
                 level: 2,
                 name: 'כלב חכם',
                 icon: '🦮',
-                wordsRequired: 10,
+                wordsRequired: 30,
                 ability: 'עוזר למצוא רמזים',
                 dialogue: 'למדתי טריקים חדשים בזכותך!'
             },
@@ -716,7 +718,7 @@ export const PET_EVOLUTION = {
                 level: 3,
                 name: 'כלב קסום',
                 icon: '🐕‍🦺',
-                wordsRequired: 25,
+                wordsRequired: 80,
                 ability: 'יכול לדבר!',
                 dialogue: 'וואו! עכשיו אני יכול לדבר איתך!'
             },
@@ -724,7 +726,7 @@ export const PET_EVOLUTION = {
                 level: 4,
                 name: 'כלב אגדי',
                 icon: '🦊',
-                wordsRequired: 50,
+                wordsRequired: 150,
                 ability: 'כוחות על-טבעיים',
                 dialogue: 'יחד נוכל לעשות הכל!'
             }
@@ -747,7 +749,7 @@ export const PET_EVOLUTION = {
                 level: 2,
                 name: 'חד קרן צעיר',
                 icon: '🦄',
-                wordsRequired: 10,
+                wordsRequired: 30,
                 ability: 'יכול לעוף קצת',
                 dialogue: 'הכנפיים שלי גדלות!'
             },
@@ -755,7 +757,7 @@ export const PET_EVOLUTION = {
                 level: 3,
                 name: 'חד קרן מופלא',
                 icon: '🦄',
-                wordsRequired: 25,
+                wordsRequired: 80,
                 ability: 'קסם ריפוי',
                 dialogue: 'אני יכול לרפא אותך עכשיו!'
             },
@@ -763,7 +765,7 @@ export const PET_EVOLUTION = {
                 level: 4,
                 name: 'חד קרן שמימי',
                 icon: '🦄',
-                wordsRequired: 50,
+                wordsRequired: 150,
                 ability: 'טלפורטציה',
                 dialogue: 'בוא נעוף לכוכבים!'
             }
@@ -786,7 +788,7 @@ export const PET_EVOLUTION = {
                 level: 2,
                 name: 'דרקון צעיר',
                 icon: '🐉',
-                wordsRequired: 10,
+                wordsRequired: 30,
                 ability: 'יורק אש קטנה',
                 dialogue: 'תראה! אני יכול לירוק אש!'
             },
@@ -794,7 +796,7 @@ export const PET_EVOLUTION = {
                 level: 3,
                 name: 'דרקון אדיר',
                 icon: '🐉',
-                wordsRequired: 25,
+                wordsRequired: 80,
                 ability: 'כנפיים גדולות',
                 dialogue: 'הכנפיים שלי חזקות מספיק לשנינו!'
             },
@@ -802,7 +804,7 @@ export const PET_EVOLUTION = {
                 level: 4,
                 name: 'דרקון אגדי',
                 icon: '🐉',
-                wordsRequired: 50,
+                wordsRequired: 150,
                 ability: 'שולט באש וקרח',
                 dialogue: 'אני הדרקון הכי חזק בממלכה!'
             }
@@ -836,12 +838,13 @@ export const MYSTERIES = {
     ],
 
     // Hidden story fragments
+    // Thresholds recalibrated for 200-word scale (Phase 6)
     lore: [
-        { id: 'lore_1', text: 'פעם, המילים היו יצורים חיים שרקדו בשמיים...', unlockAt: 5 },
-        { id: 'lore_2', text: 'הקוסם האפל היה פעם ילד שלא ידע לקרוא...', unlockAt: 10 },
-        { id: 'lore_3', text: 'מלכת המילים הראשונה למדה 1000 שפות!', unlockAt: 15 },
-        { id: 'lore_4', text: 'יש שער סודי שנפתח רק למי שיודע את כל המילים...', unlockAt: 20 },
-        { id: 'lore_5', text: 'האגדה אומרת שמי שמחזיר את כל המילים יהפוך לקוסם...', unlockAt: 30 },
+        { id: 'lore_1', text: 'פעם, המילים היו יצורים חיים שרקדו בשמיים...', unlockAt: 15 },
+        { id: 'lore_2', text: 'הקוסם האפל היה פעם ילד שלא ידע לקרוא...', unlockAt: 40 },
+        { id: 'lore_3', text: 'מלכת המילים הראשונה למדה 1000 שפות!', unlockAt: 80 },
+        { id: 'lore_4', text: 'יש שער סודי שנפתח רק למי שיודע את כל המילים...', unlockAt: 120 },
+        { id: 'lore_5', text: 'האגדה אומרת שמי שמחזיר את כל המילים יהפוך לקוסם...', unlockAt: 175 },
     ]
 };
 
