@@ -224,11 +224,21 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
              את ה
             מילה
           </span>
-          <h2
-            class="text-6xl font-black text-slate-800 my-6 leading-tight"
+          <div
+            class="flex items-center justify-center gap-3 my-6"
           >
-            חתול
-          </h2>
+            <h2
+              class="text-6xl font-black text-slate-800 leading-tight"
+            >
+              חתול
+            </h2>
+          </div>
+          <p
+            class="text-slate-500 text-lg mt-2 mb-4 leading-relaxed"
+            dir="rtl"
+          >
+            🐱 חיה שאוהבת חלב
+          </p>
           <div
             class="w-full"
           >
@@ -580,11 +590,21 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
              את ה
             מילה
           </span>
-          <h2
-            class="text-6xl font-black text-slate-800 my-6 leading-tight"
+          <div
+            class="flex items-center justify-center gap-3 my-6"
           >
-            דג
-          </h2>
+            <h2
+              class="text-6xl font-black text-slate-800 leading-tight"
+            >
+              דג
+            </h2>
+          </div>
+          <p
+            class="text-slate-500 text-lg mt-2 mb-4 leading-relaxed"
+            dir="rtl"
+          >
+            🐟 שוחה במים
+          </p>
           <div
             class="w-full"
           >
@@ -1506,11 +1526,21 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
              את ה
             מילה
           </span>
-          <h2
-            class="text-6xl font-black text-slate-800 my-6 leading-tight"
+          <div
+            class="flex items-center justify-center gap-3 my-6"
           >
-            חתול
-          </h2>
+            <h2
+              class="text-6xl font-black text-slate-800 leading-tight"
+            >
+              חתול
+            </h2>
+          </div>
+          <p
+            class="text-slate-500 text-lg mt-2 mb-4 leading-relaxed"
+            dir="rtl"
+          >
+            🐱 חיה שאוהבת חלב
+          </p>
           <div
             class="w-full"
           >

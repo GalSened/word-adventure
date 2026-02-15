@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Mic, MicOff } from 'lucide-react';
+import { Heart, Mic, MicOff, Volume2 } from 'lucide-react';
 import LetterPicker from '../LetterPicker';
 import { hapticFeedback } from '../../utils/mobile';
+import { speakWord, isSpeechSupported } from '../../utils/speech';
 
 /**
  * PlayingScreen component - Active gameplay screen
@@ -21,8 +22,15 @@ export default function PlayingScreen({
     isListening,
     startListening,
     stopListening,
+    playerGender,
     t
 }) {
+    // CONT-04: Gender-aware hint selection
+    const hint = playerGender === 'boy' && currentWord.hint_m
+        ? currentWord.hint_m
+        : playerGender === 'girl' && currentWord.hint_f
+            ? currentWord.hint_f
+            : currentWord.hint;
     return (
         <motion.div
             key="play"
@@ -50,9 +58,29 @@ export default function PlayingScreen({
                 <span className="text-slate-400 text-sm tracking-widest font-bold">
                     {t('תרגם', 'תרגמי')} את ה{currentWord.type === 'sentence' ? 'משפט' : 'מילה'}
                 </span>
-                <h2 className="text-6xl font-black text-slate-800 my-6 leading-tight">
-                    {currentWord.hebrew}
-                </h2>
+                <div className="flex items-center justify-center gap-3 my-6">
+                    <h2 className="text-6xl font-black text-slate-800 leading-tight">
+                        {currentWord.hebrew}
+                    </h2>
+                    {/* CONT-05: Speaker icon for English pronunciation */}
+                    {isSpeechSupported() && (
+                        <button
+                            onClick={() => {
+                                hapticFeedback('light');
+                                speakWord(currentWord.word);
+                            }}
+                            className="bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-full p-2 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
+                            aria-label="Hear pronunciation"
+                        >
+                            <Volume2 size={24} />
+                        </button>
+                    )}
+                </div>
+
+                {/* CONT-04: Gender-aware Hebrew hint */}
+                <p className="text-slate-500 text-lg mt-2 mb-4 leading-relaxed" dir="rtl">
+                    {hint}
+                </p>
 
                 {/* Touch-friendly letter picker */}
                 <LetterPicker
