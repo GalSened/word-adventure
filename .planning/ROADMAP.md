@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Test Safety Net** - Vitest configured with unit and snapshot tests covering core utilities before any refactoring begins (completed 2026-02-14)
 - [x] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed (completed 2026-02-15)
-- [ ] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale
+- [x] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale (completed 2026-02-15)
 - [ ] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming
 - [ ] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics
 - [ ] **Phase 6: Polish and Integration** - Word book, progress tracker, onboarding, threshold tuning, and memory game improvements
@@ -69,10 +69,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Extend Zod schema (hint_m/hint_f, exampleSentence_he, category enum) and author 200+ words across 10 themed categories
-- [ ] 03-02-PLAN.md — SpeechSynthesis audio utility, speaker icon on PlayingScreen, gender-aware hint display
-- [ ] 03-03-PLAN.md — [TDD] SRS algorithm fixes: getDueWords learned-only, addJitter, buildReviewSession with caps and priority sorting
-- [ ] 03-04-PLAN.md — Grammar engine noun sync from word bank, ENCOURAGEMENT and NPC dialogue gender audit
+- [x] 03-01-PLAN.md — Extend Zod schema (hint_m/hint_f, exampleSentence_he, category enum) and author 200+ words across 10 themed categories
+- [x] 03-02-PLAN.md — SpeechSynthesis audio utility, speaker icon on PlayingScreen, gender-aware hint display
+- [x] 03-03-PLAN.md — [TDD] SRS algorithm fixes: getDueWords learned-only, addJitter, buildReviewSession with caps and priority sorting
+- [x] 03-04-PLAN.md — Grammar engine noun sync from word bank, ENCOURAGEMENT and NPC dialogue gender audit
 
 ### Phase 4: Challenge Types and Levels
 **Goal**: Players experience five distinct challenge mechanics across 10+ themed levels that adapt difficulty based on word mastery
@@ -135,7 +135,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
-| 3. Word Bank and SRS Foundation | 0/4 | Planned | - |
+| 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
 | 4. Challenge Types and Levels | 0/4 | Not started | - |
 | 5. Adventure Game | 0/3 | Not started | - |
 | 6. Polish and Integration | 0/3 | Not started | - |
