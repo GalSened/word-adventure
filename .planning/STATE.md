@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Players learn English vocabulary through genuinely fun, varied gameplay that feels like an adventure — not a flashcard app.
-**Current focus:** Phase 4 — Challenge Types and Levels
+**Current focus:** Phase 5 — Adventure Game
 
 ## Current Position
 
-Phase: 4 of 6 (Challenge Types and Levels) -- COMPLETE
-Plan: 4 of 4 in current phase (04-01, 04-02, 04-03, 04-04 complete)
-Status: Phase Complete
-Last activity: 2026-02-15 — Completed 04-04 (level system and progression)
+Phase: 5 of 6 (Adventure Game)
+Plan: 1 of 2 in current phase (EXECUTING)
+Status: Executing — Plan 01 complete, Plan 02 pending
+Last activity: 2026-02-15 — Completed 05-01 adventure core (game loop, zones, pet companion)
 
-Progress: [████████░░] 79%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 4 min
-- Total execution time: 1.08 hours
+- Total execution time: 1.13 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [████████░░] 79%
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 | 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
+| 05-adventure-game | 1 | 3 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (4 min), 04-01 (2 min), 04-02 (2 min), 04-03 (2 min), 04-04 (6 min)
+- Last 5 plans: 04-01 (2 min), 04-02 (2 min), 04-03 (2 min), 04-04 (6 min), 05-01 (3 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -104,6 +105,10 @@ Recent decisions affecting current work:
 - [04-04]: completedLevels stored as persisted array in gameStore user slice, separate from story progress
 - [04-04]: Legacy difficulty strings (master/easy/medium/hard/expert) kept as fallback in startLevel for backward compatibility
 - [04-04]: LEVEL_CHAPTERS added alongside existing CHAPTERS (not replacing) for backward compatibility
+- [05-01]: Encounters auto-resolve in Plan 01 (no EncounterOverlay yet) -- approach/encounter/resolve cycle simulated with timeouts
+- [05-01]: Zone progress uses ref-based tracking with throttled setState (integer-only updates, max 100 re-renders per zone)
+- [05-01]: Timeout tracking via timeoutsRef for proper cleanup on unmount alongside useAnimationFrame auto-cleanup
+- [05-01]: Pet behavior derived from game phase via pure function (not state)
 
 ### Pending Todos
 
@@ -116,5 +121,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 04-04-PLAN.md (Phase 4 complete)
+Stopped at: Completed 05-01-PLAN.md (adventure core with game loop, zones, pet)
 Resume file: None
