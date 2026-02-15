@@ -319,6 +319,17 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         store.setGameState('start');
     };
 
+    // Adventure complete handler
+    const handleAdventureComplete = (earnedScore) => {
+        const store = useGameStore.getState();
+        // Score already added during encounters via store.addScore
+        // Just update daily stats and return to start
+        store.updateDailyStats({
+            dailyScore: store.dailyStats.dailyScore + earnedScore,
+        });
+        store.setGameState('start');
+    };
+
     return {
         t,
         startLevel,
@@ -330,6 +341,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         handlePetWalkComplete,
         handleMemoryComplete,
         handleAvatarSelect,
+        handleAdventureComplete,
         currentWord,
         scrambledContent,
         challengeType,

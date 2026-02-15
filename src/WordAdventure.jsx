@@ -43,7 +43,7 @@ export default function WordAdventure() {
         startLevel: logic.startLevel, handleCheck: logic.handleCheck, handleBuy: logic.handleBuy,
         handleInventoryClose: logic.handleInventoryClose, handleUse: logic.handleUse, handleWalkPet: logic.handleWalkPet,
         handlePetWalkComplete: logic.handlePetWalkComplete, handleMemoryComplete: logic.handleMemoryComplete,
-        handleAvatarSelect: logic.handleAvatarSelect, t: logic.t,
+        handleAvatarSelect: logic.handleAvatarSelect, handleAdventureComplete: logic.handleAdventureComplete, t: logic.t,
         equipped: itemEffects.equipped, equipItem: itemEffects.equipItem, unequipItem: itemEffects.unequipItem,
         completedLevels: completedLevels || [],
         gender: userProfile.gender, memoryWords: activeWords.length > 0 ? activeWords : initialWordData.slice(0, 12),

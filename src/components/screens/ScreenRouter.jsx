@@ -9,6 +9,7 @@ import InventoryScreen from './InventoryScreen';
 import MemoryScreen from './MemoryScreen';
 import PetWalkingScreen from './PetWalkingScreen';
 import AvatarScreen from './AvatarScreen';
+import AdventureScreen from './AdventureScreen';
 
 /**
  * ScreenRouter component - Maps gameState to the correct screen component
@@ -138,6 +139,17 @@ export default function ScreenRouter({ gameState, ...props }) {
                         onSelect={props.handleAvatarSelect}
                         onClose={() => props.setGameState('start')}
                         t={props.t}
+                    />
+                );
+
+            case 'adventure':
+                return (
+                    <AdventureScreen
+                        key="adventure"
+                        pet={props.activePet || { name: 'Buddy', icon: '\uD83D\uDC15' }}
+                        userProfile={props.userProfile}
+                        onExit={() => props.setGameState('start')}
+                        onComplete={props.handleAdventureComplete}
                     />
                 );
 
