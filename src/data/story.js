@@ -67,9 +67,9 @@ export const CHAPTERS = {
             icon: '👑',
             dialogues: [
                 { trigger: 'start', text: 'שלום, {name}! הממלכה שלנו צריכה אותך.' },
-                { trigger: 'correct', text: 'נפלא! אתה לומד מהר מאוד!' },
-                { trigger: 'wrong', text: 'לא נורא, נסה שוב. אני מאמינה בך!' },
-                { trigger: 'streak_3', text: '3 ברצף! אתה כוכב!' },
+                { trigger: 'correct', text: { boy: 'נפלא! אתה לומד מהר מאוד!', girl: 'נפלא! את לומדת מהר מאוד!' } },
+                { trigger: 'wrong', text: { boy: 'לא נורא, נסה שוב. אני מאמינה בך!', girl: 'לא נורא, נסי שוב. אני מאמינה בך!' } },
+                { trigger: 'streak_3', text: { boy: '3 ברצף! אתה כוכב!', girl: '3 ברצף! את כוכבת!' } },
                 { trigger: 'complete', text: 'הצלחת! עכשיו היער הקסום מחכה לך.' }
             ]
         }
@@ -109,10 +109,10 @@ export const CHAPTERS = {
             name: 'הפיה לונה',
             icon: '🧚',
             dialogues: [
-                { trigger: 'start', text: 'שלום {name}! בוא נעוף בין העצים!' },
+                { trigger: 'start', text: { boy: 'שלום {name}! בוא נעוף בין העצים!', girl: 'שלום {name}! בואי נעוף בין העצים!' } },
                 { trigger: 'correct', text: 'הכנפיים שלי מנצנצות משמחה!' },
-                { trigger: 'wrong', text: 'אופס! בוא ננסה שוב יחד.' },
-                { trigger: 'streak_5', text: '5 ברצף! אתה קוסם של מילים!' },
+                { trigger: 'wrong', text: { boy: 'אופס! בוא ננסה שוב יחד.', girl: 'אופס! בואי ננסה שוב יחד.' } },
+                { trigger: 'streak_5', text: { boy: '5 ברצף! אתה קוסם של מילים!', girl: '5 ברצף! את קוסמת של מילים!' } },
                 { trigger: 'complete', text: 'היער שלנו ניצל! תודה לך!' }
             ]
         }
@@ -153,8 +153,8 @@ export const CHAPTERS = {
             icon: '🧙',
             dialogues: [
                 { trigger: 'start', text: 'אהה, {name}! שמעתי עליך הרבה.' },
-                { trigger: 'correct', text: 'חוכמה רבה יש בך, צעיר!' },
-                { trigger: 'wrong', text: 'הקסם דורש סבלנות. נסה שוב.' },
+                { trigger: 'correct', text: { boy: 'חוכמה רבה יש בך, צעיר!', girl: 'חוכמה רבה יש בך, צעירה!' } },
+                { trigger: 'wrong', text: { boy: 'הקסם דורש סבלנות. נסה שוב.', girl: 'הקסם דורש סבלנות. נסי שוב.' } },
                 { trigger: 'streak_5', text: 'מרשים! הכוח איתך!' },
                 { trigger: 'complete', text: 'קח את השרביט. תזדקק לו.' }
             ]
@@ -197,8 +197,8 @@ export const CHAPTERS = {
             dialogues: [
                 { trigger: 'start', text: 'שלום, יצור מכדור הארץ! אני זורק.' },
                 { trigger: 'correct', text: 'מוחך חד כמו לייזר!' },
-                { trigger: 'wrong', text: 'גם בכוכב שלנו טועים. נסה שוב!' },
-                { trigger: 'streak_5', text: 'וואו! 5 נכונות! אתה גאון!' },
+                { trigger: 'wrong', text: { boy: 'גם בכוכב שלנו טועים. נסה שוב!', girl: 'גם בכוכב שלנו טועים. נסי שוב!' } },
+                { trigger: 'streak_5', text: { boy: 'וואו! 5 נכונות! אתה גאון!', girl: 'וואו! 5 נכונות! את גאונית!' } },
                 { trigger: 'complete', text: 'קיבלת את ברכת הכוכבים!' }
             ]
         }
@@ -241,7 +241,7 @@ export const CHAPTERS = {
                 { trigger: 'start', text: '{name}, חיכינו לך אלף שנה!' },
                 { trigger: 'correct', text: 'החוכמה זורמת בך!' },
                 { trigger: 'wrong', text: 'גם החכמים טועים. המשך!' },
-                { trigger: 'streak_5', text: 'אתה החכם הצעיר ביותר!' },
+                { trigger: 'streak_5', text: { boy: 'אתה החכם הצעיר ביותר!', girl: 'את החכמה הצעירה ביותר!' } },
                 { trigger: 'complete', text: 'הממלכה ניצלה! תודה לך לנצח!' }
             ]
         }
@@ -414,7 +414,7 @@ export const ENCOURAGEMENT = {
     correct: [
         'מעולה! 🌟',
         'נכון מאוד! ✨',
-        'אתה כוכב! ⭐',
+        'כוכב! ⭐',
         'מושלם! 💫',
         'וואו! 🎉',
         'גאוני! 🧠',
@@ -423,29 +423,29 @@ export const ENCOURAGEMENT = {
     ],
 
     wrong: [
-        'כמעט! נסה שוב 💪',
+        { boy: 'כמעט! נסה שוב 💪', girl: 'כמעט! נסי שוב 💪' },
         'לא נורא, בפעם הבאה! 🌈',
         'טעויות זה חלק מהלמידה 📚',
-        'אל תוותר! 🔥',
-        'אתה יכול! 💫',
+        'אל תוותרו! 🔥',
+        'אפשר! 💫',
     ],
 
     streak: {
         3: ['3 ברצף! אש! 🔥', 'מתחמם פה! 🌡️'],
         5: ['5 ברצף! סופר! 🦸', 'בלתי ניתן לעצירה! 🚀'],
-        10: ['10 ברצף! אגדי! 👑', 'אתה מכונה! 🤖'],
+        10: ['10 ברצף! אגדי! 👑', 'מכונה! 🤖'],
         15: ['15 ברצף! על-אנושי! 🌟', 'מאסטר! 🎓'],
         20: ['20 ברצף! אלוהי! ✨', 'אין כמוך! 🏆'],
     },
 
     lowLives: [
-        'נשאר לך לב אחד! התרכז! ❤️',
+        { boy: 'נשאר לך לב אחד! התרכז! ❤️', girl: 'נשאר לך לב אחד! התרכזי! ❤️' },
         'זהירות! החיים יקרים! 💔',
     ],
 
     dailyReturn: [
         'שמחים שחזרת! 🌈',
-        'בוקר טוב, גיבור! ☀️',
+        { boy: 'בוקר טוב, גיבור! ☀️', girl: 'בוקר טוב, גיבורה! ☀️' },
         'מתגעגעים אליך! 💕',
         'הממלכה צריכה אותך! 👑',
     ]
@@ -460,6 +460,17 @@ export const ENCOURAGEMENT = {
  */
 export const getRandomItem = (array) => {
     return array[Math.floor(Math.random() * array.length)];
+};
+
+/**
+ * Resolve a text value that may be a plain string or a { boy, girl } object.
+ * @param {string|{boy: string, girl: string}} text - Text or gendered text object
+ * @param {string} gender - 'boy' or 'girl', defaults to 'boy'
+ * @returns {string} The resolved string
+ */
+export const resolveGenderedText = (text, gender = 'boy') => {
+    if (typeof text === 'string') return text;
+    return text[gender] || text.boy;
 };
 
 /**
@@ -509,16 +520,26 @@ export const isChapterUnlocked = (level, wordsLearned) => {
 };
 
 /**
- * Get NPC dialogue for a trigger
+ * Get NPC dialogue for a trigger.
+ * Supports both plain string text and { boy, girl } gendered objects.
+ * @param {string} level - Chapter level key (easy/medium/hard/expert/master)
+ * @param {string} trigger - Dialogue trigger (start/correct/wrong/streak_N/complete)
+ * @param {string} playerName - Player's name for {name} substitution
+ * @param {string} gender - Player gender ('boy' or 'girl'), defaults to 'boy'
  */
-export const getNPCDialogue = (level, trigger, playerName) => {
+export const getNPCDialogue = (level, trigger, playerName, gender = 'boy') => {
     const chapter = CHAPTERS[level];
     if (!chapter || !chapter.npc) return null;
 
     const dialogue = chapter.npc.dialogues.find(d => d.trigger === trigger);
     if (!dialogue) return null;
 
-    return dialogue.text.replace('{name}', playerName);
+    // Support both plain text and { boy, girl } objects
+    const text = typeof dialogue.text === 'string'
+        ? dialogue.text
+        : dialogue.text[gender] || dialogue.text.boy;
+
+    return text.replace('{name}', playerName);
 };
 
 /**

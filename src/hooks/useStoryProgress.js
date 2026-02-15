@@ -6,6 +6,7 @@ import {
     MYSTERIES,
     ENCOURAGEMENT,
     getRandomItem,
+    resolveGenderedText,
     getPetEvolutionStage,
     canPetEvolve,
     isChapterUnlocked,
@@ -345,10 +346,11 @@ export function useStoryProgress(userProfile) {
     const getDialogue = useCallback((trigger, extra = {}) => {
         const level = progress.currentChapter;
         const name = userProfile?.name || 'גיבור';
+        const gender = userProfile?.gender || 'boy';
 
         // NPC dialogue for current chapter
         if (level && CHAPTERS[level]) {
-            const npcDialogue = getNPCDialogue(level, trigger, name);
+            const npcDialogue = getNPCDialogue(level, trigger, name, gender);
             if (npcDialogue) {
                 return {
                     npc: CHAPTERS[level].npc,
@@ -357,23 +359,23 @@ export function useStoryProgress(userProfile) {
             }
         }
 
-        // Generic encouragement
+        // Generic encouragement (items may be strings or { boy, girl } objects)
         switch (trigger) {
             case 'correct':
-                return { text: getRandomItem(ENCOURAGEMENT.correct) };
+                return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.correct), gender) };
             case 'wrong':
-                return { text: getRandomItem(ENCOURAGEMENT.wrong) };
+                return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.wrong), gender) };
             case 'streak':
                 const streakNum = extra.streak;
                 const streakMessages = ENCOURAGEMENT.streak[streakNum];
                 if (streakMessages) {
-                    return { text: getRandomItem(streakMessages) };
+                    return { text: resolveGenderedText(getRandomItem(streakMessages), gender) };
                 }
                 return null;
             case 'low_lives':
-                return { text: getRandomItem(ENCOURAGEMENT.lowLives) };
+                return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.lowLives), gender) };
             case 'daily_return':
-                return { text: getRandomItem(ENCOURAGEMENT.dailyReturn) };
+                return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.dailyReturn), gender) };
             default:
                 return null;
         }
