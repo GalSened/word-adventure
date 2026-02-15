@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale (completed 2026-02-15)
 - [x] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming (completed 2026-02-15)
 - [x] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics (completed 2026-02-15)
-- [ ] **Phase 6: Polish and Integration** - Word book, progress tracker, onboarding, threshold tuning, and memory game improvements
+- [x] **Phase 6: Polish and Integration** - Word book, progress tracker, onboarding, threshold tuning, and memory game improvements (completed 2026-02-15)
 
 ## Phase Details
 
@@ -121,9 +121,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — WordBookScreen with category navigation, mastery badges, and progress tracker on StartScreen
-- [ ] 06-02-PLAN.md — Threshold recalibration for 200-word scale, guided first lesson replacing StoryIntro overlay
-- [ ] 06-03-PLAN.md — Memory game SRS-driven word pool selection
+- [x] 06-01-PLAN.md — WordBookScreen with category navigation, mastery badges, and progress tracker on StartScreen
+- [x] 06-02-PLAN.md — Threshold recalibration for 200-word scale, guided first lesson replacing StoryIntro overlay
+- [x] 06-03-PLAN.md — Memory game SRS-driven word pool selection
 
 ## Progress
 
@@ -137,4 +137,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
 | 4. Challenge Types and Levels | 4/4 | ✓ Complete | 2026-02-15 |
 | 5. Adventure Game | 2/2 | ✓ Complete | 2026-02-15 |
-| 6. Polish and Integration | 0/3 | Not started | - |
+| 6. Polish and Integration | 3/3 | ✓ Complete | 2026-02-15 |
