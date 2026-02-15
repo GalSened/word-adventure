@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Test Safety Net** - Vitest configured with unit and snapshot tests covering core utilities before any refactoring begins (completed 2026-02-14)
 - [x] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed (completed 2026-02-15)
 - [x] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale (completed 2026-02-15)
-- [ ] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming
+- [x] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming (completed 2026-02-15)
 - [ ] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics
 - [ ] **Phase 6: Polish and Integration** - Word book, progress tracker, onboarding, threshold tuning, and memory game improvements
 
@@ -87,10 +87,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Challenge infrastructure (selector, distractors) + multiple choice, reverse choice, listening components
-- [ ] 04-02-PLAN.md — Sentence building (framer-motion Reorder), grammar challenge, spelling wrapper
-- [ ] 04-03-PLAN.md — PlayingScreen integration, ChallengeDispatcher wiring, adaptive difficulty in useGameLogic
-- [ ] 04-04-PLAN.md — 12 themed levels, MapScreen redesign, story expansion, grammar injection
+- [x] 04-01-PLAN.md — Challenge infrastructure (selector, distractors) + multiple choice, reverse choice, listening components
+- [x] 04-02-PLAN.md — Sentence building (framer-motion Reorder), grammar challenge, spelling wrapper
+- [x] 04-03-PLAN.md — PlayingScreen integration, ChallengeDispatcher wiring, adaptive difficulty in useGameLogic
+- [x] 04-04-PLAN.md — 12 themed levels, MapScreen redesign, story expansion, grammar injection
 
 ### Phase 5: Adventure Game
 **Goal**: Players explore themed zones in an adventure mini-game that integrates vocabulary challenges as natural encounters rather than interruptions
@@ -136,6 +136,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
 | 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
-| 4. Challenge Types and Levels | 0/4 | Planned | - |
+| 4. Challenge Types and Levels | 4/4 | ✓ Complete | 2026-02-15 |
 | 5. Adventure Game | 0/3 | Not started | - |
 | 6. Polish and Integration | 0/3 | Not started | - |
