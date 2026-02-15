@@ -5,7 +5,6 @@ import WelcomeScreen from './components/WelcomeScreen';
 import StoryDialogue from './components/StoryDialogue';
 import StoryPathChoice from './components/StoryPathChoice';
 import PetEvolution from './components/PetEvolution';
-import StoryIntro from './components/StoryIntro';
 import ScreenRouter from './components/screens/ScreenRouter';
 import { useGameStore } from './store/gameStore';
 import { useVoiceRecognition } from './utils/voice';
@@ -16,7 +15,7 @@ import { initialWordData } from './data/words';
 
 export default function WordAdventure() {
     const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels } = useGameStore();
-    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, activeWords, hasSeenStoryIntro, setHasSeenStoryIntro } = useGameStore();
+    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, activeWords, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding, setHasCompletedOnboarding } = useGameStore();
 
     const voice = useVoiceRecognition();
     const story = useStoryProgress(userProfile);
@@ -31,6 +30,18 @@ export default function WordAdventure() {
     }, [dailyStats.date]);
 
     useEffect(() => { if (voice.transcript) setUserInput(voice.transcript.toUpperCase().replace('.', '').replace('?', '').trim()); }, [voice.transcript]);
+
+    // Guided first lesson: auto-start level 1 for new players (replaces StoryIntro overlay)
+    useEffect(() => {
+        if (userProfile && !hasCompletedOnboarding && gameState === 'start') {
+            // Auto-start level 1 for new players
+            logic.startLevel(1);
+            // Also mark story intro as seen so StoryPathChoice doesn't block
+            if (!hasSeenStoryIntro) {
+                setHasSeenStoryIntro(true);
+            }
+        }
+    }, [userProfile, hasCompletedOnboarding]);
 
     if (!userProfile) return <WelcomeScreen onComplete={(profile) => setUserProfile(profile)} />;
 
@@ -69,8 +80,7 @@ export default function WordAdventure() {
                 </div>
                 <ScreenRouter gameState={gameState} {...screenProps} />
             </div>
-            {!hasSeenStoryIntro && userProfile && <StoryIntro gender={userProfile.gender} onComplete={() => setHasSeenStoryIntro(true)} />}
-            {!story.progress.storyPath && hasSeenStoryIntro && userProfile && <StoryPathChoice options={story.getStoryPathOptions()} onChoose={story.chooseStoryPath} playerName={userProfile.name} gender={userProfile.gender} />}
+            {!story.progress.storyPath && hasCompletedOnboarding && userProfile && <StoryPathChoice options={story.getStoryPathOptions()} onChoose={story.chooseStoryPath} playerName={userProfile.name} gender={userProfile.gender} />}
             <StoryDialogue dialogue={story.currentDialogue} onDismiss={story.dismissDialogue} />
             <PetEvolution evolution={story.evolutionNotification} onDismiss={story.dismissEvolution} />
         </div>

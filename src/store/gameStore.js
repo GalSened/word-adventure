@@ -302,6 +302,12 @@ export const useGameStore = create(
       storyPath: null,
       setHasSeenStoryIntro: (value) => a[0]({ hasSeenStoryIntro: value }),
       setStoryPath: (path) => a[0]({ storyPath: path }),
+
+      // Onboarding: guided first lesson replaces StoryIntro overlay (Phase 6)
+      hasCompletedOnboarding: false,
+      onboardingStep: 0, // 0=not started, 1=first word seen, 2=first correct, 3=completed
+      setHasCompletedOnboarding: (value) => a[0]({ hasCompletedOnboarding: value }),
+      setOnboardingStep: (step) => a[0]({ onboardingStep: step }),
     }),
     {
       name: 'word-adventure',
@@ -320,6 +326,8 @@ export const useGameStore = create(
         completedLevels: state.completedLevels,
         hasSeenStoryIntro: state.hasSeenStoryIntro,
         storyPath: state.storyPath,
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
+        onboardingStep: state.onboardingStep,
         // Do NOT persist: gameState, currentWordIndex, lives, feedback,
         // activeWords, gameMode, activePet, currentStreak, currentLevel,
         // userInput, showStoryIntro (all ephemeral)
@@ -341,6 +349,11 @@ export const useGameStore = create(
               if (Object.keys(updates).length > 0) {
                 useGameStore.setState(updates);
               }
+            }
+
+            // Backward compat: existing users with hasSeenStoryIntro=true skip onboarding
+            if (state.hasSeenStoryIntro && !state.hasCompletedOnboarding) {
+              useGameStore.setState({ hasCompletedOnboarding: true, onboardingStep: 3 });
             }
           }
         };

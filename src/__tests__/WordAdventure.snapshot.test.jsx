@@ -89,6 +89,7 @@ function resetZustandStore() {
     activePet: null, currentStreak: 0, currentLevel: null, showStoryIntro: false,
     dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
     equipped: {}, hasSeenStoryIntro: false, storyPath: null,
+    hasCompletedOnboarding: false, onboardingStep: 0,
   })
 }
 
@@ -111,6 +112,8 @@ function setupLoggedInState() {
       equipped: {},
       hasSeenStoryIntro: true,
       storyPath: 'hero',
+      hasCompletedOnboarding: true,
+      onboardingStep: 3,
     },
     version: 0,
   }))
@@ -128,6 +131,8 @@ function setupLoggedInState() {
     equipped: {},
     hasSeenStoryIntro: true,
     storyPath: 'hero',
+    hasCompletedOnboarding: true,
+    onboardingStep: 3,
   })
 
   // Keep legacy keys for story hook which still reads them

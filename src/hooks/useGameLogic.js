@@ -207,6 +207,11 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                     if (typeof s.currentLevel === 'number') {
                         s.addCompletedLevel(s.currentLevel);
                     }
+                    // Mark onboarding as complete after finishing first level
+                    if (!s.hasCompletedOnboarding) {
+                        s.setHasCompletedOnboarding(true);
+                        s.setOnboardingStep(3);
+                    }
                     s.setGameState('levelComplete');
                     s.saveHighScore(s.score);
                 }
