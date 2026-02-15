@@ -96,8 +96,13 @@ export const ANIMATION_CONFIG = {
     PET_WALK_ENCOUNTER_CHANCE: 0.005,
 };
 
-// Difficulty levels
+// Difficulty levels (legacy -- levels are now data-driven from src/data/levels.js)
+// Kept for backward compatibility with any code referencing difficulty strings.
 export const DIFFICULTY_LEVELS = ['easy', 'medium', 'hard', 'expert', 'master'];
+
+// Grammar injection interval -- inject a grammar challenge every N vocabulary
+// challenges in grammar-enabled levels (per decision [03-04])
+export const GRAMMAR_INJECTION_INTERVAL = 4;
 
 // Challenge types
 export const CHALLENGE_TYPES = {
