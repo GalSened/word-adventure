@@ -66,13 +66,13 @@ Plans:
   3. Hints display correct Hebrew gender forms — gender-neutral where grammar allows, hint_m/hint_f variants where Hebrew requires it
   4. Grammar engine sentences use words from the unified word bank (no separate VOCAB list)
   5. Review mode surfaces only previously-played words (never unseen words), caps sessions at 3 new + 7 review words, and spaces reviews with jitter to prevent clustering
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: Word bank authoring — 200+ words across themed categories with gender, hints, and example sentences
-- [ ] 03-02: Audio pronunciation and gender-aware hint system
-- [ ] 03-03: SRS algorithm fixes — learned vs unseen, session caps, jitter, priority sorting
-- [ ] 03-04: Grammar engine synchronization and encouragement message gender audit
+- [ ] 03-01-PLAN.md — Extend Zod schema (hint_m/hint_f, exampleSentence_he, category enum) and author 200+ words across 10 themed categories
+- [ ] 03-02-PLAN.md — SpeechSynthesis audio utility, speaker icon on PlayingScreen, gender-aware hint display
+- [ ] 03-03-PLAN.md — [TDD] SRS algorithm fixes: getDueWords learned-only, addJitter, buildReviewSession with caps and priority sorting
+- [ ] 03-04-PLAN.md — Grammar engine noun sync from word bank, ENCOURAGEMENT and NPC dialogue gender audit
 
 ### Phase 4: Challenge Types and Levels
 **Goal**: Players experience five distinct challenge mechanics across 10+ themed levels that adapt difficulty based on word mastery
@@ -135,7 +135,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
-| 3. Word Bank and SRS Foundation | 0/4 | Not started | - |
+| 3. Word Bank and SRS Foundation | 0/4 | Planned | - |
 | 4. Challenge Types and Levels | 0/4 | Not started | - |
 | 5. Adventure Game | 0/3 | Not started | - |
 | 6. Polish and Integration | 0/3 | Not started | - |
