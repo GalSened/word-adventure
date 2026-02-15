@@ -15,7 +15,7 @@ import { useGameLogic } from './hooks/useGameLogic';
 import { initialWordData } from './data/words';
 
 export default function WordAdventure() {
-    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars } = useGameStore();
+    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels } = useGameStore();
     const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, activeWords, hasSeenStoryIntro, setHasSeenStoryIntro } = useGameStore();
 
     const voice = useVoiceRecognition();
@@ -45,6 +45,7 @@ export default function WordAdventure() {
         handlePetWalkComplete: logic.handlePetWalkComplete, handleMemoryComplete: logic.handleMemoryComplete,
         handleAvatarSelect: logic.handleAvatarSelect, t: logic.t,
         equipped: itemEffects.equipped, equipItem: itemEffects.equipItem, unequipItem: itemEffects.unequipItem,
+        completedLevels: completedLevels || [],
         gender: userProfile.gender, memoryWords: activeWords.length > 0 ? activeWords : initialWordData.slice(0, 12),
     };
 

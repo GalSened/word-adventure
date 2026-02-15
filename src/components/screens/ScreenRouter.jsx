@@ -36,6 +36,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         story={props.story}
                         onStartLevel={props.startLevel}
                         t={props.t}
+                        completedLevels={props.completedLevels}
                     />
                 );
 

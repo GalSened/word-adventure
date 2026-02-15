@@ -157,6 +157,15 @@ export const createUserSlice = (set, get) => ({
   updateAvatar: (newAvatar) => set({ avatar: newAvatar }),
 
   setInventory: (inventory) => set({ inventory }),
+
+  // Completed levels (persisted array of level ids)
+  completedLevels: [],
+
+  addCompletedLevel: (levelId) =>
+    set((state) => {
+      if (state.completedLevels.includes(levelId)) return state;
+      return { completedLevels: [...state.completedLevels, levelId] };
+    }),
 });
 
 /**
@@ -308,6 +317,7 @@ export const useGameStore = create(
         inventory: state.inventory,
         dailyStats: state.dailyStats,
         equipped: state.equipped,
+        completedLevels: state.completedLevels,
         hasSeenStoryIntro: state.hasSeenStoryIntro,
         storyPath: state.storyPath,
         // Do NOT persist: gameState, currentWordIndex, lives, feedback,

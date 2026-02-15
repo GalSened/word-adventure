@@ -84,7 +84,7 @@ const PROFILE = { name: 'Test', gender: 'boy', avatar: '\u{1F9D9}' }
 function resetZustandStore() {
   useGameStore.setState({
     userProfile: null, score: 0, stars: 0, userProgress: {}, avatar: '\u{1F478}',
-    highScores: [], inventory: [], gameState: 'start', currentWordIndex: 0,
+    highScores: [], inventory: [], completedLevels: [], gameState: 'start', currentWordIndex: 0,
     userInput: '', lives: 3, feedback: null, activeWords: [], gameMode: 'regular',
     activePet: null, currentStreak: 0, currentLevel: null, showStoryIntro: false,
     dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
@@ -147,7 +147,7 @@ function setupLoggedInState() {
     unlockedLore: [],
     collectibles: [],
     achievements: [],
-    seenIntros: ['easy', 'medium', 'hard', 'expert', 'master'],
+    seenIntros: ['easy', 'medium', 'hard', 'expert', 'master', 'level_1', 'level_2', 'level_3', 'level_4', 'level_5', 'level_6', 'level_7', 'level_8', 'level_9', 'level_10', 'level_11', 'level_12'],
     seenEvolutions: [],
     answeredUnder3Seconds: false,
     wonWith1Life: false,
@@ -158,7 +158,7 @@ function setupLoggedInState() {
 }
 
 /**
- * Navigate from start to playing state for the easy level.
+ * Navigate from start to playing state for level 1 (The Kingdom Gate).
  * Returns all letter buttons found in the LetterPicker grid.
  */
 function navigateToPlayingState(container) {
@@ -167,9 +167,9 @@ function navigateToPlayingState(container) {
     fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
   })
 
-  // Click the easy level button
+  // Click level 1 button (שער הממלכה - The Kingdom Gate)
   act(() => {
-    fireEvent.click(screen.getByText('\u{05D4}\u{05DE}\u{05DE}\u{05DC}\u{05DB}\u{05D4} \u{05D4}\u{05E7}\u{05E1}\u{05D5}\u{05DE}\u{05D4}'))
+    fireEvent.click(screen.getByText('\u{05E9}\u{05E2}\u{05E8} \u{05D4}\u{05DE}\u{05DE}\u{05DC}\u{05DB}\u{05D4}'))
   })
 
   // Settle state
@@ -260,10 +260,11 @@ describe('WordAdventure Snapshot Tests', () => {
 
     navigateToPlayingState(container)
 
-    // The easy level has 5 words: CAT, DOG, SUN, BOOK, FISH
-    const easyWords = ['CAT', 'DOG', 'SUN', 'BOOK', 'FISH']
+    // Level 1 has 8 animal/easy words. With Math.random mocked to 0.5,
+    // sort is stable so we get the first 8 in array order.
+    const level1Words = ['CAT', 'DOG', 'FISH', 'BIRD', 'BEAR', 'BEE', 'DUCK', 'FROG']
 
-    for (const word of easyWords) {
+    for (const word of level1Words) {
       clickLettersForWord(container, word)
       submitAnswer()
 

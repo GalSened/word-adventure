@@ -13,8 +13,10 @@ import { calculateNextReview, buildReviewSession } from '../utils/srs';
 import { selectChallengeType } from '../utils/challengeSelector';
 import { hapticFeedback } from '../utils/mobile';
 import { generateChallenge } from '../utils/grammarEngine';
+import { getLevelById, getLevelWords } from '../data/levels';
 import { STORE_ITEMS } from '../data/storeItems';
 import { initialWordData } from '../data/words';
+import { GRAMMAR_INJECTION_INTERVAL } from '../config/constants';
 import confetti from 'canvas-confetti';
 
 export function useGameLogic({ story, itemEffects, setTranscript }) {
@@ -38,15 +40,12 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         }
     };
 
-    const startLevel = (level) => {
+    const startLevel = (levelId) => {
         const store = useGameStore.getState();
         let wordsToPlay = [];
 
-        if (level === 'master') {
-            wordsToPlay = Array(5).fill(null).map(() => generateChallenge());
-            store.setGameMode('regular');
-        }
-        else if (level === 'review') {
+        if (levelId === 'review') {
+            // Keep existing review mode logic
             wordsToPlay = buildReviewSession(initialWordData, store.userProgress);
             if (wordsToPlay.length === 0) {
                 alert("אין מילים לחזרה כרגע! כל הכבוד! 🎉");
@@ -54,12 +53,36 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             }
             store.setGameMode('srs');
         } else {
-            wordsToPlay = initialWordData.filter(w => w.level === level);
+            const level = typeof levelId === 'number' ? getLevelById(levelId) : null;
+            if (level) {
+                // New level system
+                wordsToPlay = getLevelWords(level);
+
+                // Inject grammar challenges if enabled for this level
+                if (level.grammarEnabled) {
+                    const grammarInterval = GRAMMAR_INJECTION_INTERVAL || 4;
+                    const withGrammar = [];
+                    wordsToPlay.forEach((w, i) => {
+                        withGrammar.push(w);
+                        if ((i + 1) % grammarInterval === 0) {
+                            withGrammar.push(generateChallenge());
+                        }
+                    });
+                    wordsToPlay = withGrammar;
+                }
+            } else {
+                // Legacy fallback for old difficulty strings
+                if (levelId === 'master') {
+                    wordsToPlay = Array(5).fill(null).map(() => generateChallenge());
+                } else {
+                    wordsToPlay = initialWordData.filter(w => w.level === levelId);
+                }
+            }
             store.setGameMode('regular');
         }
 
-        store.setCurrentLevel(level);
-        story.startChapter(level);
+        store.setCurrentLevel(levelId);
+        story.startChapter(typeof levelId === 'number' ? `level_${levelId}` : levelId);
 
         store.setActiveWords(wordsToPlay);
         store.setCurrentWordIndex(0);
@@ -175,9 +198,14 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                 } else {
                     const startingLives = itemEffects.getStartingLives(3);
                     const wasPerfect = s.lives === startingLives;
-                    story.completeChapter(s.currentLevel, wasPerfect);
+                    const chapterKey = typeof s.currentLevel === 'number' ? `level_${s.currentLevel}` : s.currentLevel;
+                    story.completeChapter(chapterKey, wasPerfect);
                     if (s.lives === 1) {
                         story.recordComebackWin();
+                    }
+                    // Persist completed level for progression unlocking
+                    if (typeof s.currentLevel === 'number') {
+                        s.addCompletedLevel(s.currentLevel);
                     }
                     s.setGameState('levelComplete');
                     s.saveHighScore(s.score);
