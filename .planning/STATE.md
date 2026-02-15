@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 6 of 6 (Polish and Integration)
-Plan: 2 of 3 in current phase (IN PROGRESS)
-Status: Executing — Plan 06-02 complete
-Last activity: 2026-02-15 — Completed 06-02 (Progression Recalibration and Onboarding)
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: All phases complete — v1.0 milestone reached
+Last activity: 2026-02-15 — Completed 06-03 (SRS Memory Game Integration)
 
-Progress: [██████████] 96%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 4 min
-- Total execution time: 1.30 hours
+- Total execution time: 1.32 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [██████████] 96%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 | 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
 | 05-adventure-game | 2 | 7 min | 3.5 min |
-| 06-polish-and-integration | 2 | 6 min | 3.0 min |
+| 06-polish-and-integration | 3 | 7 min | 2.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-04 (6 min), 05-01 (3 min), 05-02 (4 min), 06-01 (2 min), 06-02 (4 min)
+- Last 5 plans: 05-01 (3 min), 05-02 (4 min), 06-01 (2 min), 06-02 (4 min), 06-03 (1 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -120,6 +120,8 @@ Recent decisions affecting current work:
 - [06-02]: Onboarding completes on first level finish (not step-based mid-level tracking) for simplicity and reliability
 - [06-02]: StoryIntro.jsx file preserved for potential reuse; only removed from render
 - [06-02]: StoryPathChoice deferred to after hasCompletedOnboarding instead of hasSeenStoryIntro
+- [06-03]: Memory game word selection prioritizes low-repetition (recently learned) words over high-repetition (well-known)
+- [06-03]: Fallback fills with easy-level unlearned words when player has fewer than 6 learned words
 
 ### Pending Todos
 
@@ -132,5 +134,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 06-02-PLAN.md (Progression Recalibration and Onboarding)
+Stopped at: Completed 06-03-PLAN.md (SRS Memory Game Integration) -- ALL PLANS COMPLETE
 Resume file: None
