@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 3 of 6 (Word Bank and SRS Foundation)
-Plan: 3 of 4 in current phase
+Plan: 4 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-15 — Completed 03-01 (Word bank expansion to 201 entries)
+Last activity: 2026-02-15 — Completed 03-02 (Audio pronunciation and gender-aware hints)
 
-Progress: [██████░░░░] 57%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 4 min
-- Total execution time: 0.56 hours
+- Total execution time: 0.62 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 57%
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
-| 03-word-bank-and-srs-foundation | 2 | 11 min | 5.5 min |
+| 03-word-bank-and-srs-foundation | 3 | 14 min | 4.7 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-04 (2 min), 02-03 (4 min), 02-05 (6 min), 03-03 (3 min), 03-01 (8 min)
+- Last 5 plans: 02-03 (4 min), 02-05 (6 min), 03-03 (3 min), 03-01 (8 min), 03-02 (3 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -80,6 +80,10 @@ Recent decisions affecting current work:
 - [03-03]: Base interval stays un-jittered for SM-2 algorithm continuity; only nextReviewDate uses jittered value
 - [03-03]: Low-rep threshold set to repetition < 3 for new-slot eligibility in review sessions
 - [03-03]: getDueWords kept exported for potential direct use, though useGameLogic now uses buildReviewSession
+- [03-02]: Speech rate 0.8x for child-friendly pronunciation speed
+- [03-02]: Speaker icon hidden (not disabled) when SpeechSynthesis unavailable
+- [03-02]: Gender hint fallback chain: hint_m (boys) -> hint_f (girls) -> hint (neutral default)
+- [03-02]: playerGender defaults to 'boy' when userProfile.gender is undefined
 
 ### Pending Todos
 
@@ -92,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 03-01-PLAN.md (Word bank expansion -- 201 entries, 10 categories, extended schema)
+Stopped at: Completed 03-02-PLAN.md (Audio pronunciation and gender-aware hints)
 Resume file: None
