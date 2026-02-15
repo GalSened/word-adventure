@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed (completed 2026-02-15)
 - [x] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale (completed 2026-02-15)
 - [x] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming (completed 2026-02-15)
-- [ ] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics
+- [x] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics (completed 2026-02-15)
 - [ ] **Phase 6: Polish and Integration** - Word book, progress tracker, onboarding, threshold tuning, and memory game improvements
 
 ## Phase Details
@@ -105,8 +105,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — AdventureGame core: state machine, useAnimationFrame game loop, 5 zone configs, ZoneRenderer, PetCompanion
-- [ ] 05-02-PLAN.md — EncounterOverlay with ChallengeDispatcher, SRS updates, pet hints, app integration (ScreenRouter + StartScreen)
+- [x] 05-01-PLAN.md — AdventureGame core: state machine, useAnimationFrame game loop, 5 zone configs, ZoneRenderer, PetCompanion
+- [x] 05-02-PLAN.md — EncounterOverlay with ChallengeDispatcher, SRS updates, pet hints, app integration (ScreenRouter + StartScreen)
 
 ### Phase 6: Polish and Integration
 **Goal**: The complete game has a word book for review, visible progress tracking, a welcoming onboarding experience, and properly calibrated progression thresholds
@@ -136,5 +136,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
 | 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
 | 4. Challenge Types and Levels | 4/4 | ✓ Complete | 2026-02-15 |
-| 5. Adventure Game | 0/2 | Not started | - |
+| 5. Adventure Game | 2/2 | ✓ Complete | 2026-02-15 |
 | 6. Polish and Integration | 0/3 | Not started | - |
