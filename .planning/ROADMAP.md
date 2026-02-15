@@ -118,12 +118,12 @@ Plans:
   3. Story chapter unlocks and pet evolution thresholds are calibrated for 200-word scale (first chapter does not unlock after only 20 words; pet evolution milestones feel appropriately spaced)
   4. New players experience a guided first lesson that teaches core mechanics through play — no multi-step story intro blocking gameplay
   5. The memory match mini-game draws its word pool from recently learned words based on SRS data rather than a static or random selection
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Word book UI and progress tracker
-- [ ] 06-02: Onboarding revision and threshold recalibration
-- [ ] 06-03: Memory game SRS integration
+- [ ] 06-01-PLAN.md — WordBookScreen with category navigation, mastery badges, and progress tracker on StartScreen
+- [ ] 06-02-PLAN.md — Threshold recalibration for 200-word scale, guided first lesson replacing StoryIntro overlay
+- [ ] 06-03-PLAN.md — Memory game SRS-driven word pool selection
 
 ## Progress
 
