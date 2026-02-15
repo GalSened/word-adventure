@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Players learn English vocabulary through genuinely fun, varied gameplay that feels like an adventure — not a flashcard app.
-**Current focus:** Phase 2 — Architecture Refactoring
+**Current focus:** Phase 3 — Word Bank and SRS Foundation
 
 ## Current Position
 
-Phase: 2 of 6 (Architecture Refactoring)
-Plan: 5 of 5 in current phase (all complete)
-Status: Phase Complete
-Last activity: 2026-02-15 — Completed 02-05 (Zustand store wiring gap closure)
+Phase: 3 of 6 (Word Bank and SRS Foundation)
+Plan: 3 of 4 in current phase
+Status: In Progress
+Last activity: 2026-02-15 — Completed 03-03 (SRS algorithm fixes)
 
-Progress: [█████░░░░░] 47%
+Progress: [██████░░░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 3 min
-- Total execution time: 0.38 hours
+- Total execution time: 0.43 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [█████░░░░░] 47%
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
+| 03-word-bank-and-srs-foundation | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (2 min), 02-02 (2 min), 02-04 (2 min), 02-03 (4 min), 02-05 (6 min)
+- Last 5 plans: 02-02 (2 min), 02-04 (2 min), 02-03 (4 min), 02-05 (6 min), 03-03 (3 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [02-05]: Tests reset Zustand in-memory state via setState() (not replace mode) to preserve action functions
 - [02-05]: Daily reset useEffect kept in WordAdventure as single remaining side effect on mount
 - [02-05]: showStoryIntro derived from !hasSeenStoryIntro via store field rather than separate useState
+- [03-03]: Base interval stays un-jittered for SM-2 algorithm continuity; only nextReviewDate uses jittered value
+- [03-03]: Low-rep threshold set to repetition < 3 for new-slot eligibility in review sessions
+- [03-03]: getDueWords kept exported for potential direct use, though useGameLogic now uses buildReviewSession
 
 ### Pending Todos
 
@@ -84,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 02-05-PLAN.md (Zustand store wiring gap closure) -- Phase 2 all 5 plans complete
+Stopped at: Completed 03-03-PLAN.md (SRS algorithm fixes -- learned-only, jitter, session builder)
 Resume file: None
