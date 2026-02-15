@@ -61,18 +61,66 @@ vi.mock('../data/storeItems', () => ({
 import React from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import WordAdventure from '../WordAdventure'
+import { useGameStore } from '../store/gameStore'
 
 // --- TEST HELPERS ---
 
 const PROFILE = { name: 'Test', gender: 'boy', avatar: '\u{1F9D9}' }
 
 /**
- * Set up localStorage so that WordAdventure renders with a logged-in user
+ * Reset Zustand in-memory state to defaults so tests don't leak state.
+ */
+function resetZustandStore() {
+  useGameStore.setState({
+    userProfile: null, score: 0, stars: 0, userProgress: {}, avatar: '\u{1F478}',
+    highScores: [], inventory: [], gameState: 'start', currentWordIndex: 0,
+    userInput: '', lives: 3, feedback: null, activeWords: [], gameMode: 'regular',
+    activePet: null, currentStreak: 0, currentLevel: null, showStoryIntro: false,
+    dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
+    equipped: {}, hasSeenStoryIntro: false, storyPath: null,
+  })
+}
+
+/**
+ * Set up Zustand store + localStorage so that WordAdventure renders with a logged-in user
  * and all overlays (StoryIntro, StoryPathChoice, chapter intros) are suppressed.
  */
 function setupLoggedInState() {
+  // Seed Zustand persisted store
+  localStorage.setItem('word-adventure', JSON.stringify({
+    state: {
+      userProfile: PROFILE,
+      score: 0,
+      stars: 0,
+      userProgress: {},
+      avatar: PROFILE.avatar,
+      highScores: [],
+      inventory: [],
+      dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
+      equipped: {},
+      hasSeenStoryIntro: true,
+      storyPath: 'hero',
+    },
+    version: 0,
+  }))
+
+  // Also set Zustand in-memory state directly
+  useGameStore.setState({
+    userProfile: PROFILE,
+    score: 0,
+    stars: 0,
+    userProgress: {},
+    avatar: PROFILE.avatar,
+    highScores: [],
+    inventory: [],
+    dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
+    equipped: {},
+    hasSeenStoryIntro: true,
+    storyPath: 'hero',
+  })
+
+  // Keep legacy keys for story hook which still reads them
   localStorage.setItem('userProfile', JSON.stringify(PROFILE))
-  // Suppress StoryIntro overlay
   localStorage.setItem('hasSeenStoryIntro', JSON.stringify(true))
   // Suppress StoryPathChoice overlay and chapter intro dialogues by providing
   // a fully configured storyProgress with seenIntros for all chapters
@@ -103,11 +151,15 @@ function setupLoggedInState() {
  * Returns all letter buttons found in the LetterPicker grid.
  */
 function navigateToPlayingState(container) {
-  // Navigate to map
-  fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
+  // Navigate to map (wrap in act to flush Zustand state update)
+  act(() => {
+    fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
+  })
 
   // Click the easy level button
-  fireEvent.click(screen.getByText('\u{05D4}\u{05DE}\u{05DE}\u{05DC}\u{05DB}\u{05D4} \u{05D4}\u{05E7}\u{05E1}\u{05D5}\u{05DE}\u{05D4}'))
+  act(() => {
+    fireEvent.click(screen.getByText('\u{05D4}\u{05DE}\u{05DE}\u{05DC}\u{05DB}\u{05D4} \u{05D4}\u{05E7}\u{05E1}\u{05D5}\u{05DE}\u{05D4}'))
+  })
 
   // Settle state
   act(() => {
@@ -151,6 +203,7 @@ describe('WordAdventure Snapshot Tests', () => {
     // Mock Math.random for deterministic shuffling and dialogue selection
     vi.spyOn(Math, 'random').mockReturnValue(0.5)
     localStorage.clear()
+    resetZustandStore()
   })
 
   afterEach(() => {
@@ -159,7 +212,7 @@ describe('WordAdventure Snapshot Tests', () => {
   })
 
   it('renders welcome state when no userProfile exists', () => {
-    // Do NOT set any userProfile in localStorage
+    // Do NOT set any userProfile in localStorage or store
     const { container } = render(<WordAdventure />)
     expect(container).toMatchSnapshot()
   })
@@ -174,7 +227,9 @@ describe('WordAdventure Snapshot Tests', () => {
     setupLoggedInState()
     const { container } = render(<WordAdventure />)
 
-    fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
+    act(() => {
+      fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
+    })
 
     expect(container).toMatchSnapshot()
   })

@@ -179,7 +179,12 @@ export const createGameSlice = (set) => ({
   // Actions
   setGameState: (gameState) => set({ gameState }),
   setCurrentWordIndex: (currentWordIndex) => set({ currentWordIndex }),
-  setUserInput: (userInput) => set({ userInput }),
+  setUserInput: (userInputOrFn) =>
+    set((state) => ({
+      userInput: typeof userInputOrFn === 'function'
+        ? userInputOrFn(state.userInput)
+        : userInputOrFn,
+    })),
   setLives: (lives) => set({ lives }),
   setFeedback: (feedback) => set({ feedback }),
   setActiveWords: (activeWords) => set({ activeWords }),
