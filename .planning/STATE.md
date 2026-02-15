@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 4 of 6 (Challenge Types and Levels)
-Plan: 3 of 4 in current phase (04-01, 04-02, 04-03 complete)
-Status: Executing
-Last activity: 2026-02-15 — Completed 04-03 (challenge system integration)
+Phase: 4 of 6 (Challenge Types and Levels) -- COMPLETE
+Plan: 4 of 4 in current phase (04-01, 04-02, 04-03, 04-04 complete)
+Status: Phase Complete
+Last activity: 2026-02-15 — Completed 04-04 (level system and progression)
 
-Progress: [███████░░░] 74%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 18
 - Average duration: 4 min
-- Total execution time: 0.78 hours
+- Total execution time: 1.08 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [███████░░░] 74%
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
+| 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3 min), 03-04 (4 min), 04-02 (2 min), 04-01 (2 min), 04-03 (2 min)
+- Last 5 plans: 03-04 (4 min), 04-01 (2 min), 04-02 (2 min), 04-03 (2 min), 04-04 (6 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -98,6 +99,11 @@ Recent decisions affecting current work:
 - [04-03]: ChallengeDispatcher default fallback changed from MultipleChoice to Spelling for behavior preservation
 - [04-03]: recentChallengeTypes tracked as useRef (last 3) to prevent repetitive challenge sequences
 - [04-03]: Voice input removed from PlayingScreen (can be re-added per-challenge in Phase 6)
+- [04-04]: Level difficulty fallback: when primary band has too few words, adjacent difficulties tried (easy->medium, medium->easy/hard, etc.)
+- [04-04]: Grammar injection uses GRAMMAR_INJECTION_INTERVAL=4 constant (every 4th vocab word triggers grammar challenge)
+- [04-04]: completedLevels stored as persisted array in gameStore user slice, separate from story progress
+- [04-04]: Legacy difficulty strings (master/easy/medium/hard/expert) kept as fallback in startLevel for backward compatibility
+- [04-04]: LEVEL_CHAPTERS added alongside existing CHAPTERS (not replacing) for backward compatibility
 
 ### Pending Todos
 
@@ -110,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 04-03-PLAN.md
+Stopped at: Completed 04-04-PLAN.md (Phase 4 complete)
 Resume file: None
