@@ -102,12 +102,11 @@ Plans:
   3. Each zone draws vocabulary from its corresponding word category (forest zone uses Nature words, city zone uses Professions words)
   4. Encounters present varied challenge types (spelling, multiple choice, listening) reusing the challenge components from Phase 4
   5. The pet provides contextual help during encounters (hints at correct answer, finds bonus items) and visual cues signal upcoming encounters (pet sniffing, rustling bushes) so discoveries feel organic
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: AdventureGame component architecture and memory leak fix
-- [ ] 05-02: Themed zones with visual environments and category-mapped vocabulary
-- [ ] 05-03: Encounter system with challenge integration, pet abilities, and discovery cues
+- [ ] 05-01-PLAN.md — AdventureGame core: state machine, useAnimationFrame game loop, 5 zone configs, ZoneRenderer, PetCompanion
+- [ ] 05-02-PLAN.md — EncounterOverlay with ChallengeDispatcher, SRS updates, pet hints, app integration (ScreenRouter + StartScreen)
 
 ### Phase 6: Polish and Integration
 **Goal**: The complete game has a word book for review, visible progress tracking, a welcoming onboarding experience, and properly calibrated progression thresholds
@@ -137,5 +136,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
 | 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
 | 4. Challenge Types and Levels | 4/4 | ✓ Complete | 2026-02-15 |
-| 5. Adventure Game | 0/3 | Not started | - |
+| 5. Adventure Game | 0/2 | Not started | - |
 | 6. Polish and Integration | 0/3 | Not started | - |
