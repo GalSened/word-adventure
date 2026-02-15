@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 5 of 6 (Adventure Game)
-Plan: 1 of 2 in current phase (EXECUTING)
-Status: Executing — Plan 01 complete, Plan 02 pending
-Last activity: 2026-02-15 — Completed 05-01 adventure core (game loop, zones, pet companion)
+Phase: 5 of 6 (Adventure Game) -- COMPLETE
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase 5 complete -- ready for Phase 6
+Last activity: 2026-02-15 — Completed 05-02 encounter system and app integration
 
-Progress: [████████░░] 83%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 4 min
-- Total execution time: 1.13 hours
+- Total execution time: 1.20 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████░░] 83%
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 | 04-challenge-types-and-levels | 4 | 12 min | 3.0 min |
-| 05-adventure-game | 1 | 3 min | 3.0 min |
+| 05-adventure-game | 2 | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (2 min), 04-02 (2 min), 04-03 (2 min), 04-04 (6 min), 05-01 (3 min)
+- Last 5 plans: 04-02 (2 min), 04-03 (2 min), 04-04 (6 min), 05-01 (3 min), 05-02 (4 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -109,6 +109,10 @@ Recent decisions affecting current work:
 - [05-01]: Zone progress uses ref-based tracking with throttled setState (integer-only updates, max 100 re-renders per zone)
 - [05-01]: Timeout tracking via timeoutsRef for proper cleanup on unmount alongside useAnimationFrame auto-cleanup
 - [05-01]: Pet behavior derived from game phase via pure function (not state)
+- [05-02]: EncounterOverlay manages own userInput/scrambledContent state to isolate encounter from main game
+- [05-02]: SRS updates in AdventureGame directly (not via useGameLogic.processAnswer) to avoid advancing main word index
+- [05-02]: Default pet { name: Buddy, icon: dog } provided when no activePet for store-free adventure access
+- [05-02]: World Map emoji changed from map to globe to differentiate from Adventure button
 
 ### Pending Todos
 
@@ -121,5 +125,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 05-01-PLAN.md (adventure core with game loop, zones, pet)
+Stopped at: Completed 05-02-PLAN.md (encounter system, app integration, Phase 5 complete)
 Resume file: None
