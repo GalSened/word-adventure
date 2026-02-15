@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 4 of 6 (Challenge Types and Levels)
-Plan: 1 of 4 in current phase (04-02 complete)
+Plan: 2 of 4 in current phase (04-01, 04-02 complete)
 Status: Executing
-Last activity: 2026-02-15 — Completed 04-02 (sentence build, grammar, spelling challenges)
+Last activity: 2026-02-15 — Completed 04-01 (challenge infrastructure and dispatcher)
 
-Progress: [██████░░░░] 65%
+Progress: [██████░░░░] 68%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 4 min
-- Total execution time: 0.72 hours
+- Total execution time: 0.75 hours
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: [██████░░░░] 65%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (3 min), 03-01 (8 min), 03-02 (3 min), 03-04 (4 min), 04-02 (2 min)
+- Last 5 plans: 03-01 (8 min), 03-02 (3 min), 03-04 (4 min), 04-02 (2 min), 04-01 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -88,6 +88,9 @@ Recent decisions affecting current work:
 - [03-04]: Adjectives/verbs/objects remain hardcoded in grammar engine (require he_m/he_f forms not in word schema)
 - [03-04]: ENCOURAGEMENT messages prefer gender-neutral rewrites; { boy, girl } only when genuinely unavoidable
 - [03-04]: getNPCDialogue defaults to 'boy' gender for backward compatibility with existing callers
+- [04-01]: Challenge components use shared props interface { word, onAnswer, disabled, playerGender, t } for uniform dispatch
+- [04-01]: Distractor generator returns full word objects (not strings) so caller decides which field to display
+- [04-01]: Each challenge type uses distinct gradient color for visual differentiation (blue/green/purple)
 - [04-02]: GrammarChallenge generates distractors via grammarEngine.generateChallenge() (not word bank) since grammar sentences are procedural
 - [04-02]: SpellingChallenge receives extended props (scrambledContent, userInput, setUserInput, onCheck) beyond standard challenge interface
 - [04-02]: Reorder items use {id, text} objects with unique IDs to handle duplicate words in sentences
@@ -103,5 +106,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 04-02-PLAN.md
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
