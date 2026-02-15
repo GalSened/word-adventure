@@ -1,13 +1,16 @@
 /**
  * Switch-based routing from challengeType to challenge component
  * Routes the challengeType string to the correct challenge UI component.
- * Spelling, sentenceBuild, and grammar return null pending Plan 02-03 completion.
+ * All 6 challenge types are now fully wired.
  */
 
 import React from 'react';
 import MultipleChoiceChallenge from './MultipleChoiceChallenge';
 import ReverseChoiceChallenge from './ReverseChoiceChallenge';
 import ListeningChallenge from './ListeningChallenge';
+import SpellingChallenge from './SpellingChallenge';
+import SentenceBuildChallenge from './SentenceBuildChallenge';
+import GrammarChallenge from './GrammarChallenge';
 
 export default function ChallengeDispatcher({ challengeType, ...challengeProps }) {
     switch (challengeType) {
@@ -18,16 +21,13 @@ export default function ChallengeDispatcher({ challengeType, ...challengeProps }
         case 'listening':
             return <ListeningChallenge {...challengeProps} />;
         case 'spelling':
-            // Will be wired in Plan 03 to existing LetterPicker
-            return null;
+            return <SpellingChallenge {...challengeProps} />;
         case 'sentenceBuild':
-            // Will be created in Plan 02
-            return null;
+            return <SentenceBuildChallenge {...challengeProps} />;
         case 'grammar':
-            // Will be created in Plan 02
-            return null;
+            return <GrammarChallenge {...challengeProps} />;
         default:
-            // Safe fallback to multiple choice
-            return <MultipleChoiceChallenge {...challengeProps} />;
+            // Safe fallback to spelling -- preserves existing behavior
+            return <SpellingChallenge {...challengeProps} />;
     }
 }
