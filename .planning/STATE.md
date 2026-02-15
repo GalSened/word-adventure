@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 2 of 6 (Architecture Refactoring)
-Plan: 4 of 4 in current phase (all complete)
+Plan: 5 of 5 in current phase (all complete)
 Status: Phase Complete
-Last activity: 2026-02-14 — Completed 02-03 (WordAdventure decomposition and ScreenRouter)
+Last activity: 2026-02-15 — Completed 02-05 (Zustand store wiring gap closure)
 
-Progress: [████░░░░░░] 43%
+Progress: [█████░░░░░] 47%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 3 min
-- Total execution time: 0.28 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
-| 02-architecture-refactoring | 4 | 10 min | 2.5 min |
+| 02-architecture-refactoring | 5 | 16 min | 3.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (4 min), 02-01 (2 min), 02-02 (2 min), 02-04 (2 min), 02-03 (4 min)
-- Trend: Accelerating
+- Last 5 plans: 02-01 (2 min), 02-02 (2 min), 02-04 (2 min), 02-03 (4 min), 02-05 (6 min)
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -68,6 +68,10 @@ Recent decisions affecting current work:
 - [02-03]: ScreenRouter uses switch/case with explicit prop mapping per screen for visibility
 - [02-03]: New screen components use prop drilling (not useGame context) to preserve snapshot test compatibility
 - [02-03]: PetWalkingGame gender simplified to userProfile.gender only -- avatar emoji inference removed (ARCH-06)
+- [02-05]: Store setUserInput supports function updaters for LetterPicker backward compat
+- [02-05]: Tests reset Zustand in-memory state via setState() (not replace mode) to preserve action functions
+- [02-05]: Daily reset useEffect kept in WordAdventure as single remaining side effect on mount
+- [02-05]: showStoryIntro derived from !hasSeenStoryIntro via store field rather than separate useState
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: Completed 02-03-PLAN.md (WordAdventure decomposition) -- Phase 2 all 4 plans complete
+Last session: 2026-02-15
+Stopped at: Completed 02-05-PLAN.md (Zustand store wiring gap closure) -- Phase 2 all 5 plans complete
 Resume file: None
