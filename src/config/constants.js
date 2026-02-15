@@ -98,3 +98,13 @@ export const ANIMATION_CONFIG = {
 
 // Difficulty levels
 export const DIFFICULTY_LEVELS = ['easy', 'medium', 'hard', 'expert', 'master'];
+
+// Challenge types
+export const CHALLENGE_TYPES = {
+    SPELLING: 'spelling',
+    MULTIPLE_CHOICE: 'multipleChoice',
+    REVERSE_CHOICE: 'reverseChoice',
+    LISTENING: 'listening',
+    SENTENCE_BUILD: 'sentenceBuild',
+    GRAMMAR: 'grammar',
+};
