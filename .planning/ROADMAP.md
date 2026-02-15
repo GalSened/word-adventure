@@ -84,13 +84,13 @@ Plans:
   3. The game presents easier challenge types (multiple choice) for newly-encountered words and harder types (spelling, sentence building) for words the player has demonstrated mastery of
   4. Players progress through 10+ levels with each level having a visually distinct theme (unique background, colors, decorations) and story continuity between levels
   5. Each level contains enough words and challenge variety that completion requires sustained engagement (not finishable in under a minute)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: Challenge components — multiple choice, reverse multiple choice, listening challenge
-- [ ] 04-02: Sentence building challenge with drag-and-drop (@dnd-kit)
-- [ ] 04-03: Grammar challenges and adaptive difficulty engine
-- [ ] 04-04: Level definitions, visual theming, and story journey integration
+- [ ] 04-01-PLAN.md — Challenge infrastructure (selector, distractors) + multiple choice, reverse choice, listening components
+- [ ] 04-02-PLAN.md — Sentence building (framer-motion Reorder), grammar challenge, spelling wrapper
+- [ ] 04-03-PLAN.md — PlayingScreen integration, ChallengeDispatcher wiring, adaptive difficulty in useGameLogic
+- [ ] 04-04-PLAN.md — 12 themed levels, MapScreen redesign, story expansion, grammar injection
 
 ### Phase 5: Adventure Game
 **Goal**: Players explore themed zones in an adventure mini-game that integrates vocabulary challenges as natural encounters rather than interruptions
@@ -136,6 +136,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
 | 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
 | 3. Word Bank and SRS Foundation | 4/4 | ✓ Complete | 2026-02-15 |
-| 4. Challenge Types and Levels | 0/4 | Not started | - |
+| 4. Challenge Types and Levels | 0/4 | Planned | - |
 | 5. Adventure Game | 0/3 | Not started | - |
 | 6. Polish and Integration | 0/3 | Not started | - |
