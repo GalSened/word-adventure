@@ -47,15 +47,13 @@ export default function ScreenRouter({ gameState, ...props }) {
                         currentWord={props.currentWord}
                         lives={props.lives}
                         itemEffects={props.itemEffects}
+                        challengeType={props.challengeType}
                         scrambledContent={props.scrambledContent}
                         userInput={props.userInput}
                         setUserInput={props.setUserInput}
                         handleCheck={props.handleCheck}
+                        onAnswer={props.onAnswer}
                         feedback={props.feedback}
-                        isSupported={props.isSupported}
-                        isListening={props.isListening}
-                        startListening={props.startListening}
-                        stopListening={props.stopListening}
                         playerGender={props.userProfile?.gender || 'boy'}
                         t={props.t}
                     />

@@ -44,6 +44,17 @@ vi.mock('../utils/mobile', () => ({
   hapticFeedback: vi.fn()
 }))
 
+// Mock challenge selector to always return 'spelling' for deterministic snapshot tests
+vi.mock('../utils/challengeSelector', () => ({
+  selectChallengeType: () => 'spelling',
+  CHALLENGE_POOLS: {
+    new: ['multipleChoice', 'reverseChoice'],
+    learning: ['multipleChoice', 'reverseChoice', 'listening'],
+    familiar: ['reverseChoice', 'listening', 'spelling'],
+    mastered: ['spelling', 'sentenceBuild', 'listening'],
+  },
+}))
+
 vi.mock('../data/storeItems', () => ({
   STORE_ITEMS: {},
   getItemsByCategory: () => [],

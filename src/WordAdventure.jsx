@@ -37,7 +37,8 @@ export default function WordAdventure() {
     const screenProps = {
         userProfile, score, stars, avatar, inventory, dailyStats, gameState, currentWord: logic.currentWord,
         lives, feedback, userInput, scrambledContent: logic.scrambledContent, currentStreak, story, itemEffects,
-        activePet, gameMode, isSupported: voice.isSupported, isListening: voice.isListening,
+        activePet, gameMode, challengeType: logic.challengeType, onAnswer: logic.onAnswer,
+        isSupported: voice.isSupported, isListening: voice.isListening,
         startListening: voice.startListening, stopListening: voice.stopListening, setGameState, setUserInput,
         startLevel: logic.startLevel, handleCheck: logic.handleCheck, handleBuy: logic.handleBuy,
         handleInventoryClose: logic.handleInventoryClose, handleUse: logic.handleUse, handleWalkPet: logic.handleWalkPet,

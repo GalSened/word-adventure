@@ -7,9 +7,10 @@
  * Only receives non-store dependencies as parameters.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { calculateNextReview, buildReviewSession } from '../utils/srs';
+import { selectChallengeType } from '../utils/challengeSelector';
 import { hapticFeedback } from '../utils/mobile';
 import { generateChallenge } from '../utils/grammarEngine';
 import { STORE_ITEMS } from '../data/storeItems';
@@ -94,6 +95,27 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
     };
 
     const currentWord = activeWords[currentWordIndex];
+
+    // Track recent challenge types to avoid repetitive sequences
+    const recentChallengeTypes = useRef([]);
+
+    // Select challenge type adaptively based on SRS mastery
+    const challengeType = useMemo(() => {
+        if (!currentWord) return 'spelling';
+        // Grammar-generated words always get grammar challenge
+        if (currentWord.id?.startsWith('gen_')) return 'grammar';
+        // Select based on SRS mastery
+        const srsState = useGameStore.getState().userProgress[currentWord.id];
+        const selected = selectChallengeType(currentWord, srsState, recentChallengeTypes.current);
+        // Track for variety (keep last 3)
+        recentChallengeTypes.current = [...recentChallengeTypes.current.slice(-2), selected];
+        return selected;
+    }, [currentWordIndex, activeWords]);
+
+    // Callback for non-spelling challenges to report answer directly
+    const onAnswer = (isCorrect) => {
+        processAnswer(isCorrect);
+    };
 
     const scrambledContent = useMemo(() => {
         if (!currentWord) return [];
@@ -282,5 +304,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         handleAvatarSelect,
         currentWord,
         scrambledContent,
+        challengeType,
+        onAnswer,
     };
 }
