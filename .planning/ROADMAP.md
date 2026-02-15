@@ -13,7 +13,7 @@ This milestone transforms Word Adventure from a 13-word prototype with one chall
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Test Safety Net** - Vitest configured with unit and snapshot tests covering core utilities before any refactoring begins (completed 2026-02-14)
-- [ ] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed
+- [x] **Phase 2: Architecture Refactoring** - Mega-component decomposed, state centralized, unified word schema established, gender source of truth fixed (completed 2026-02-15)
 - [ ] **Phase 3: Word Bank and SRS Foundation** - 200+ words authored across themed categories with working SRS at scale
 - [ ] **Phase 4: Challenge Types and Levels** - Five challenge mechanics, 10+ progressive levels, adaptive difficulty, and visual theming
 - [ ] **Phase 5: Adventure Game** - New adventure component with themed encounter zones reusing challenge mechanics
@@ -50,11 +50,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Install deps (zustand, zod, nanoid), create Zustand store with persist middleware and localStorage migration
-- [ ] 02-02-PLAN.md — GameContext provider wrapping Zustand store, rewire 4 hooks as thin wrappers
-- [ ] 02-03-PLAN.md — Decompose WordAdventure.jsx into ScreenRouter + 5 new screen components, fix gender inference, remove duplicate word data
-- [ ] 02-04-PLAN.md — Zod word schema, enrich 13 words, nanoid IDs in grammarEngine
-- [ ] 02-05-PLAN.md — [Gap closure] Wire WordAdventure to Zustand store, eliminate all direct localStorage access
+- [x] 02-01-PLAN.md — Install deps (zustand, zod, nanoid), create Zustand store with persist middleware and localStorage migration
+- [x] 02-02-PLAN.md — GameContext provider wrapping Zustand store, rewire 4 hooks as thin wrappers
+- [x] 02-03-PLAN.md — Decompose WordAdventure.jsx into ScreenRouter + 5 new screen components, fix gender inference, remove duplicate word data
+- [x] 02-04-PLAN.md — Zod word schema, enrich 13 words, nanoid IDs in grammarEngine
+- [x] 02-05-PLAN.md — [Gap closure] Wire WordAdventure to Zustand store, eliminate all direct localStorage access
 
 ### Phase 3: Word Bank and SRS Foundation
 **Goal**: The game has 200+ validated words across themed categories with audio, gender-aware hints, and an SRS system that correctly manages review scheduling at scale
@@ -134,7 +134,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Test Safety Net | 2/2 | ✓ Complete | 2026-02-14 |
-| 2. Architecture Refactoring | 4/5 | Gap closure | - |
+| 2. Architecture Refactoring | 5/5 | ✓ Complete | 2026-02-15 |
 | 3. Word Bank and SRS Foundation | 0/4 | Not started | - |
 | 4. Challenge Types and Levels | 0/4 | Not started | - |
 | 5. Adventure Game | 0/3 | Not started | - |
