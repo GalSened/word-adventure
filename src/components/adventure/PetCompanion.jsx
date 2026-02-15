@@ -32,7 +32,7 @@ const PET_ANIMATIONS = {
  * @param {string} props.behavior - Current behavior: 'walk', 'sniff', 'idle', 'celebrate'
  * @param {string} [props.className] - Additional CSS classes
  */
-export default function PetCompanion({ pet, behavior = 'walk', className = '' }) {
+export default function PetCompanion({ pet, behavior = 'walk', className = '', showAlert = false }) {
   const anim = PET_ANIMATIONS[behavior] || PET_ANIMATIONS.walk;
 
   return (
@@ -54,6 +54,18 @@ export default function PetCompanion({ pet, behavior = 'walk', className = '' })
           transition={{ duration: 0.3 }}
         >
           {'\uD83D\uDD0D'}
+        </motion.div>
+      )}
+
+      {/* Alert badge during approach */}
+      {showAlert && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: [1, 1.3, 1] }}
+          transition={{ repeat: Infinity, duration: 0.6 }}
+          className="absolute -top-4 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow"
+        >
+          !
         </motion.div>
       )}
     </div>

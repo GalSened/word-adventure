@@ -4,8 +4,12 @@ import { ArrowLeft } from 'lucide-react';
 import { ADVENTURE_ZONES, ADVENTURE_STATES, ADVENTURE_CONFIG } from './adventureConfig';
 import ZoneRenderer from './ZoneRenderer';
 import PetCompanion from './PetCompanion';
+import EncounterOverlay from './EncounterOverlay';
 import { useGameStore } from '../../store/gameStore';
 import { initialWordData } from '../../data/words';
+import { calculateNextReview } from '../../utils/srs';
+import { hapticFeedback } from '../../utils/mobile';
+import confetti from 'canvas-confetti';
 
 /**
  * Derive pet behavior from the current game phase.
@@ -46,6 +50,7 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
   const [encounterWord, setEncounterWord] = useState(null);
   const [score, setScore] = useState(0);
   const [zoneProgress, setZoneProgress] = useState(0);
+  const [showHint, setShowHint] = useState(false);
 
   // --- Refs (mutable values for game loop -- no re-renders) ---
   const sceneOffsetRef = useRef(0);
@@ -57,6 +62,7 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
 
   // Track timeouts for cleanup
   const timeoutsRef = useRef([]);
+  const hintTimerRef = useRef(null);
 
   // Derived values
   const zone = ADVENTURE_ZONES[currentZoneIndex];
@@ -91,7 +97,7 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
 
   /**
    * Trigger the approach phase: pet sniffs, visual cue appears.
-   * After approachDuration, auto-resolve (Plan 01 -- no EncounterOverlay yet).
+   * After approachDuration, transition to ENCOUNTERING with EncounterOverlay.
    */
   const triggerApproach = useCallback(() => {
     setGamePhase(ADVENTURE_STATES.APPROACHING);
@@ -106,22 +112,67 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
       encounterCountRef.current += 1;
       lastEncounterProgressRef.current = progressRef.current;
 
-      // Plan 01: No EncounterOverlay yet, so auto-resolve.
-      // Transition to ENCOUNTERING briefly, then RESOLVED, then back to EXPLORING.
+      // Transition to ENCOUNTERING -- EncounterOverlay renders
       setGamePhase(ADVENTURE_STATES.ENCOUNTERING);
+      setShowHint(false);
 
-      safeTimeout(() => {
-        // Auto-resolve with bonus points (simulates correct answer)
-        setScore((prev) => prev + ADVENTURE_CONFIG.bonusPoints);
-        setGamePhase(ADVENTURE_STATES.RESOLVED);
-
-        safeTimeout(() => {
-          setEncounterWord(null);
-          setGamePhase(ADVENTURE_STATES.EXPLORING);
-        }, ADVENTURE_CONFIG.resolvedDuration);
-      }, 500); // Brief encountering pause
+      // Start pet hint timer (ADVN-07)
+      hintTimerRef.current = setTimeout(() => setShowHint(true), ADVENTURE_CONFIG.petHintDelay);
     }, ADVENTURE_CONFIG.approachDuration);
   }, [currentZoneIndex, selectWord, safeTimeout]);
+
+  /**
+   * Handle encounter answer from EncounterOverlay.
+   * Updates SRS state, awards score, triggers feedback.
+   */
+  const handleEncounterAnswer = useCallback((isCorrect) => {
+    // Clear hint timer
+    if (hintTimerRef.current) {
+      clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = null;
+    }
+    setShowHint(false);
+    setGamePhase(ADVENTURE_STATES.RESOLVED);
+
+    if (isCorrect) {
+      // SRS update
+      const store = useGameStore.getState();
+      if (encounterWord && !encounterWord.id.startsWith('gen_')) {
+        const newState = calculateNextReview(store.userProgress[encounterWord.id], 5);
+        store.updateWordProgress(encounterWord.id, newState);
+      }
+
+      // Score
+      const points = 150;
+      setScore(prev => prev + points);
+      store.addScore(points);
+      store.addStars(2);
+
+      // Feedback
+      confetti({ particleCount: 50, origin: { y: 0.7 } });
+      hapticFeedback('success');
+
+      // Pet bonus item chance (ADVN-07)
+      if (Math.random() < ADVENTURE_CONFIG.bonusChance) {
+        setScore(prev => prev + ADVENTURE_CONFIG.bonusPoints);
+        useGameStore.getState().addScore(ADVENTURE_CONFIG.bonusPoints);
+      }
+    } else {
+      // Wrong answer -- still update SRS with quality 0
+      const store = useGameStore.getState();
+      if (encounterWord && !encounterWord.id.startsWith('gen_')) {
+        const newState = calculateNextReview(store.userProgress[encounterWord.id], 0);
+        store.updateWordProgress(encounterWord.id, newState);
+      }
+      hapticFeedback('error');
+    }
+
+    // Return to exploring after resolved duration
+    setTimeout(() => {
+      setGamePhase(ADVENTURE_STATES.EXPLORING);
+      setEncounterWord(null);
+    }, ADVENTURE_CONFIG.resolvedDuration);
+  }, [encounterWord]);
 
   /**
    * Handle zone completion: transition to next zone or finish adventure.
@@ -197,6 +248,13 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
     };
   }, []);
 
+  // Cleanup hint timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hintTimerRef.current) clearTimeout(hintTimerRef.current);
+    };
+  }, []);
+
   return (
     <ZoneRenderer zone={zone} sceneRef={sceneRef}>
       {/* Player character */}
@@ -205,7 +263,7 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
       </div>
 
       {/* Pet companion */}
-      <PetCompanion pet={pet} behavior={petBehavior} />
+      <PetCompanion pet={pet} behavior={petBehavior} showAlert={gamePhase === ADVENTURE_STATES.APPROACHING} />
 
       {/* Top bar: exit, zone name, score */}
       <div className="absolute top-4 left-4 right-4 z-40">
@@ -297,6 +355,37 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
             className="absolute bottom-[25vh] right-[30%] text-8xl z-30 drop-shadow-2xl"
           >
             {zone.theme.encounterCue}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Encounter overlay (ADVN-05) */}
+      <AnimatePresence>
+        {gamePhase === ADVENTURE_STATES.ENCOUNTERING && encounterWord && (
+          <EncounterOverlay
+            word={encounterWord}
+            zone={zone}
+            pet={pet}
+            playerGender={userProfile?.gender || 'boy'}
+            t={(male, female) => (userProfile?.gender === 'boy' ? male : female)}
+            onAnswer={handleEncounterAnswer}
+            showHint={showHint}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Resolved feedback */}
+      <AnimatePresence>
+        {gamePhase === ADVENTURE_STATES.RESOLVED && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+          >
+            <div className="text-8xl">
+              {'\u2728'}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
