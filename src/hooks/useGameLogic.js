@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { calculateNextReview, getDueWords } from '../utils/srs';
+import { calculateNextReview, buildReviewSession } from '../utils/srs';
 import { hapticFeedback } from '../utils/mobile';
 import { generateChallenge } from '../utils/grammarEngine';
 import { STORE_ITEMS } from '../data/storeItems';
@@ -46,8 +46,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             store.setGameMode('regular');
         }
         else if (level === 'review') {
-            const allWordsWithState = initialWordData.map(w => ({ ...w, srs: store.userProgress[w.id] }));
-            wordsToPlay = getDueWords(allWordsWithState).slice(0, 10);
+            wordsToPlay = buildReviewSession(initialWordData, store.userProgress);
             if (wordsToPlay.length === 0) {
                 alert("אין מילים לחזרה כרגע! כל הכבוד! 🎉");
                 return;
