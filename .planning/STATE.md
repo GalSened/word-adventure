@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Players learn English vocabulary through genuinely fun, varied gameplay that feels like an adventure — not a flashcard app.
-**Current focus:** Phase 3 — Word Bank and SRS Foundation
+**Current focus:** Phase 4 — Challenge Types and Levels
 
 ## Current Position
 
-Phase: 3 of 6 (Word Bank and SRS Foundation)
-Plan: 4 of 4 in current phase (PHASE COMPLETE)
-Status: Phase Complete
-Last activity: 2026-02-15 — Completed 03-04 (Grammar engine noun sync and gender audit)
+Phase: 4 of 6 (Challenge Types and Levels)
+Plan: 1 of 4 in current phase (04-02 complete)
+Status: Executing
+Last activity: 2026-02-15 — Completed 04-02 (sentence build, grammar, spelling challenges)
 
-Progress: [██████░░░░] 63%
+Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 4 min
-- Total execution time: 0.69 hours
+- Total execution time: 0.72 hours
 
 **By Phase:**
 
@@ -32,7 +32,7 @@ Progress: [██████░░░░] 63%
 | 03-word-bank-and-srs-foundation | 4 | 18 min | 4.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-05 (6 min), 03-03 (3 min), 03-01 (8 min), 03-02 (3 min), 03-04 (4 min)
+- Last 5 plans: 03-03 (3 min), 03-01 (8 min), 03-02 (3 min), 03-04 (4 min), 04-02 (2 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -88,6 +88,9 @@ Recent decisions affecting current work:
 - [03-04]: Adjectives/verbs/objects remain hardcoded in grammar engine (require he_m/he_f forms not in word schema)
 - [03-04]: ENCOURAGEMENT messages prefer gender-neutral rewrites; { boy, girl } only when genuinely unavoidable
 - [03-04]: getNPCDialogue defaults to 'boy' gender for backward compatibility with existing callers
+- [04-02]: GrammarChallenge generates distractors via grammarEngine.generateChallenge() (not word bank) since grammar sentences are procedural
+- [04-02]: SpellingChallenge receives extended props (scrambledContent, userInput, setUserInput, onCheck) beyond standard challenge interface
+- [04-02]: Reorder items use {id, text} objects with unique IDs to handle duplicate words in sentences
 
 ### Pending Todos
 
@@ -100,5 +103,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 03-04-PLAN.md (Grammar engine noun sync and gender audit -- Phase 3 complete)
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
