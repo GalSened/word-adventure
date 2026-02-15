@@ -1,16 +1,36 @@
 import { z } from 'zod';
 
+/**
+ * The 10 themed word categories for the word bank.
+ * Used by the schema enum and exported for use by other modules.
+ */
+export const WORD_CATEGORIES = [
+  'animals',
+  'food',
+  'family',
+  'colors',
+  'nature',
+  'body',
+  'actions',
+  'home',
+  'emotions',
+  'professions',
+];
+
 export const WordSchema = z.object({
   id: z.string().min(1),
   word: z.string().min(1),
   hebrew: z.string().min(1),
   hint: z.string().min(1),
-  category: z.string().min(1),
+  hint_m: z.string().optional(),
+  hint_f: z.string().optional(),
+  category: z.enum(WORD_CATEGORIES),
   emoji: z.string().min(1),
   level: z.enum(['easy', 'medium', 'hard', 'expert']),
   type: z.enum(['word', 'sentence']),
   gender: z.enum(['m', 'f', 'n']),
   exampleSentence: z.string().min(1),
+  exampleSentence_he: z.string().min(1),
 });
 
 export const WordListSchema = z.array(WordSchema);
