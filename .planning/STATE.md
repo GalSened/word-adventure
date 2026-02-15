@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 Phase: 3 of 6 (Word Bank and SRS Foundation)
 Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-15 — Completed 03-03 (SRS algorithm fixes)
+Last activity: 2026-02-15 — Completed 03-01 (Word bank expansion to 201 entries)
 
-Progress: [██████░░░░] 53%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 3 min
-- Total execution time: 0.43 hours
+- Total plans completed: 9
+- Average duration: 4 min
+- Total execution time: 0.56 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 53%
 |-------|-------|-------|----------|
 | 01-test-safety-net | 2 | 7 min | 3.5 min |
 | 02-architecture-refactoring | 5 | 16 min | 3.2 min |
-| 03-word-bank-and-srs-foundation | 1 | 3 min | 3 min |
+| 03-word-bank-and-srs-foundation | 2 | 11 min | 5.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (2 min), 02-04 (2 min), 02-03 (4 min), 02-05 (6 min), 03-03 (3 min)
+- Last 5 plans: 02-04 (2 min), 02-03 (4 min), 02-05 (6 min), 03-03 (3 min), 03-01 (8 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -73,6 +73,10 @@ Recent decisions affecting current work:
 - [02-05]: Tests reset Zustand in-memory state via setState() (not replace mode) to preserve action functions
 - [02-05]: Daily reset useEffect kept in WordAdventure as single remaining side effect on mount
 - [02-05]: showStoryIntro derived from !hasSeenStoryIntro via store field rather than separate useState
+- [03-01]: Category enum locked to 10 values (animals, food, family, colors, nature, body, actions, home, emotions, professions)
+- [03-01]: exampleSentence_he is required (not optional) to enforce bilingual completeness
+- [03-01]: hint_m/hint_f only added where hint directly addresses player with gendered Hebrew (~10% of words)
+- [03-01]: Original 13 words preserved with updated categories (objects -> home) and new required fields
 - [03-03]: Base interval stays un-jittered for SM-2 algorithm continuity; only nextReviewDate uses jittered value
 - [03-03]: Low-rep threshold set to repetition < 3 for new-slot eligibility in review sessions
 - [03-03]: getDueWords kept exported for potential direct use, though useGameLogic now uses buildReviewSession
@@ -88,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 03-03-PLAN.md (SRS algorithm fixes -- learned-only, jitter, session builder)
+Stopped at: Completed 03-01-PLAN.md (Word bank expansion -- 201 entries, 10 categories, extended schema)
 Resume file: None
