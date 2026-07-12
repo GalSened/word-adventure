@@ -20,6 +20,7 @@ function resetStore(overrides = {}) {
         gameState: 'start', currentWordIndex: 0, activeWords: [],
         userInput: '', lives: 3, feedback: null, currentStreak: 0,
         currentLevel: null, gameMode: 'regular',
+        levelScore: 0, returnScreen: null,
         dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
         hasCompletedOnboarding: true, onboardingStep: 3,
         ...overrides,
@@ -210,6 +211,71 @@ describe('hint during play', () => {
         const { result } = renderLogic();
         act(() => result.current.useHint());
         expect(useGameStore.getState().userInput).toBe('');
+    });
+});
+
+describe('leaderboard records per-level scores', () => {
+    it('saves the points earned in the level, not the lifetime total', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word], currentWordIndex: 0,
+            userInput: word.word.toUpperCase(), currentLevel: 3, score: 1000,
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // correct answer on the last word
+        act(() => vi.advanceTimersByTime(2000)); // level-complete transition
+        const s = useGameStore.getState();
+        expect(s.gameState).toBe('levelComplete');
+        const earned = s.score - 1000;
+        expect(earned).toBeGreaterThan(0);
+        expect(s.highScores).toHaveLength(1);
+        expect(s.highScores[0].points).toBe(earned); // NOT the 1000+ lifetime total
+        expect(s.highScores[0].level).toBe(3);
+    });
+
+    it('a level finished only by skipping records no leaderboard entry', () => {
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word], currentWordIndex: 0,
+            skipsAvailable: 1, currentLevel: 1, score: 500,
+        });
+        const { result } = renderLogic();
+        act(() => result.current.skipWord());
+        const s = useGameStore.getState();
+        expect(s.gameState).toBe('levelComplete');
+        expect(s.highScores).toHaveLength(0); // zero points earned → nothing to rank
+    });
+
+    it('startLevel resets the per-level score counter', () => {
+        resetStore({ levelScore: 999 });
+        const { result } = renderLogic();
+        act(() => result.current.startLevel(1));
+        expect(useGameStore.getState().levelScore).toBe(0);
+    });
+});
+
+describe('inventory close returns to an in-progress level', () => {
+    it('returns to playing when the inventory was opened mid-level', () => {
+        resetStore({
+            gameState: 'playing', activeWords: initialWordData.slice(0, 2),
+            currentWordIndex: 1, lives: 2,
+        });
+        const { result } = renderLogic();
+        act(() => useGameStore.getState().openInventory());
+        act(() => result.current.handleInventoryClose(null));
+        const s = useGameStore.getState();
+        expect(s.gameState).toBe('playing');
+        expect(s.currentWordIndex).toBe(1); // level state untouched
+        expect(s.lives).toBe(2);
+    });
+
+    it('falls back to the map when not opened from a level', () => {
+        resetStore();
+        const { result } = renderLogic();
+        act(() => useGameStore.getState().openInventory());
+        act(() => result.current.handleInventoryClose(null));
+        expect(useGameStore.getState().gameState).toBe('map');
     });
 });
 

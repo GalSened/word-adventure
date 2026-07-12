@@ -39,11 +39,12 @@ function petBehaviorFromPhase(phase) {
  *
  * @param {Object} props
  * @param {Object} props.pet - Pet object with name and icon
- * @param {Object} props.userProfile - User profile with avatar, gender, etc.
+ * @param {Object} props.userProfile - User profile with gender, name
+ * @param {string} props.avatar - Player's chosen avatar emoji
  * @param {Function} props.onExit - Callback to leave adventure
  * @param {Function} props.onComplete - Callback with score when adventure finishes
  */
-export default function AdventureGame({ pet, userProfile, onExit, onComplete }) {
+export default function AdventureGame({ pet, userProfile, avatar, onExit, onComplete }) {
   // --- State (triggers re-renders) ---
   const [gamePhase, setGamePhase] = useState(ADVENTURE_STATES.EXPLORING);
   const [currentZoneIndex, setCurrentZoneIndex] = useState(0);
@@ -257,7 +258,7 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
     <ZoneRenderer zone={zone} sceneRef={sceneRef}>
       {/* Player character */}
       <div className="absolute bottom-[22vh] left-[45%] text-6xl">
-        {userProfile?.avatar || '\uD83D\uDC78'}
+        {avatar || '\uD83D\uDC78'}
       </div>
 
       {/* Pet companion */}

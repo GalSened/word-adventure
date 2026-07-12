@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import DailyQuests from '../DailyQuests';
+import Leaderboard from '../Leaderboard';
 import { useGameStore } from '../../store/gameStore';
 import { initialWordData } from '../../data/words';
 
@@ -15,6 +16,7 @@ export default function StartScreen({
     t
 }) {
     const userProgress = useGameStore((s) => s.userProgress);
+    const highScores = useGameStore((s) => s.highScores);
     const masteredCount = Object.values(userProgress).filter(
         (srs) => srs.repetition >= 6
     ).length;
@@ -114,6 +116,13 @@ export default function StartScreen({
                     <div className="text-2xl font-bold">{'\u05D7\u05E0\u05D5\u05EA \u05D4\u05D4\u05E4\u05EA\u05E2\u05D5\u05EA'}</div>
                 </button>
             </div>
+
+            {/* Best level runs \u2014 hidden until the first level is scored */}
+            {highScores.length > 0 && (
+                <div className="max-w-4xl mx-auto mb-10">
+                    <Leaderboard scores={highScores} />
+                </div>
+            )}
         </motion.div>
     );
 }

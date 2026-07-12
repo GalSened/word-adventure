@@ -10,6 +10,7 @@ function resetStore() {
         hintsAvailable: 0, skipsAvailable: 0,
         gameState: 'start', currentWordIndex: 0, activeWords: [],
         lives: 3, currentStreak: 0,
+        levelScore: 0, returnScreen: null, avatar: '\u{1F478}',
     });
 }
 
@@ -92,5 +93,115 @@ describe('consumable counters', () => {
         const persisted = JSON.parse(localStorage.getItem(STORE_KEY)).state;
         expect(persisted.hintsAvailable).toBe(3);
         expect(persisted.skipsAvailable).toBe(2);
+    });
+});
+
+describe('avatar defaults from gender', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        resetStore();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('first profile creation for a girl keeps the princess avatar', () => {
+        useGameStore.getState().setUserProfile({ name: 'דנה', gender: 'girl' });
+        expect(useGameStore.getState().avatar).toBe('👸');
+    });
+
+    it('first profile creation for a boy sets the prince avatar', () => {
+        useGameStore.getState().setUserProfile({ name: 'אדם', gender: 'boy' });
+        expect(useGameStore.getState().avatar).toBe('🤴');
+    });
+
+    it('re-setting the profile never clobbers a manually chosen avatar', () => {
+        useGameStore.getState().setUserProfile({ name: 'אדם', gender: 'boy' });
+        useGameStore.getState().updateAvatar('🤖');
+        useGameStore.getState().setUserProfile({ name: 'אדם', gender: 'boy' });
+        expect(useGameStore.getState().avatar).toBe('🤖');
+    });
+});
+
+describe('per-level high scores', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        resetStore();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('records points together with the level they were earned in', () => {
+        useGameStore.getState().saveHighScore(300, 2);
+        const entry = useGameStore.getState().highScores[0];
+        expect(entry.points).toBe(300);
+        expect(entry.level).toBe(2);
+    });
+
+    it('keeps only the top 5, sorted descending', () => {
+        [100, 500, 300, 200, 400, 250].forEach((p, i) =>
+            useGameStore.getState().saveHighScore(p, i + 1));
+        const points = useGameStore.getState().highScores.map(e => e.points);
+        expect(points).toEqual([500, 400, 300, 250, 200]);
+    });
+
+    it('levelScore accumulates and resets', () => {
+        useGameStore.getState().addLevelScore(150);
+        useGameStore.getState().addLevelScore(165);
+        expect(useGameStore.getState().levelScore).toBe(315);
+        useGameStore.getState().resetLevelScore();
+        expect(useGameStore.getState().levelScore).toBe(0);
+    });
+});
+
+describe('store/inventory navigation preserves an in-progress level', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        resetStore();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('store opened mid-level returns to the level on close', () => {
+        useGameStore.setState({ gameState: 'playing' });
+        useGameStore.getState().openStore();
+        expect(useGameStore.getState().gameState).toBe('store');
+        useGameStore.getState().closeOverlay('start');
+        expect(useGameStore.getState().gameState).toBe('playing');
+    });
+
+    it('store opened from the start screen closes back to start', () => {
+        useGameStore.getState().openStore();
+        useGameStore.getState().closeOverlay('start');
+        expect(useGameStore.getState().gameState).toBe('start');
+    });
+
+    it('inventory opened mid-level returns to the level on close', () => {
+        useGameStore.setState({ gameState: 'playing' });
+        useGameStore.getState().openInventory();
+        useGameStore.getState().closeOverlay('map');
+        expect(useGameStore.getState().gameState).toBe('playing');
+    });
+
+    it('hopping store↔inventory keeps the way back to the level', () => {
+        useGameStore.setState({ gameState: 'playing' });
+        useGameStore.getState().openInventory();
+        useGameStore.getState().openStore(); // header hop while inside inventory
+        useGameStore.getState().closeOverlay('start');
+        expect(useGameStore.getState().gameState).toBe('playing');
+    });
+
+    it('explicit navigation (Home) abandons the resume point', () => {
+        useGameStore.setState({ gameState: 'playing' });
+        useGameStore.getState().openStore();
+        useGameStore.getState().setGameState('start'); // Home from inside the store
+        useGameStore.getState().openStore();
+        useGameStore.getState().closeOverlay('start');
+        expect(useGameStore.getState().gameState).toBe('start');
     });
 });

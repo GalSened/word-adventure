@@ -29,6 +29,16 @@ export default function Leaderboard({ scores }) {
                                     </div>
                                     <span className="text-2xl">{score.avatar}</span>
                                     <span className="font-bold text-slate-700">{score.date}</span>
+                                    {typeof score.level === 'number' && (
+                                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
+                                            שלב {score.level}
+                                        </span>
+                                    )}
+                                    {score.level === 'review' && (
+                                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                                            חזרה
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="font-mono font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-lg">
                                     {score.points.toLocaleString()}
