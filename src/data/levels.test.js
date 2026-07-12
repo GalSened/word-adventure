@@ -33,3 +33,30 @@ describe('level word pools', () => {
         }
     });
 });
+
+describe('level map shape', () => {
+    it('defines 16 sequential levels', () => {
+        expect(LEVELS).toHaveLength(16);
+        expect(LEVELS.map(l => l.id)).toEqual(
+            Array.from({ length: 16 }, (_, i) => i + 1)
+        );
+    });
+
+    it('unlock chain is contiguous — each level unlocks by completing the previous one', () => {
+        for (const level of LEVELS) {
+            expect(level.unlockRequirement, `level ${level.id}`).toBe(level.id - 1);
+        }
+    });
+
+    it('grammar is enabled only where categories include grammar-capable nouns', () => {
+        const NOUN_CATEGORIES = ['animals', 'family', 'professions'];
+        for (const level of LEVELS) {
+            if (level.grammarEnabled) {
+                expect(
+                    level.categories.some(c => NOUN_CATEGORIES.includes(c)),
+                    `level ${level.id} enables grammar without noun categories`
+                ).toBe(true);
+            }
+        }
+    });
+});

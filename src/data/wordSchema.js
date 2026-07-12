@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /**
- * The 10 themed word categories for the word bank.
+ * The 12 themed word categories for the word bank.
  * Used by the schema enum and exported for use by other modules.
  */
 export const WORD_CATEGORIES = [
@@ -15,6 +15,8 @@ export const WORD_CATEGORIES = [
   'home',
   'emotions',
   'professions',
+  'school',
+  'transport',
 ];
 
 export const WordSchema = z.object({

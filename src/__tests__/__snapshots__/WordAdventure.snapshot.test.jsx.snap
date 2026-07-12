@@ -1121,6 +1121,134 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </button>
           <button
+            aria-label="בית הספר הקסום - נעול"
+            class="relative w-full bg-gradient-to-r from-sky-400 to-blue-600 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                13
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  בית הספר הקסום
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The Magic School
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              🏫
+            </div>
+          </button>
+          <button
+            aria-label="מסע הדרכים - נעול"
+            class="relative w-full bg-gradient-to-r from-slate-400 to-zinc-600 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                14
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  מסע הדרכים
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The Great Journey
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              🚂
+            </div>
+          </button>
+          <button
+            aria-label="אתגר האלופים - נעול"
+            class="relative w-full bg-gradient-to-r from-fuchsia-500 to-purple-700 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                15
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  אתגר האלופים
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  Champions Challenge
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              🎯
+            </div>
+          </button>
+          <button
+            aria-label="כתר האגדות - נעול"
+            class="relative w-full bg-gradient-to-r from-yellow-400 to-amber-700 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                16
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  כתר האגדות
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The Legendary Crown
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              👑
+            </div>
+          </button>
+          <button
             class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center hover:scale-[1.02] hover:shadow-xl transition-all"
           >
             <div
@@ -1684,7 +1812,7 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
           >
             0
             /
-            201
+            261
              
             מילים נשלטו
           </div>
