@@ -119,7 +119,16 @@ export const createUserSlice = (set) => ({
   inventory: [],
 
   // Actions
-  setUserProfile: (profile) => set({ userProfile: profile }),
+  setUserProfile: (profile) =>
+    set((state) => ({
+      userProfile: profile,
+      // First profile creation picks a gender-appropriate avatar; a profile
+      // re-set must never clobber an avatar the player chose manually
+      avatar:
+        state.userProfile === null && profile?.gender
+          ? (profile.gender === 'girl' ? '\u{1F478}' : '\u{1F934}') // 👸 / 🤴
+          : state.avatar,
+    })),
 
   addScore: (points) =>
     set((state) => ({ score: state.score + points })),
@@ -135,10 +144,11 @@ export const createUserSlice = (set) => ({
       userProgress: { ...state.userProgress, [wordId]: srsState },
     })),
 
-  saveHighScore: (points) =>
+  saveHighScore: (points, level) =>
     set((state) => {
       const newScore = {
         points,
+        level,
         date: new Date().toLocaleDateString('he-IL'),
         avatar: state.avatar,
       };
@@ -200,9 +210,49 @@ export const createGameSlice = (set) => ({
   currentStreak: 0,
   currentLevel: null,
   showStoryIntro: false,
+  // Points earned within the current level only (the persisted `score` is a
+  // lifetime total AND the coin currency — useless for a leaderboard)
+  levelScore: 0,
+  // Where to resume when closing the store/inventory overlay; only 'playing'
+  // is ever worth resuming, everything else falls back to the caller's default
+  returnScreen: null,
 
   // Actions
-  setGameState: (gameState) => set({ gameState }),
+  // Any explicit navigation abandons the resume point — only openStore /
+  // openInventory (below) set one
+  setGameState: (gameState) => set({ gameState, returnScreen: null }),
+
+  addLevelScore: (points) =>
+    set((state) => ({ levelScore: state.levelScore + points })),
+
+  resetLevelScore: () => set({ levelScore: 0 }),
+
+  openStore: () =>
+    set((state) => ({
+      gameState: 'store',
+      returnScreen: state.gameState === 'playing'
+        ? 'playing'
+        // hopping store↔inventory must not lose the way back to the level
+        : (state.gameState === 'store' || state.gameState === 'inventory')
+          ? state.returnScreen
+          : null,
+    })),
+
+  openInventory: () =>
+    set((state) => ({
+      gameState: 'inventory',
+      returnScreen: state.gameState === 'playing'
+        ? 'playing'
+        : (state.gameState === 'store' || state.gameState === 'inventory')
+          ? state.returnScreen
+          : null,
+    })),
+
+  closeOverlay: (fallback) =>
+    set((state) => ({
+      gameState: state.returnScreen || fallback,
+      returnScreen: null,
+    })),
   setCurrentWordIndex: (currentWordIndex) => set({ currentWordIndex }),
   setUserInput: (userInputOrFn) =>
     set((state) => ({
@@ -232,6 +282,8 @@ export const createGameSlice = (set) => ({
       currentStreak: 0,
       currentLevel: null,
       showStoryIntro: false,
+      levelScore: 0,
+      returnScreen: null,
     }),
 });
 

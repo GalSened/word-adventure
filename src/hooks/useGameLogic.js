@@ -103,6 +103,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         store.setUserInput('');
         store.setFeedback(null);
         store.setCurrentStreak(0);
+        store.resetLevelScore();
         store.setGameState('playing');
     };
 
@@ -113,12 +114,11 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             if (item && item.walkable) {
                 store.setActivePet({ name: item.name, icon: item.icon });
                 store.setGameState('petWalking');
-            } else {
-                store.setGameState('map');
+                return;
             }
-        } else {
-            store.setGameState('map');
         }
+        // Resume an in-progress level if the inventory was opened from one
+        store.closeOverlay('map');
     };
 
     const shuffleArray = (array) => {
@@ -186,7 +186,11 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             s.setOnboardingStep(3);
         }
         s.setGameState('levelComplete');
-        s.saveHighScore(s.score);
+        // Leaderboard ranks what THIS level earned; s.score is the lifetime
+        // total (and coin balance), which made every entry a running maximum
+        if (s.levelScore > 0) {
+            s.saveHighScore(s.levelScore, s.currentLevel);
+        }
     };
 
     /**
@@ -257,6 +261,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
 
             const earnedScore = itemEffects.calculatePoints(GAME_CONFIG.SCORE_PER_CORRECT, store.currentStreak);
             store.addScore(earnedScore);
+            store.addLevelScore(earnedScore);
             store.addStars(GAME_CONFIG.STARS_PER_CORRECT);
 
             const newStreak = store.currentStreak + 1;

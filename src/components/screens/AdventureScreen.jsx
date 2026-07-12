@@ -9,10 +9,11 @@ import AdventureGame from '../adventure/AdventureGame';
  * @param {Object} props
  * @param {Object} props.pet - Pet object with name and icon
  * @param {Object} props.userProfile - User profile
+ * @param {string} props.avatar - Player's chosen avatar emoji
  * @param {Function} props.onExit - Callback to leave adventure
  * @param {Function} props.onComplete - Callback with score when adventure finishes
  */
-export default function AdventureScreen({ pet, userProfile, onExit, onComplete }) {
+export default function AdventureScreen({ pet, userProfile, avatar, onExit, onComplete }) {
   return (
     <motion.div
       key="adventure"
@@ -23,6 +24,7 @@ export default function AdventureScreen({ pet, userProfile, onExit, onComplete }
       <AdventureGame
         pet={pet}
         userProfile={userProfile}
+        avatar={avatar}
         onExit={onExit}
         onComplete={onComplete}
       />

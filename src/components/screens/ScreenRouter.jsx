@@ -95,7 +95,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         coins={props.score}
                         inventory={props.inventory}
                         onBuy={props.handleBuy}
-                        onClose={() => props.setGameState('start')}
+                        onClose={() => props.closeOverlay('start')}
                     />
                 );
 
@@ -153,6 +153,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         key="adventure"
                         pet={props.activePet || { name: 'Buddy', icon: '\uD83D\uDC15' }}
                         userProfile={props.userProfile}
+                        avatar={props.avatar}
                         onExit={() => props.setGameState('start')}
                         onComplete={props.handleAdventureComplete}
                     />

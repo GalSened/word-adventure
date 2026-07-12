@@ -16,7 +16,7 @@ import { getMemoryGameWords } from './utils/memoryGameWords';
 
 export default function WordAdventure() {
     const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels, userProgress, hintsAvailable, skipsAvailable } = useGameStore();
-    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding } = useGameStore();
+    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding, openStore, openInventory, closeOverlay } = useGameStore();
 
     const voice = useVoiceRecognition();
     const story = useStoryProgress(userProfile);
@@ -72,7 +72,7 @@ export default function WordAdventure() {
         completedLevels: completedLevels || [],
         gender: userProfile.gender, memoryWords,
         skipWord: logic.skipWord, useHint: logic.useHint,
-        hintsAvailable, skipsAvailable,
+        hintsAvailable, skipsAvailable, closeOverlay,
     };
 
     return (
@@ -85,8 +85,8 @@ export default function WordAdventure() {
                 <div className="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md">
                     <div className="flex gap-2">
                         <button onClick={() => setGameState('start')}><Home className="text-purple-600" /></button>
-                        <button onClick={() => setGameState('store')} className="text-yellow-600"><ShoppingBag /></button>
-                        <button onClick={() => setGameState('inventory')} className="text-blue-600"><Backpack /></button>
+                        <button onClick={openStore} className="text-yellow-600"><ShoppingBag /></button>
+                        <button onClick={openInventory} className="text-blue-600"><Backpack /></button>
                     </div>
                     <div className="flex gap-4 font-bold text-lg">
                         <span className="flex items-center gap-1 text-yellow-600"><Trophy size={18} /> {score}</span>
