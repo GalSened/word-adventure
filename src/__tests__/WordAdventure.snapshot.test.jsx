@@ -2,17 +2,19 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 // --- GLOBAL MOCKS (before imports) ---
 
-vi.mock('framer-motion', () => {
-  const React = require('react')
+vi.mock('framer-motion', async () => {
+  const React = await import('react')
+  const MOTION_ONLY_PROPS = new Set([
+    'animate', 'initial', 'exit', 'variants', 'transition',
+    'whileHover', 'whileTap', 'whileFocus', 'whileInView',
+    'layout', 'layoutId', 'onAnimationComplete', 'drag', 'dragConstraints',
+  ])
   const motion = new Proxy({}, {
     get: (_, tag) => {
       return React.forwardRef(({ children, ...props }, ref) => {
-        const {
-          animate, initial, exit, variants, transition,
-          whileHover, whileTap, whileFocus, whileInView,
-          layout, layoutId, onAnimationComplete, drag, dragConstraints,
-          ...htmlProps
-        } = props
+        const htmlProps = Object.fromEntries(
+          Object.entries(props).filter(([key]) => !MOTION_ONLY_PROPS.has(key))
+        )
         return React.createElement(tag, { ...htmlProps, ref }, children)
       })
     }
@@ -166,7 +168,7 @@ function setupLoggedInState() {
  * Navigate from start to playing state for level 1 (The Kingdom Gate).
  * Returns all letter buttons found in the LetterPicker grid.
  */
-function navigateToPlayingState(container) {
+function navigateToPlayingState() {
   // Navigate to map (wrap in act to flush Zustand state update)
   act(() => {
     fireEvent.click(screen.getByText('\u{05DE}\u{05E4}\u{05EA} \u{05E2}\u{05D5}\u{05DC}\u{05DE}\u{05D5}\u{05EA}'))
@@ -265,11 +267,14 @@ describe('WordAdventure Snapshot Tests', () => {
 
     navigateToPlayingState(container)
 
-    // Level 1 has 8 animal/easy words. With Math.random mocked to 0.5,
-    // sort is stable so we get the first 8 in array order.
-    const level1Words = ['CAT', 'DOG', 'FISH', 'BIRD', 'BEAR', 'BEE', 'DUCK', 'FROG']
+    // Level 1 has 8 words. Read the actual session words from the store so
+    // the test doesn't depend on the shuffle implementation.
+    const wordCount = useGameStore.getState().activeWords.length
+    expect(wordCount).toBe(8)
 
-    for (const word of level1Words) {
+    for (let i = 0; i < wordCount; i++) {
+      const s = useGameStore.getState()
+      const word = s.activeWords[s.currentWordIndex].word.toUpperCase()
       clickLettersForWord(container, word)
       submitAnswer()
 
@@ -279,6 +284,7 @@ describe('WordAdventure Snapshot Tests', () => {
       })
     }
 
+    expect(useGameStore.getState().gameState).toBe('levelComplete')
     expect(container).toMatchSnapshot()
   })
 

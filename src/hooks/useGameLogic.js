@@ -7,7 +7,7 @@
  * Only receives non-store dependencies as parameters.
  */
 
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { calculateNextReview, buildReviewSession } from '../utils/srs';
 import { selectChallengeType } from '../utils/challengeSelector';
@@ -16,28 +16,40 @@ import { generateChallenge } from '../utils/grammarEngine';
 import { getLevelById, getLevelWords } from '../data/levels';
 import { STORE_ITEMS } from '../data/storeItems';
 import { initialWordData } from '../data/words';
-import { GRAMMAR_INJECTION_INTERVAL } from '../config/constants';
+import { GRAMMAR_INJECTION_INTERVAL, GAME_CONFIG } from '../config/constants';
 import confetti from 'canvas-confetti';
 
 export function useGameLogic({ story, itemEffects, setTranscript }) {
     // Read all state from Zustand store
     const {
-        userProfile, score, avatar, inventory, dailyStats,
-        gameState, currentWordIndex, userInput, lives, feedback,
-        activeWords, gameMode, activePet, currentStreak, currentLevel,
+        userProfile,
+        currentWordIndex, activeWords,
     } = useGameStore();
 
     // GENDER HELPER
     const t = (male, female) => userProfile.gender === 'boy' ? male : female;
 
     const handleBuy = (item) => {
+        // Always read fresh state: render-scope score/inventory go stale when
+        // two clicks land before a re-render (double-charge hazard)
         const store = useGameStore.getState();
-        if (score >= item.price) {
-            store.subtractScore(item.price);
-            store.setInventory([...inventory, item.id]);
-            store.setFeedback({ type: 'success', message: `${t('רכשת', 'רכשת')} ${item.name}! 🎉` });
-            setTimeout(() => useGameStore.getState().setFeedback(null), 1500);
+
+        if (!item.stackable && store.inventory.includes(item.id)) {
+            store.setFeedback({ type: 'warning', message: `${item.name} כבר ברשותך!` });
+            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+            return;
         }
+
+        if (store.score < item.price) {
+            store.setFeedback({ type: 'error', message: 'אין מספיק מטבעות! 💰' });
+            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+            return;
+        }
+
+        store.subtractScore(item.price);
+        store.setInventory([...store.inventory, item.id]);
+        store.setFeedback({ type: 'success', message: `רכשת ${item.name}! 🎉` });
+        setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
     };
 
     const startLevel = (levelId) => {
@@ -48,7 +60,8 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             // Keep existing review mode logic
             wordsToPlay = buildReviewSession(initialWordData, store.userProgress);
             if (wordsToPlay.length === 0) {
-                alert("אין מילים לחזרה כרגע! כל הכבוד! 🎉");
+                store.setFeedback({ type: 'success', message: 'אין מילים לחזרה כרגע! כל הכבוד! 🎉' });
+                setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
                 return;
             }
             store.setGameMode('srs');
@@ -86,7 +99,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
 
         store.setActiveWords(wordsToPlay);
         store.setCurrentWordIndex(0);
-        store.setLives(itemEffects.getStartingLives(3));
+        store.setLives(itemEffects.getStartingLives(GAME_CONFIG.INITIAL_LIVES));
         store.setUserInput('');
         store.setFeedback(null);
         store.setCurrentStreak(0);
@@ -122,18 +135,22 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
     // Track recent challenge types to avoid repetitive sequences
     const recentChallengeTypes = useRef([]);
 
-    // Select challenge type adaptively based on SRS mastery
+    // Select challenge type adaptively based on SRS mastery.
+    // The memo must stay pure (no ref writes) — history is recorded in the
+    // effect below, after the selection has been committed.
     const challengeType = useMemo(() => {
         if (!currentWord) return 'spelling';
         // Grammar-generated words always get grammar challenge
         if (currentWord.id?.startsWith('gen_')) return 'grammar';
         // Select based on SRS mastery
         const srsState = useGameStore.getState().userProgress[currentWord.id];
-        const selected = selectChallengeType(currentWord, srsState, recentChallengeTypes.current);
-        // Track for variety (keep last 3)
-        recentChallengeTypes.current = [...recentChallengeTypes.current.slice(-2), selected];
-        return selected;
-    }, [currentWordIndex, activeWords]);
+        return selectChallengeType(currentWord, srsState, recentChallengeTypes.current);
+    }, [currentWord]);
+
+    // Record the committed selection for variety tracking (keep last 3)
+    useEffect(() => {
+        recentChallengeTypes.current = [...recentChallengeTypes.current.slice(-2), challengeType];
+    }, [challengeType, currentWordIndex]);
 
     // Callback for non-spelling challenges to report answer directly
     const onAnswer = (isCorrect) => {
@@ -147,7 +164,87 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         } else {
             return shuffleArray(currentWord.word.split(''));
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentWord?.id]);
+
+    // Shared level-completion path for the last word (answered or skipped)
+    const completeLevel = (s) => {
+        const startingLives = itemEffects.getStartingLives(GAME_CONFIG.INITIAL_LIVES);
+        const wasPerfect = s.lives === startingLives;
+        const chapterKey = typeof s.currentLevel === 'number' ? `level_${s.currentLevel}` : s.currentLevel;
+        story.completeChapter(chapterKey, wasPerfect);
+        if (s.lives === 1) {
+            story.recordComebackWin();
+        }
+        // Persist completed level for progression unlocking
+        if (typeof s.currentLevel === 'number') {
+            s.addCompletedLevel(s.currentLevel);
+        }
+        // Mark onboarding as complete after finishing first level
+        if (!s.hasCompletedOnboarding) {
+            s.setHasCompletedOnboarding(true);
+            s.setOnboardingStep(3);
+        }
+        s.setGameState('levelComplete');
+        s.saveHighScore(s.score);
+    };
+
+    /**
+     * Spend a purchased skip: advance past the current word with no penalty —
+     * no life loss, no streak reset, no SRS update, no score.
+     */
+    const skipWord = () => {
+        const store = useGameStore.getState();
+        if (store.gameState !== 'playing' || store.skipsAvailable <= 0) return;
+
+        store.consumeSkip();
+        hapticFeedback('light');
+
+        if (store.currentWordIndex < store.activeWords.length - 1) {
+            store.setCurrentWordIndex(store.currentWordIndex + 1);
+            store.setUserInput('');
+            setTranscript('');
+            store.setFeedback(null);
+        } else {
+            completeLevel(store);
+        }
+    };
+
+    /**
+     * Spend a purchased hint: replace the input with the correct prefix plus
+     * one more token (letter for words, word for sentences).
+     */
+    const useHint = () => {
+        const store = useGameStore.getState();
+        if (store.gameState !== 'playing' || store.hintsAvailable <= 0) return;
+
+        const word = store.activeWords[store.currentWordIndex];
+        if (!word) return;
+
+        const isSentence = word.type === 'sentence';
+        const target = isSentence
+            ? word.word.toUpperCase().split(' ')
+            : word.word.toUpperCase().split('');
+        const current = isSentence
+            ? store.userInput.split(' ').filter(Boolean)
+            : store.userInput.split('');
+
+        // Longest correct prefix of the current input
+        let correctLen = 0;
+        while (
+            correctLen < current.length &&
+            correctLen < target.length &&
+            current[correctLen] === target[correctLen]
+        ) {
+            correctLen++;
+        }
+        if (correctLen >= target.length) return; // already complete
+
+        const revealed = target.slice(0, correctLen + 1);
+        store.setUserInput(isSentence ? revealed.join(' ') : revealed.join(''));
+        store.consumeHint();
+        hapticFeedback('light');
+    };
 
     const processAnswer = (isCorrect) => {
         const store = useGameStore.getState();
@@ -158,9 +255,9 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                 store.updateWordProgress(word.id, newState);
             }
 
-            const earnedScore = itemEffects.calculatePoints(150, store.currentStreak);
+            const earnedScore = itemEffects.calculatePoints(GAME_CONFIG.SCORE_PER_CORRECT, store.currentStreak);
             store.addScore(earnedScore);
-            store.addStars(2);
+            store.addStars(GAME_CONFIG.STARS_PER_CORRECT);
 
             const newStreak = store.currentStreak + 1;
             store.setCurrentStreak(newStreak);
@@ -190,32 +287,18 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
 
             setTimeout(() => {
                 const s = useGameStore.getState();
+                // The player may have navigated away (Home/Store) during the
+                // feedback delay — never yank them back into the level flow
+                if (s.gameState !== 'playing') return;
                 if (s.currentWordIndex < s.activeWords.length - 1) {
                     s.setCurrentWordIndex(s.currentWordIndex + 1);
                     s.setUserInput('');
                     setTranscript('');
                     s.setFeedback(null);
                 } else {
-                    const startingLives = itemEffects.getStartingLives(3);
-                    const wasPerfect = s.lives === startingLives;
-                    const chapterKey = typeof s.currentLevel === 'number' ? `level_${s.currentLevel}` : s.currentLevel;
-                    story.completeChapter(chapterKey, wasPerfect);
-                    if (s.lives === 1) {
-                        story.recordComebackWin();
-                    }
-                    // Persist completed level for progression unlocking
-                    if (typeof s.currentLevel === 'number') {
-                        s.addCompletedLevel(s.currentLevel);
-                    }
-                    // Mark onboarding as complete after finishing first level
-                    if (!s.hasCompletedOnboarding) {
-                        s.setHasCompletedOnboarding(true);
-                        s.setOnboardingStep(3);
-                    }
-                    s.setGameState('levelComplete');
-                    s.saveHighScore(s.score);
+                    completeLevel(s);
                 }
-            }, 1500);
+            }, GAME_CONFIG.FEEDBACK_DURATION);
         } else {
             if (!word.id.startsWith('gen_')) {
                 const newState = calculateNextReview(store.userProgress[word.id], 0);
@@ -250,7 +333,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             const wrongDialogue = story.getDialogue('wrong');
             store.setFeedback({ type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
             hapticFeedback('error');
-            setTimeout(() => useGameStore.getState().setFeedback(null), 1000);
+            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.ERROR_FEEDBACK_DURATION);
         }
     };
 
@@ -266,9 +349,11 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         }
     };
 
-    // Inventory onUse handler
+    // Inventory onUse handler.
+    // Every consumable must produce a real, visible effect — items were
+    // previously consumed (and paid for) while their effects were discarded.
     const handleUse = (item) => {
-        const effect = itemEffects.useConsumable(item, (itemId) => {
+        const removeOne = (itemId) => {
             const store = useGameStore.getState();
             const prev = store.inventory;
             const idx = prev.indexOf(itemId);
@@ -277,15 +362,68 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                 newInv.splice(idx, 1);
                 store.setInventory(newInv);
             }
-        });
-        if (effect) {
-            const store = useGameStore.getState();
-            const result = itemEffects.applyConsumableEffect(effect, { lives: store.lives, hintsAvailable: 0, skipsAvailable: 0 });
-            if (result.lives !== undefined) store.setLives(result.lives);
-            if (result.bonusCoins) {
-                store.addScore(result.bonusCoins);
-                store.setFeedback({ type: 'success', message: `קיבלת ${result.bonusCoins} מטבעות! 🎉` });
-                setTimeout(() => useGameStore.getState().setFeedback(null), 1500);
+        };
+
+        const showFeedback = (type, message) => {
+            useGameStore.getState().setFeedback({ type, message });
+            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+        };
+
+        const effect = itemEffects.useConsumable(item, removeOne);
+        if (!effect) return;
+
+        const store = useGameStore.getState();
+
+        // Retired items (e.g. freeze_time — the game has no timer) refund their price
+        if (item.retired) {
+            store.addScore(item.price);
+            showFeedback('success', `${item.name} יצא משימוש — קיבלת ${item.price} מטבעות בחזרה! 💰`);
+            return;
+        }
+
+        switch (effect.type) {
+            case 'heal': {
+                const result = itemEffects.applyConsumableEffect(effect, { lives: store.lives });
+                store.setLives(result.lives);
+                showFeedback('success', 'לב אחד חזר! ❤️');
+                break;
+            }
+            case 'hint':
+                store.addHints(effect.value || 1);
+                showFeedback('success', `יש לך רמז מוכן למשחק! 💡`);
+                break;
+            case 'skip':
+                store.addSkips(effect.value || 1);
+                showFeedback('success', `אפשר לדלג על מילה קשה! ⏭️`);
+                break;
+            case 'luck': {
+                if (Math.random() < (effect.bonus_chance || 0.5)) {
+                    const bonus = item.price * 2;
+                    store.addScore(bonus);
+                    showFeedback('success', `מזל גדול! קיבלת ${bonus} מטבעות! 🍀`);
+                } else {
+                    showFeedback('warning', 'לא הפעם... נסה שוב מחר! 🍀');
+                }
+                break;
+            }
+            case 'mystery': {
+                if (Math.random() < 0.5) {
+                    const bonus = Math.floor(Math.random() * 100) + 50;
+                    store.addScore(bonus);
+                    showFeedback('success', `בקופסה היו ${bonus} מטבעות! 🎁`);
+                } else {
+                    const prizes = ['potion_health', 'potion_hint', 'skip_word'];
+                    const prizeId = prizes[Math.floor(Math.random() * prizes.length)];
+                    store.setInventory([...useGameStore.getState().inventory, prizeId]);
+                    showFeedback('success', `בקופסה היה ${STORE_ITEMS[prizeId].name}! 🎁`);
+                }
+                break;
+            }
+            default: {
+                // Unknown effect — never silently swallow a purchased item: refund
+                store.addScore(item.price);
+                showFeedback('success', `קיבלת ${item.price} מטבעות בחזרה! 💰`);
+                break;
             }
         }
     };
@@ -351,5 +489,7 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         scrambledContent,
         challengeType,
         onAnswer,
+        skipWord,
+        useHint,
     };
 }

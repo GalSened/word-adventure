@@ -108,7 +108,7 @@ export function migrateFromLegacyStorage() {
 /**
  * User data slice: profile, scores, progress, inventory
  */
-export const createUserSlice = (set, get) => ({
+export const createUserSlice = (set) => ({
   // State
   userProfile: null,
   score: 0,
@@ -166,6 +166,22 @@ export const createUserSlice = (set, get) => ({
       if (state.completedLevels.includes(levelId)) return state;
       return { completedLevels: [...state.completedLevels, levelId] };
     }),
+
+  // Purchased consumable charges, usable during play (persisted)
+  hintsAvailable: 0,
+  skipsAvailable: 0,
+
+  addHints: (count) =>
+    set((state) => ({ hintsAvailable: state.hintsAvailable + count })),
+
+  consumeHint: () =>
+    set((state) => ({ hintsAvailable: Math.max(0, state.hintsAvailable - 1) })),
+
+  addSkips: (count) =>
+    set((state) => ({ skipsAvailable: state.skipsAvailable + count })),
+
+  consumeSkip: () =>
+    set((state) => ({ skipsAvailable: Math.max(0, state.skipsAvailable - 1) })),
 });
 
 /**
@@ -265,9 +281,23 @@ export const createItemSlice = (set) => ({
  * Creates a storage adapter that debounces writes to localStorage by 300ms.
  * Reads are synchronous. This prevents performance issues from
  * serializing state to JSON on every keystroke.
+ *
+ * The pending write MUST be flushable: without it, closing the tab within
+ * 300ms of the last state change silently drops that write (SRS progress,
+ * score, completed levels). flushPendingWrites() runs on pagehide and on
+ * visibilitychange→hidden, the only reliable exit signals on mobile.
  */
 function createDebouncedStorage() {
   let timeout;
+  let pending = null; // { name, value } awaiting the debounce timer
+
+  const flush = () => {
+    clearTimeout(timeout);
+    if (pending) {
+      localStorage.setItem(pending.name, JSON.stringify(pending.value));
+      pending = null;
+    }
+  };
 
   return {
     getItem: (name) => {
@@ -276,14 +306,28 @@ function createDebouncedStorage() {
     },
     setItem: (name, value) => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        localStorage.setItem(name, JSON.stringify(value));
-      }, 300);
+      pending = { name, value };
+      timeout = setTimeout(flush, 300);
     },
     removeItem: (name) => {
       localStorage.removeItem(name);
     },
+    flush,
   };
+}
+
+const debouncedStorage = createDebouncedStorage();
+
+/** Immediately persist any pending debounced write. */
+export function flushPendingWrites() {
+  debouncedStorage.flush();
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', flushPendingWrites);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingWrites();
+  });
 }
 
 // --- Store composition ---
@@ -324,6 +368,8 @@ export const useGameStore = create(
         dailyStats: state.dailyStats,
         equipped: state.equipped,
         completedLevels: state.completedLevels,
+        hintsAvailable: state.hintsAvailable,
+        skipsAvailable: state.skipsAvailable,
         hasSeenStoryIntro: state.hasSeenStoryIntro,
         storyPath: state.storyPath,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
@@ -359,7 +405,7 @@ export const useGameStore = create(
         };
       },
 
-      storage: createDebouncedStorage(),
+      storage: debouncedStorage,
     }
   )
 );

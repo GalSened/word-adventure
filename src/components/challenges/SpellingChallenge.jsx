@@ -14,7 +14,6 @@ import { hapticFeedback } from '../../utils/mobile';
  */
 export default function SpellingChallenge({
     word,
-    onAnswer,
     disabled,
     playerGender,
     t,

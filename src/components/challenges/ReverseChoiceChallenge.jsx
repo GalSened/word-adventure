@@ -7,18 +7,20 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { hapticFeedback } from '../../utils/mobile';
-import { generateDistractors, shuffleArray } from '../../utils/distractorGenerator';
+import { generateDistractors } from '../../utils/distractorGenerator';
+import { seededShuffle } from '../../utils/seededRandom';
 
-export default function ReverseChoiceChallenge({ word, onAnswer, disabled, playerGender, t }) {
-    // Generate 4 options: correct Hebrew + 3 distractor Hebrew words, shuffled
+export default function ReverseChoiceChallenge({ word, onAnswer, disabled, t }) {
+    // Generate 4 options: correct Hebrew + 3 distractor Hebrew words.
+    // Order is seeded by word id so it is stable across re-renders (pure memo).
     const options = useMemo(() => {
         const distractors = generateDistractors(word, 3, 'hebrew');
         const allOptions = [
             { text: word.hebrew, isCorrect: true },
             ...distractors.map(d => ({ text: d.hebrew, isCorrect: false })),
         ];
-        return shuffleArray(allOptions);
-    }, [word.id]);
+        return seededShuffle(allOptions, word.id);
+    }, [word]);
 
     const handleSelect = (option) => {
         if (disabled) return;

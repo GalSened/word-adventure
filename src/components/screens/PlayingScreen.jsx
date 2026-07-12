@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, Lightbulb, SkipForward } from 'lucide-react';
 import ChallengeDispatcher from '../challenges/ChallengeDispatcher';
 
 /**
  * PlayingScreen component - Active gameplay screen
- * Thin shell: lives display + ChallengeDispatcher + feedback overlay.
+ * Thin shell: lives display + purchased-consumable quick-use bar +
+ * ChallengeDispatcher + feedback overlay.
  * Challenge rendering is fully delegated to ChallengeDispatcher.
  */
 export default function PlayingScreen({
@@ -20,8 +21,16 @@ export default function PlayingScreen({
     onAnswer,
     feedback,
     playerGender,
-    t
+    t,
+    hintsAvailable = 0,
+    skipsAvailable = 0,
+    onUseHint,
+    onSkipWord,
 }) {
+    // Hints reveal letters, so they only make sense in the spelling challenge
+    const canHint = hintsAvailable > 0 && challengeType === 'spelling';
+    const canSkip = skipsAvailable > 0;
+
     return (
         <motion.div
             key="play"
@@ -29,8 +38,8 @@ export default function PlayingScreen({
             animate={{ opacity: 1 }}
             className="max-w-xl mx-auto"
         >
-            {/* Lives Display */}
-            <div className="flex justify-center gap-2 mb-6">
+            {/* Lives Display + purchased quick-use items */}
+            <div className="relative flex justify-center gap-2 mb-6">
                 {Array.from(
                     { length: itemEffects.getStartingLives(3) },
                     (_, i) => i + 1
@@ -42,6 +51,31 @@ export default function PlayingScreen({
                         aria-label={i <= lives ? "חיה פעילה" : "חיה אבודה"}
                     />
                 ))}
+
+                {(canHint || canSkip) && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 flex gap-2">
+                        {canHint && (
+                            <button
+                                onClick={onUseHint}
+                                disabled={!!feedback}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-xl font-bold text-sm shadow-sm hover:bg-amber-200 disabled:opacity-40 transition-colors"
+                                aria-label="השתמש ברמז"
+                            >
+                                <Lightbulb size={16} /> {hintsAvailable}
+                            </button>
+                        )}
+                        {canSkip && (
+                            <button
+                                onClick={onSkipWord}
+                                disabled={!!feedback}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-sky-100 text-sky-700 rounded-xl font-bold text-sm shadow-sm hover:bg-sky-200 disabled:opacity-40 transition-colors"
+                                aria-label="דלג על המילה"
+                            >
+                                <SkipForward size={16} /> {skipsAvailable}
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Challenge Card */}

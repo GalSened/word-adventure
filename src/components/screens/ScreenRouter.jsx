@@ -59,6 +59,10 @@ export default function ScreenRouter({ gameState, ...props }) {
                         feedback={props.feedback}
                         playerGender={props.userProfile?.gender || 'boy'}
                         t={props.t}
+                        hintsAvailable={props.hintsAvailable}
+                        skipsAvailable={props.skipsAvailable}
+                        onUseHint={props.useHint}
+                        onSkipWord={props.skipWord}
                     />
                 );
 

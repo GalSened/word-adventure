@@ -7,12 +7,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'הרפתקת המילים',
         short_name: 'מילים',
         description: 'משחק לימוד אנגלית קסום',
-        theme_color: '#ffffff',
+        lang: 'he',
+        dir: 'rtl',
+        display: 'standalone',
+        start_url: '/',
+        background_color: '#f8fafc',
+        theme_color: '#7c3aed',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -23,9 +28,28 @@ export default defineConfig({
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split heavyweight vendors so the app shell loads fast and
+        // framework updates don't bust the whole-bundle cache
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          motion: ['framer-motion'],
+          icons: ['lucide-react'],
+        },
+      },
+    },
+  },
 })

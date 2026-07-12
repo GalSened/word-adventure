@@ -8,7 +8,6 @@ import {
     getRandomItem,
     resolveGenderedText,
     getPetEvolutionStage,
-    canPetEvolve,
     isChapterUnlocked,
     getNPCDialogue,
     getUnlockedLore
@@ -122,6 +121,28 @@ export function useStoryProgress(userProfile) {
     }, []);
 
     /**
+     * Unlock a secret achievement
+     * (defined before the callbacks below that list it as a dependency)
+     */
+    const unlockSecret = useCallback((secretId) => {
+        if (progress.discoveredSecrets.includes(secretId)) return;
+
+        const secret = MYSTERIES.secrets.find(s => s.id === secretId);
+        if (!secret) return;
+
+        updateProgress({
+            discoveredSecrets: [...progress.discoveredSecrets, secretId],
+            achievements: [...progress.achievements, secretId]
+        });
+
+        // Show achievement notification
+        setCurrentDialogue({
+            type: 'achievement',
+            achievement: secret
+        });
+    }, [progress.discoveredSecrets, progress.achievements, updateProgress]);
+
+    /**
      * Set the player's story path choice
      */
     const chooseStoryPath = useCallback((path) => {
@@ -222,7 +243,7 @@ export function useStoryProgress(userProfile) {
             chapter: level,
             mystery: chapter.mystery
         });
-    }, [progress, userProfile, updateProgress]);
+    }, [progress, userProfile, updateProgress, unlockSecret]);
 
     /**
      * Record a word learned
@@ -267,7 +288,7 @@ export function useStoryProgress(userProfile) {
         }
 
         updateProgress(updates);
-    }, [progress, updateProgress]);
+    }, [progress, updateProgress, unlockSecret]);
 
     /**
      * Set active pet
@@ -291,27 +312,6 @@ export function useStoryProgress(userProfile) {
     }, [progress.activePetId, progress.totalWordsLearned]);
 
     /**
-     * Unlock a secret achievement
-     */
-    const unlockSecret = useCallback((secretId) => {
-        if (progress.discoveredSecrets.includes(secretId)) return;
-
-        const secret = MYSTERIES.secrets.find(s => s.id === secretId);
-        if (!secret) return;
-
-        updateProgress({
-            discoveredSecrets: [...progress.discoveredSecrets, secretId],
-            achievements: [...progress.achievements, secretId]
-        });
-
-        // Show achievement notification
-        setCurrentDialogue({
-            type: 'achievement',
-            achievement: secret
-        });
-    }, [progress.discoveredSecrets, progress.achievements, updateProgress]);
-
-    /**
      * Record fast answer (under 3 seconds)
      */
     const recordFastAnswer = useCallback(() => {
@@ -319,7 +319,7 @@ export function useStoryProgress(userProfile) {
             updateProgress({ answeredUnder3Seconds: true });
             unlockSecret('speed_demon');
         }
-    }, [progress.answeredUnder3Seconds, updateProgress]);
+    }, [progress.answeredUnder3Seconds, updateProgress, unlockSecret]);
 
     /**
      * Record comeback win (won with 1 life)
@@ -329,7 +329,7 @@ export function useStoryProgress(userProfile) {
             updateProgress({ wonWith1Life: true });
             unlockSecret('comeback_kid');
         }
-    }, [progress.wonWith1Life, updateProgress]);
+    }, [progress.wonWith1Life, updateProgress, unlockSecret]);
 
     /**
      * Record a streak milestone
@@ -338,7 +338,7 @@ export function useStoryProgress(userProfile) {
         if (streak >= 20) {
             unlockSecret('streak_champion');
         }
-    }, []);
+    }, [unlockSecret]);
 
     /**
      * Get contextual dialogue for current game state
@@ -365,13 +365,14 @@ export function useStoryProgress(userProfile) {
                 return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.correct), gender) };
             case 'wrong':
                 return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.wrong), gender) };
-            case 'streak':
+            case 'streak': {
                 const streakNum = extra.streak;
                 const streakMessages = ENCOURAGEMENT.streak[streakNum];
                 if (streakMessages) {
                     return { text: resolveGenderedText(getRandomItem(streakMessages), gender) };
                 }
                 return null;
+            }
             case 'low_lives':
                 return { text: resolveGenderedText(getRandomItem(ENCOURAGEMENT.lowLives), gender) };
             case 'daily_return':

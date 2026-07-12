@@ -13,21 +13,25 @@ import SentenceBuildChallenge from './SentenceBuildChallenge';
 import GrammarChallenge from './GrammarChallenge';
 
 export default function ChallengeDispatcher({ challengeType, ...challengeProps }) {
+    // Key by word id: challenge components hold per-word state (reorder tiles,
+    // spoken audio); remounting on word change guarantees a clean slate
+    const key = challengeProps.word?.id;
+
     switch (challengeType) {
         case 'multipleChoice':
-            return <MultipleChoiceChallenge {...challengeProps} />;
+            return <MultipleChoiceChallenge key={key} {...challengeProps} />;
         case 'reverseChoice':
-            return <ReverseChoiceChallenge {...challengeProps} />;
+            return <ReverseChoiceChallenge key={key} {...challengeProps} />;
         case 'listening':
-            return <ListeningChallenge {...challengeProps} />;
+            return <ListeningChallenge key={key} {...challengeProps} />;
         case 'spelling':
-            return <SpellingChallenge {...challengeProps} />;
+            return <SpellingChallenge key={key} {...challengeProps} />;
         case 'sentenceBuild':
-            return <SentenceBuildChallenge {...challengeProps} />;
+            return <SentenceBuildChallenge key={key} {...challengeProps} />;
         case 'grammar':
-            return <GrammarChallenge {...challengeProps} />;
+            return <GrammarChallenge key={key} {...challengeProps} />;
         default:
             // Safe fallback to spelling -- preserves existing behavior
-            return <SpellingChallenge {...challengeProps} />;
+            return <SpellingChallenge key={key} {...challengeProps} />;
     }
 }

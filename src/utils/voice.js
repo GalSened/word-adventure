@@ -1,27 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Custom hook for voice recognition with proper error handling
  * @returns {Object} Voice recognition state and controls
  */
+const getSpeechRecognitionAPI = () =>
+    typeof window !== 'undefined'
+        ? (window.SpeechRecognition || window.webkitSpeechRecognition)
+        : undefined;
+
 export const useVoiceRecognition = () => {
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
-    const [isSupported, setIsSupported] = useState(false);
-    const [recognition, setRecognition] = useState(null);
+    // Support is known synchronously — no effect round-trip needed
+    const [isSupported, setIsSupported] = useState(() => !!getSpeechRecognitionAPI());
+    // The recognizer never drives rendering — keep it in a ref, not state
+    const recognitionRef = useRef(null);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        // Check for browser support
-        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Lazily construct the recognizer on first use (startListening is always
+    // a user gesture). Keeps the mount effect side-effect-free except cleanup.
+    const ensureRecognizer = useCallback(() => {
+        if (recognitionRef.current) return recognitionRef.current;
 
-        if (!SpeechRecognitionAPI) {
-            setIsSupported(false);
-            return;
-        }
+        const SpeechRecognitionAPI = getSpeechRecognitionAPI();
+        if (!SpeechRecognitionAPI) return null;
 
         try {
-            setIsSupported(true);
             const recognizer = new SpeechRecognitionAPI();
             recognizer.continuous = false;
             recognizer.interimResults = false;
@@ -53,36 +58,52 @@ export const useVoiceRecognition = () => {
                 setError('no-match');
             };
 
-            setRecognition(recognizer);
+            recognitionRef.current = recognizer;
+            return recognizer;
         } catch (err) {
             console.error('[VoiceRecognition] Failed to initialize:', err);
             setIsSupported(false);
+            return null;
         }
     }, []);
 
+    // Abort any in-flight recognition on unmount
+    useEffect(() => {
+        return () => {
+            const recognizer = recognitionRef.current;
+            recognitionRef.current = null;
+            try {
+                recognizer?.abort();
+            } catch {
+                // already stopped
+            }
+        };
+    }, []);
+
     const startListening = useCallback(() => {
-        if (!recognition || isListening) return;
+        const recognizer = ensureRecognizer();
+        if (!recognizer || isListening) return;
 
         try {
             setTranscript('');
             setError(null);
-            recognition.start();
+            recognizer.start();
         } catch (err) {
             // Handle case where recognition is already started
             console.warn('[VoiceRecognition] Start failed:', err);
             setError('start-failed');
         }
-    }, [recognition, isListening]);
+    }, [isListening, ensureRecognizer]);
 
     const stopListening = useCallback(() => {
-        if (!recognition || !isListening) return;
+        if (!recognitionRef.current || !isListening) return;
 
         try {
-            recognition.stop();
+            recognitionRef.current.stop();
         } catch (err) {
             console.warn('[VoiceRecognition] Stop failed:', err);
         }
-    }, [recognition, isListening]);
+    }, [isListening]);
 
     const clearError = useCallback(() => {
         setError(null);
