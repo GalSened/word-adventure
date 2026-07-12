@@ -16,12 +16,12 @@ class ErrorBoundary extends React.Component {
     }
 
     static getDerivedStateFromError(error) {
-        return { hasError: true };
+        return { hasError: true, error };
     }
 
     componentDidCatch(error, errorInfo) {
         // Log error to console in development
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
             console.error('ErrorBoundary caught an error:', error, errorInfo);
         }
 
@@ -77,7 +77,7 @@ class ErrorBoundary extends React.Component {
                             נתקלנו בבעיה לא צפויה. אל דאגה, המידע שלך נשמר!
                         </p>
 
-                        {process.env.NODE_ENV === 'development' && this.state.error && (
+                        {import.meta.env.DEV && this.state.error && (
                             <details className="mb-6 text-right">
                                 <summary className="cursor-pointer text-sm text-slate-500 hover:text-slate-700">
                                     פרטים טכניים (למפתחים)

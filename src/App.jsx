@@ -1,8 +1,12 @@
 import WordAdventure from './WordAdventure'
+import ErrorBoundary from './components/ErrorBoundary'
+import { useGameStore } from './store/gameStore'
 
 function App() {
   return (
-    <WordAdventure />
+    <ErrorBoundary onGoHome={() => useGameStore.getState().resetGame()}>
+      <WordAdventure />
+    </ErrorBoundary>
   )
 }
 

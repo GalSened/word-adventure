@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Delete, RotateCcw } from 'lucide-react';
 import { hapticFeedback } from '../utils/mobile';
@@ -9,32 +9,37 @@ import { hapticFeedback } from '../utils/mobile';
  */
 export default function LetterPicker({
     letters, // Array of letters/words to pick from
-    onComplete, // Called when answer is ready
     onCheck, // Called to check the answer
     currentInput,
     setCurrentInput,
     isWord = true, // true for letters, false for sentence words
     disabled = false
 }) {
-    // Track which letter indices have been used
-    const [usedIndices, setUsedIndices] = useState(new Set());
-
-    // Sync with parent input
-    useEffect(() => {
-        if (currentInput === '') {
-            setUsedIndices(new Set());
+    // Which tile indices are consumed is DERIVED from currentInput:
+    // walk the input tokens and greedily claim the first unused matching tile.
+    // Deriving (instead of mirroring in state) keeps the tiles correct when
+    // the input changes from outside — hints, voice dictation, resets.
+    const usedIndices = useMemo(() => {
+        const tokens = isWord
+            ? currentInput.split('')
+            : currentInput.split(' ').filter(Boolean);
+        const used = new Set();
+        for (const token of tokens) {
+            for (let i = 0; i < letters.length; i++) {
+                if (!used.has(i) && letters[i] === token) {
+                    used.add(i);
+                    break;
+                }
+            }
         }
-    }, [currentInput]);
+        return used;
+    }, [currentInput, letters, isWord]);
 
     // Handle letter/word tap
     const handleSelect = (item, index) => {
         if (disabled || usedIndices.has(index)) return;
 
         hapticFeedback('tap');
-
-        const newUsed = new Set(usedIndices);
-        newUsed.add(index);
-        setUsedIndices(newUsed);
 
         if (isWord) {
             // Add letter
@@ -52,36 +57,11 @@ export default function LetterPicker({
         hapticFeedback('light');
 
         if (isWord) {
-            // Remove last letter
-            const removedLetter = currentInput.slice(-1);
             setCurrentInput(prev => prev.slice(0, -1));
-
-            // Find and unmark the last used index for this letter
-            const indices = Array.from(usedIndices);
-            for (let i = indices.length - 1; i >= 0; i--) {
-                if (letters[indices[i]] === removedLetter) {
-                    const newUsed = new Set(usedIndices);
-                    newUsed.delete(indices[i]);
-                    setUsedIndices(newUsed);
-                    break;
-                }
-            }
         } else {
-            // Remove last word
             const words = currentInput.split(' ');
-            const removedWord = words.pop();
+            words.pop();
             setCurrentInput(words.join(' '));
-
-            // Find and unmark the index
-            const indices = Array.from(usedIndices);
-            for (let i = indices.length - 1; i >= 0; i--) {
-                if (letters[indices[i]] === removedWord) {
-                    const newUsed = new Set(usedIndices);
-                    newUsed.delete(indices[i]);
-                    setUsedIndices(newUsed);
-                    break;
-                }
-            }
         }
     };
 
@@ -89,7 +69,6 @@ export default function LetterPicker({
     const handleReset = () => {
         hapticFeedback('medium');
         setCurrentInput('');
-        setUsedIndices(new Set());
     };
 
     // Handle submit

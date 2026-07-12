@@ -9,12 +9,15 @@ import { initialWordData } from './words';
 /**
  * Difficulty fallback order -- when a level's primary difficulty band
  * doesn't have enough words, try adjacent difficulties in this order.
+ * Every band cascades through ALL other bands (nearest first) so a level
+ * can never silently serve fewer words than its configured wordCount
+ * (level 5 "Rainbow Bridge" used to short 13/15 because easy stopped at medium).
  */
 const DIFFICULTY_FALLBACK = {
-    easy: ['medium'],
-    medium: ['easy', 'hard'],
-    hard: ['medium', 'expert'],
-    expert: ['hard'],
+    easy: ['medium', 'hard', 'expert'],
+    medium: ['easy', 'hard', 'expert'],
+    hard: ['medium', 'expert', 'easy'],
+    expert: ['hard', 'medium', 'easy'],
 };
 
 /**
@@ -263,6 +266,11 @@ export const getLevelWords = (level) => {
     }
 
     // Shuffle and trim to wordCount
-    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    // (Fisher-Yates: Array.sort with a random comparator is a biased shuffle)
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, wordCount);
 };

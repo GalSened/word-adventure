@@ -5,7 +5,6 @@ const SpriteAnimator = ({
     spriteSheet,
     frames = 4,
     fps = 10,
-    scale = 1,
     className = ""
 }) => {
     const [scope, animate] = useAnimate();
@@ -37,7 +36,7 @@ const SpriteAnimator = ({
             repeatType: "loop"
         });
 
-    }, [spriteSheet, frames, fps]);
+    }, [spriteSheet, frames, fps, animate, scope]);
 
     return (
         <div className={`relative overflow-hidden ${className}`}>

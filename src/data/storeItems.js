@@ -336,6 +336,9 @@ export const STORE_ITEMS = {
         consumable: true,
         stackable: true,
     },
+    // Retired: the game has no timer, so "freeze time" can never do anything.
+    // Kept in the catalog so legacy owners still see it in their inventory;
+    // using it refunds the purchase price. Not sold in the store (retired: true).
     freeze_time: {
         id: 'freeze_time',
         name: 'הקפאת זמן',
@@ -343,10 +346,11 @@ export const STORE_ITEMS = {
         price: 250,
         category: 'consumables',
         rarity: 'rare',
-        description: 'עוצר את הזמן לחשיבה!',
+        description: 'הפריט יצא משימוש — שימוש בו מחזיר את המטבעות!',
         effect: { type: 'freeze', duration: 30 },
         consumable: true,
         stackable: true,
+        retired: true,
     },
     lucky_coin: {
         id: 'lucky_coin',
@@ -368,15 +372,15 @@ export const STORE_ITEMS = {
         category: 'consumables',
         rarity: 'epic',
         description: 'מה יש בפנים? הפתעה!',
-        effect: { type: 'mystery', possible_rewards: ['coins', 'item', 'boost'] },
+        effect: { type: 'mystery', possible_rewards: ['coins', 'item'] },
         consumable: true,
         stackable: true,
     },
 };
 
-// Get items by category
+// Get items by category (retired items stay usable but are no longer sold)
 export const getItemsByCategory = (category) => {
-    return Object.values(STORE_ITEMS).filter(item => item.category === category);
+    return Object.values(STORE_ITEMS).filter(item => item.category === category && !item.retired);
 };
 
 // Get item by ID
@@ -404,8 +408,13 @@ export const FEATURED_ITEMS = ['unicorn', 'double_points', 'theme_galaxy', 'myst
 
 // Daily deals (random selection)
 export const getDailyDeals = () => {
-    const allItems = Object.values(STORE_ITEMS);
-    const shuffled = allItems.sort(() => 0.5 - Math.random());
+    const allItems = Object.values(STORE_ITEMS).filter(item => !item.retired);
+    // Fisher-Yates: Array.sort with a random comparator produces a biased shuffle
+    const shuffled = [...allItems];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, 3).map(item => ({
         ...item,
         originalPrice: item.price,

@@ -3,45 +3,58 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Star, ArrowRight, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+// Random particle trajectories computed once at module load — render must stay pure
+const SPARKLE_PARTICLES = Array.from({ length: 20 }, () => ({
+    x: `${Math.random() * 100}vw`,
+    duration: 2 + Math.random() * 2,
+    delay: Math.random() * 2,
+}));
+
 /**
  * Pet Evolution Notification Component
  * Shows dramatic pet evolution animation
  */
 export default function PetEvolution({ evolution, onDismiss }) {
     useEffect(() => {
-        if (evolution) {
-            // Celebration confetti
-            const duration = 3000;
-            const end = Date.now() + duration;
+        if (!evolution) return;
 
-            const frame = () => {
-                confetti({
-                    particleCount: 3,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
-                });
-                confetti({
-                    particleCount: 3,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
-                });
+        // Celebration confetti — cancel the RAF chain on dismiss/unmount
+        let active = true;
+        let rafId;
+        const end = Date.now() + 3000;
 
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            };
+        const frame = () => {
+            if (!active) return;
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4']
+            });
 
-            frame();
-        }
+            if (Date.now() < end) {
+                rafId = requestAnimationFrame(frame);
+            }
+        };
+
+        frame();
+        return () => {
+            active = false;
+            if (rafId) cancelAnimationFrame(rafId);
+        };
     }, [evolution]);
 
     if (!evolution) return null;
 
-    const { pet, oldStage, newStage } = evolution;
+    const { oldStage, newStage } = evolution;
 
     return (
         <AnimatePresence>
@@ -53,15 +66,15 @@ export default function PetEvolution({ evolution, onDismiss }) {
             >
                 {/* Animated particles */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    {[...Array(20)].map((_, i) => (
+                    {SPARKLE_PARTICLES.map((p, i) => (
                         <motion.div
                             key={i}
-                            initial={{ y: '100vh', x: `${Math.random() * 100}vw` }}
+                            initial={{ y: '100vh', x: p.x }}
                             animate={{ y: '-10vh' }}
                             transition={{
-                                duration: 2 + Math.random() * 2,
+                                duration: p.duration,
                                 repeat: Infinity,
-                                delay: Math.random() * 2
+                                delay: p.delay
                             }}
                             className="absolute"
                         >

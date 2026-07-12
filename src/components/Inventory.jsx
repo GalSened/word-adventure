@@ -74,18 +74,6 @@ export default function Inventory({
         return Object.values(equipped).includes(itemId);
     };
 
-    // Get category icon
-    const getCategoryIcon = (categoryId) => {
-        switch (categoryId) {
-            case 'pets': return <PawPrint size={20} />;
-            case 'cosmetics': return <Sparkles size={20} />;
-            case 'boosters': return <Zap size={20} />;
-            case 'themes': return <Palette size={20} />;
-            case 'consumables': return <FlaskConical size={20} />;
-            default: return <Star size={20} />;
-        }
-    };
-
     // Handle equip/unequip
     const handleEquipToggle = (item) => {
         if (isEquipped(item.id)) {

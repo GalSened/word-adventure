@@ -1,28 +1,25 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Reorder, motion } from 'framer-motion';
 import { hapticFeedback } from '../../utils/mobile';
+import { seededShuffle } from '../../utils/seededRandom';
 
 /**
  * SentenceBuildChallenge (CHAL-05)
  * Drag-and-drop sentence building challenge using framer-motion Reorder.
  * Shows shuffled word tiles that can be reordered, then checks if the
  * assembled sentence matches the correct answer.
+ * Remounted per word by ChallengeDispatcher (key=word.id), so the lazy
+ * useState initializer runs freshly for every sentence.
  */
-export default function SentenceBuildChallenge({ word, onAnswer, disabled, playerGender, t }) {
-    // Create unique items for Reorder (handles duplicate words like "THE CAT SEES THE DOG")
-    const initialItems = useMemo(() => {
-        const words = word.word.split(' ');
-        const items = words.map((w, i) => ({ id: `${w}_${i}`, text: w }));
-        // Shuffle using Fisher-Yates
-        const shuffled = [...items];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-    }, [word.id]);
-
-    const [items, setItems] = useState(initialItems);
+export default function SentenceBuildChallenge({ word, onAnswer, disabled, t }) {
+    // Unique ids handle duplicate words like "THE CAT SEES THE DOG";
+    // seeded shuffle keeps the initial order stable for a given sentence
+    const [items, setItems] = useState(() =>
+        seededShuffle(
+            word.word.split(' ').map((w, i) => ({ id: `${w}_${i}`, text: w })),
+            word.id
+        )
+    );
 
     const handleSubmit = () => {
         if (disabled) return;

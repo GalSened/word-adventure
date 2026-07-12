@@ -1,6 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sword, Map, BookOpen, Sparkles } from 'lucide-react';
+
+// Random star positions computed once at module load — render must stay pure
+const STAR_FIELD = Array.from({ length: 50 }, () => ({
+    duration: 2 + Math.random() * 2,
+    delay: Math.random() * 2,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+}));
 
 /**
  * Story Path Choice Component
@@ -8,15 +15,6 @@ import { Sword, Map, BookOpen, Sparkles } from 'lucide-react';
  */
 export default function StoryPathChoice({ options, onChoose, playerName, gender }) {
     const t = (male, female) => gender === 'boy' ? male : female;
-
-    const getIcon = (id) => {
-        switch (id) {
-            case 'hero': return <Sword className="w-12 h-12" />;
-            case 'explorer': return <Map className="w-12 h-12" />;
-            case 'scholar': return <BookOpen className="w-12 h-12" />;
-            default: return <Sparkles className="w-12 h-12" />;
-        }
-    };
 
     const getGradient = (id) => {
         switch (id) {
@@ -35,20 +33,20 @@ export default function StoryPathChoice({ options, onChoose, playerName, gender 
         >
             {/* Stars background */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(50)].map((_, i) => (
+                {STAR_FIELD.map((star, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: [0.2, 1, 0.2] }}
                         transition={{
-                            duration: 2 + Math.random() * 2,
+                            duration: star.duration,
                             repeat: Infinity,
-                            delay: Math.random() * 2
+                            delay: star.delay
                         }}
                         className="absolute w-1 h-1 bg-white rounded-full"
                         style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
+                            left: star.left,
+                            top: star.top,
                         }}
                     />
                 ))}

@@ -10,27 +10,29 @@ import { motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import { speakWord, isSpeechSupported } from '../../utils/speech';
 import { hapticFeedback } from '../../utils/mobile';
-import { generateDistractors, shuffleArray } from '../../utils/distractorGenerator';
+import { generateDistractors } from '../../utils/distractorGenerator';
+import { seededShuffle } from '../../utils/seededRandom';
 
-export default function ListeningChallenge({ word, onAnswer, disabled, playerGender, t }) {
+export default function ListeningChallenge({ word, onAnswer, disabled, t }) {
     const speechSupported = isSpeechSupported();
 
-    // Speak the word on mount
+    // Speak the word on mount / when the word changes
     useEffect(() => {
         if (speechSupported) {
             speakWord(word.word);
         }
-    }, [word.id]);
+    }, [word.word, speechSupported]);
 
-    // Generate 4 English options: correct + 3 distractors, shuffled
+    // Generate 4 English options: correct + 3 distractors.
+    // Order is seeded by word id so it is stable across re-renders (pure memo).
     const options = useMemo(() => {
         const distractors = generateDistractors(word, 3, 'word');
         const allOptions = [
             { text: word.word, isCorrect: true },
             ...distractors.map(d => ({ text: d.word, isCorrect: false })),
         ];
-        return shuffleArray(allOptions);
-    }, [word.id]);
+        return seededShuffle(allOptions, word.id);
+    }, [word]);
 
     const handleReplay = () => {
         if (speechSupported) {

@@ -68,9 +68,6 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
   const zone = ADVENTURE_ZONES[currentZoneIndex];
   const petBehavior = petBehaviorFromPhase(gamePhase);
 
-  // Store access for SRS updates
-  const addScore = useGameStore((s) => s.addScore);
-
   /**
    * Select a random word from the current zone's categories,
    * avoiding already-used words within this session.
@@ -168,11 +165,12 @@ export default function AdventureGame({ pet, userProfile, onExit, onComplete }) 
     }
 
     // Return to exploring after resolved duration
-    setTimeout(() => {
+    // (safeTimeout so exiting during the RESOLVED window can't fire on an unmounted tree)
+    safeTimeout(() => {
       setGamePhase(ADVENTURE_STATES.EXPLORING);
       setEncounterWord(null);
     }, ADVENTURE_CONFIG.resolvedDuration);
-  }, [encounterWord]);
+  }, [encounterWord, safeTimeout]);
 
   /**
    * Handle zone completion: transition to next zone or finish adventure.

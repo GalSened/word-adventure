@@ -160,7 +160,7 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
         class="max-w-xl mx-auto"
       >
         <div
-          class="flex justify-center gap-2 mb-6"
+          class="relative flex justify-center gap-2 mb-6"
         >
           <svg
             aria-label="חיה פעילה"
@@ -260,7 +260,7 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
                   <span
                     class="inline-flex items-center justify-center font-bold font-mono w-10 h-12 text-2xl bg-purple-100 text-purple-700 rounded-lg"
                   >
-                    C
+                    T
                   </span>
                 </div>
                 <div
@@ -326,13 +326,13 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
                 dir="ltr"
               >
                 <button
-                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-gradient-to-b from-yellow-300 to-yellow-400 text-yellow-800 hover:from-yellow-400 hover:to-yellow-500"
+                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-slate-200 text-slate-400 opacity-40 scale-90"
                   disabled=""
                 >
                   C
                 </button>
                 <button
-                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-gradient-to-b from-yellow-300 to-yellow-400 text-yellow-800 hover:from-yellow-400 hover:to-yellow-500"
+                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-slate-200 text-slate-400 opacity-40 scale-90"
                   disabled=""
                 >
                   T
@@ -1312,7 +1312,7 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
         class="max-w-xl mx-auto"
       >
         <div
-          class="flex justify-center gap-2 mb-6"
+          class="relative flex justify-center gap-2 mb-6"
         >
           <svg
             aria-label="חיה פעילה"

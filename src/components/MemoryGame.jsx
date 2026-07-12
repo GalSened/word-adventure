@@ -1,32 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Check, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+// Fisher-Yates (Array.sort with a random comparator is a biased shuffle)
+function shuffle(array) {
+    const out = [...array];
+    for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+}
+
+function buildBoard(words) {
+    // Select 6 random pairs, create English+Hebrew cards
+    const selectedWords = shuffle(words).slice(0, 6);
+    return shuffle([
+        ...selectedWords.map(w => ({ id: w.word + '-en', content: w.word, type: 'en', pairId: w.word })),
+        ...selectedWords.map(w => ({ id: w.word + '-he', content: w.hebrew, type: 'he', pairId: w.word }))
+    ]);
+}
+
 export default function MemoryGame({ words, onComplete, onExit }) {
-    const [cards, setCards] = useState([]);
+    // Board is built ONCE per mount (each entry to the memory screen remounts
+    // this component). Deriving it from the `words` prop in an effect used to
+    // reshuffle the board mid-game whenever the parent re-rendered.
+    const [cards] = useState(() => buildBoard(words));
     const [flipped, setFlipped] = useState([]);
     const [matched, setMatched] = useState([]);
     const [moves, setMoves] = useState(0);
     const [isLocked, setIsLocked] = useState(false);
-
-    useEffect(() => {
-        // Select 6 random pairs
-        const selectedWords = [...words].sort(() => 0.5 - Math.random()).slice(0, 6);
-
-        // Create card pairs (English + Hebrew)
-        const gameCards = [
-            ...selectedWords.map(w => ({ id: w.word + '-en', content: w.word, type: 'en', pairId: w.word })),
-            ...selectedWords.map(w => ({ id: w.word + '-he', content: w.hebrew, type: 'he', pairId: w.word }))
-        ];
-
-        setCards(gameCards.sort(() => 0.5 - Math.random()));
-        // Reset game state when words change
-        setFlipped([]);
-        setMatched([]);
-        setMoves(0);
-        setIsLocked(false);
-    }, [words]);
 
     const handleCardClick = (index) => {
         if (isLocked || flipped.includes(index) || matched.includes(cards[index].pairId)) return;
@@ -57,14 +61,27 @@ export default function MemoryGame({ words, onComplete, onExit }) {
         }
     };
 
+    // Completion must fire exactly once: onComplete awards score, and its
+    // identity changes every parent render, so guard with a ref and keep the
+    // timer cancellable on unmount.
+    const completedRef = useRef(false);
+    const completionTimerRef = useRef(null);
+    const onCompleteRef = useRef(onComplete);
+
     useEffect(() => {
+        onCompleteRef.current = onComplete;
+    }, [onComplete]);
+
+    useEffect(() => {
+        if (completedRef.current) return;
         if (cards.length > 0 && matched.length === cards.length / 2) {
-            setTimeout(() => {
-                const score = Math.max(100, 1000 - (moves * 10)); // Calculate score based on moves
-                onComplete(score);
-            }, 1000);
+            completedRef.current = true;
+            const score = Math.max(100, 1000 - (moves * 10)); // Calculate score based on moves
+            completionTimerRef.current = setTimeout(() => onCompleteRef.current(score), 1000);
         }
-    }, [matched, cards.length, moves, onComplete]);
+    }, [matched, cards.length, moves]);
+
+    useEffect(() => () => clearTimeout(completionTimerRef.current), []);
 
     return (
         <div className="p-4 max-w-4xl mx-auto">

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ChallengeDispatcher from '../challenges/ChallengeDispatcher';
 import { selectChallengeType } from '../../utils/challengeSelector';
-import { shuffleArray } from '../../utils/distractorGenerator';
+import { seededShuffle } from '../../utils/seededRandom';
 import { useGameStore } from '../../store/gameStore';
 
 /**
@@ -28,13 +28,14 @@ export default function EncounterOverlay({ word, zone, pet, playerGender, t, onA
     if (word.id?.startsWith('gen_')) return 'grammar';
     const srsState = useGameStore.getState().userProgress[word.id];
     return selectChallengeType(word, srsState, []);
-  }, [word.id]);
+  }, [word]);
 
-  // Scrambled content for spelling/sentence challenges
+  // Scrambled content for spelling/sentence challenges — seeded by word id
+  // so the tiles don't reshuffle on re-render (pure memo)
   const scrambledContent = useMemo(() => {
-    if (word.type === 'sentence') return shuffleArray(word.word.split(' '));
-    return shuffleArray(word.word.split(''));
-  }, [word.id]);
+    if (word.type === 'sentence') return seededShuffle(word.word.split(' '), word.id);
+    return seededShuffle(word.word.split(''), word.id);
+  }, [word]);
 
   const handleAnswer = (isCorrect) => {
     setIsResolved(true);

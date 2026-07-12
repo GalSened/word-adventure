@@ -156,7 +156,7 @@ export function useItemEffects(inventory = []) {
             case 'luck':
                 newState.luckBonus = effect.bonus_chance;
                 break;
-            case 'mystery':
+            case 'mystery': {
                 // Random reward
                 const rewards = effect.possible_rewards;
                 const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
@@ -175,6 +175,7 @@ export function useItemEffects(inventory = []) {
                         break;
                 }
                 break;
+            }
             default:
                 break;
         }

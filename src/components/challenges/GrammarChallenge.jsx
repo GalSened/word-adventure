@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { generateChallenge } from '../../utils/grammarEngine';
 import { hapticFeedback } from '../../utils/mobile';
+import { seededShuffle } from '../../utils/seededRandom';
 
 /**
  * GrammarChallenge (CHAL-06)
@@ -9,8 +10,9 @@ import { hapticFeedback } from '../../utils/mobile';
  * Generates a grammar exercise using generateChallenge() from grammarEngine.js
  * and presents it as a multiple-choice question with 4 Hebrew translation options.
  */
-export default function GrammarChallenge({ word, onAnswer, disabled, playerGender, t }) {
-    // Generate 4 options: correct Hebrew + 3 distractors from grammar engine
+export default function GrammarChallenge({ word, onAnswer, disabled, t }) {
+    // Generate 4 options: correct Hebrew + 3 distractors from grammar engine.
+    // Order is seeded by word id so it is stable across re-renders.
     const options = useMemo(() => {
         const correct = { text: word.hebrew, isCorrect: true };
         const distractors = [];
@@ -25,15 +27,8 @@ export default function GrammarChallenge({ word, onAnswer, disabled, playerGende
             attempts++;
         }
 
-        // Shuffle all options using Fisher-Yates
-        const all = [correct, ...distractors];
-        for (let i = all.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [all[i], all[j]] = [all[j], all[i]];
-        }
-
-        return all;
-    }, [word.id]);
+        return seededShuffle([correct, ...distractors], word.id);
+    }, [word]);
 
     const handleSelect = (option) => {
         if (disabled) return;
@@ -47,7 +42,7 @@ export default function GrammarChallenge({ word, onAnswer, disabled, playerGende
                 {t('בחר', 'בחרי')} את התרגום הנכון
             </span>
 
-            <h2 className="text-3xl font-black text-slate-800 my-6">
+            <h2 className="text-3xl font-black text-slate-800 my-6" dir="ltr">
                 {word.word}
             </h2>
 

@@ -29,12 +29,16 @@ export function shuffleArray(array) {
  *
  * @param {Object} correctWord - The correct word object (must have .id and .category)
  * @param {number} count - Number of distractors to generate (default 3)
- * @param {string} field - Not used for filtering but kept for API consistency
+ * @param {string} field - The field shown to the player ('word' or 'hebrew');
+ *   distractors are deduplicated on it so a "wrong" option can never render
+ *   identically to the correct answer (two entries may share a translation)
  * @returns {Object[]} Array of distractor word objects
  */
 export function generateDistractors(correctWord, count = 3, field = 'word') {
-    // Filter out the correct word
-    const otherWords = initialWordData.filter(w => w.id !== correctWord.id);
+    // Filter out the correct word and anything that displays like it
+    const otherWords = initialWordData.filter(
+        w => w.id !== correctWord.id && w[field] !== correctWord[field]
+    );
 
     // Split into same-category and different-category pools
     const sameCategory = shuffleArray(
@@ -44,18 +48,16 @@ export function generateDistractors(correctWord, count = 3, field = 'word') {
         otherWords.filter(w => w.category !== correctWord.category)
     );
 
-    // Take distractors preferring same-category first
+    // Take distractors preferring same-category first, unique display text
     const distractors = [];
+    const seenTexts = new Set();
 
-    for (const w of sameCategory) {
+    for (const w of [...sameCategory, ...differentCategory]) {
         if (distractors.length >= count) break;
+        if (seenTexts.has(w[field])) continue;
+        seenTexts.add(w[field]);
         distractors.push(w);
     }
 
-    for (const w of differentCategory) {
-        if (distractors.length >= count) break;
-        distractors.push(w);
-    }
-
-    return distractors.slice(0, count);
+    return distractors;
 }

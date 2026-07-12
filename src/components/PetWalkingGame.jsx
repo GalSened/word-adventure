@@ -48,7 +48,6 @@ const AVATAR_WALK_FRAMES = {
 
 export default function PetWalkingGame({
     pet = { icon: '🐕', name: 'כלבלב' },
-    avatar,
     userProfile,
     onExit,
     onComplete
@@ -70,7 +69,7 @@ export default function PetWalkingGame({
 
     // Scene scroll offset
     const sceneOffsetRef = useRef(0);
-    const [sceneRenderTrigger, setSceneRenderTrigger] = useState(0);
+    const [, setSceneRenderTrigger] = useState(0);
 
     // Positions (relative to viewport)
     const petPosRef = useRef({ x: 400, y: 0, bobOffset: 0 });
@@ -83,6 +82,13 @@ export default function PetWalkingGame({
     // Animation frame reference
     const animationFrameRef = useRef(null);
     const lastFrameTimeRef = useRef(performance.now());
+
+    // Loop-owned progress + one-shot completion guard. State updaters must be
+    // pure (React StrictMode invokes them twice — onComplete inside an updater
+    // double-awarded the score in dev), so the loop mutates the ref and the
+    // setState below only mirrors the computed value for rendering.
+    const progressRef = useRef(0);
+    const completedRef = useRef(false);
 
     // --- PROCEDURAL GENERATION ---
     const worldObjects = useMemo(() => {
@@ -118,6 +124,22 @@ export default function PetWalkingGame({
         { en: 'OCEAN', he: 'אוקיינוס', icon: '🌊' }
     ], []);
 
+    const triggerFind = useCallback(() => {
+        setGameState('sniffing');
+        hapticFeedback('medium');
+
+        setTimeout(() => {
+            setGameState('found');
+            const word = quests[Math.floor(Math.random() * quests.length)];
+            setCurrentWord(word);
+            const distractors = quests
+                .filter(w => w.en !== word.en)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 2);
+            setOptions([word, ...distractors].sort(() => 0.5 - Math.random()));
+        }, 1200);
+    }, [quests]);
+
     // --- OPTIMIZED GAME LOOP ---
     useEffect(() => {
         let isActive = true;
@@ -142,20 +164,22 @@ export default function PetWalkingGame({
                 petPosRef.current.x = 400 + Math.sin(currentTime * petSwaySpeed) * petSwayAmount;
 
                 // Update progress
-                setProgress(prev => {
-                    const next = prev + 0.05;
-                    if (next >= 100) {
-                        isActive = false;
-                        onComplete(score);
-                        return 100;
-                    }
+                progressRef.current = Math.min(100, progressRef.current + 0.05);
+                setProgress(progressRef.current);
 
-                    // Random encounter (less frequent, more controlled)
-                    if (Math.random() < 0.003 && next < 95 && next > 5) {
-                        triggerFind();
+                if (progressRef.current >= 100) {
+                    isActive = false;
+                    if (!completedRef.current) {
+                        completedRef.current = true;
+                        onComplete(score);
                     }
-                    return next;
-                });
+                    return;
+                }
+
+                // Random encounter (less frequent, more controlled)
+                if (Math.random() < 0.003 && progressRef.current < 95 && progressRef.current > 5) {
+                    triggerFind();
+                }
 
                 // Update walk animation frame (every 5 frames)
                 frameCount++;
@@ -180,23 +204,7 @@ export default function PetWalkingGame({
                 cancelAnimationFrame(animationFrameRef.current);
             }
         };
-    }, [gameState, score, onComplete]);
-
-    const triggerFind = useCallback(() => {
-        setGameState('sniffing');
-        hapticFeedback('medium');
-
-        setTimeout(() => {
-            setGameState('found');
-            const word = quests[Math.floor(Math.random() * quests.length)];
-            setCurrentWord(word);
-            const distractors = quests
-                .filter(w => w.en !== word.en)
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 2);
-            setOptions([word, ...distractors].sort(() => 0.5 - Math.random()));
-        }, 1200);
-    }, [quests]);
+    }, [gameState, score, onComplete, triggerFind]);
 
     const handleAnswer = useCallback((selected) => {
         if (selected.en === currentWord.en) {
@@ -239,7 +247,7 @@ export default function PetWalkingGame({
         const midY = Math.max(handY, collarY) + sag;
 
         return `M ${handX} ${handY} Q ${midX} ${midY} ${collarX} ${collarY}`;
-    }, [gameState, sceneRenderTrigger]);
+    }, [gameState]);
 
     const currentTheme = THEMES[themeIndex];
 
