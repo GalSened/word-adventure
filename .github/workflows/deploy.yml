@@ -1,4 +1,4 @@
-name: Deploy to Vercel
+name: CI & Deploy
 
 on:
   push:
@@ -6,14 +6,11 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
 jobs:
-  build-and-deploy:
+  # Quality gates — run on every push and PR. Lint and tests are REAL gates:
+  # they were previously `|| true`-neutered, which let 100+ lint errors accumulate.
+  ci:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,12 +24,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linting
-        run: npm run lint || true
-        continue-on-error: true
+      - name: Lint
+        run: npm run lint
 
-      - name: Build project
+      - name: Test
+        run: npm test
+
+      - name: Build
         run: npm run build
+
+  # Deploy — only on push to main, after CI passes.
+  # PR builds must not run Vercel steps: fork PRs have no secrets.
+  deploy:
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
@@ -44,5 +65,4 @@ jobs:
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
