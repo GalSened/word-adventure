@@ -4,6 +4,8 @@
  * based on the word's SRS repetition count.
  */
 
+import { supportsCloze } from './cloze';
+
 /**
  * Challenge pools mapping mastery bands to allowed challenge types.
  * As repetition increases, harder challenge types become available.
@@ -11,8 +13,8 @@
 export const CHALLENGE_POOLS = {
     new: ['multipleChoice', 'reverseChoice'],
     learning: ['multipleChoice', 'reverseChoice', 'listening'],
-    familiar: ['reverseChoice', 'listening', 'spelling'],
-    mastered: ['spelling', 'sentenceBuild', 'listening'],
+    familiar: ['reverseChoice', 'listening', 'spelling', 'cloze'],
+    mastered: ['spelling', 'sentenceBuild', 'listening', 'cloze'],
 };
 
 /**
@@ -43,6 +45,11 @@ export function selectChallengeType(word, srsState, recentTypes = []) {
     // Filter out sentenceBuild if word is not a sentence type
     if (word?.type !== 'sentence') {
         pool = pool.filter(t => t !== 'sentenceBuild');
+    }
+
+    // Cloze needs a sentence the word can be blanked out of (exactly once)
+    if (!supportsCloze(word)) {
+        pool = pool.filter(t => t !== 'cloze');
     }
 
     // Avoid consecutive same-type challenges if possible

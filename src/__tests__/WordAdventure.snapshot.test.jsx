@@ -41,8 +41,8 @@ vi.mock('../utils/challengeSelector', () => ({
   CHALLENGE_POOLS: {
     new: ['multipleChoice', 'reverseChoice'],
     learning: ['multipleChoice', 'reverseChoice', 'listening'],
-    familiar: ['reverseChoice', 'listening', 'spelling'],
-    mastered: ['spelling', 'sentenceBuild', 'listening'],
+    familiar: ['reverseChoice', 'listening', 'spelling', 'cloze'],
+    mastered: ['spelling', 'sentenceBuild', 'listening', 'cloze'],
   },
 }))
 
