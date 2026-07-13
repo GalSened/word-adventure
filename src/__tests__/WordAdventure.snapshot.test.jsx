@@ -31,17 +31,6 @@ vi.mock('framer-motion', async () => {
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
-vi.mock('../utils/voice', () => ({
-  useVoiceRecognition: () => ({
-    isListening: false,
-    transcript: '',
-    startListening: vi.fn(),
-    stopListening: vi.fn(),
-    isSupported: false,
-    setTranscript: vi.fn(),
-  })
-}))
-
 vi.mock('../utils/mobile', () => ({
   hapticFeedback: vi.fn()
 }))
@@ -85,10 +74,10 @@ const PROFILE = { name: 'Test', gender: 'boy', avatar: '\u{1F9D9}' }
  */
 function resetZustandStore() {
   useGameStore.setState({
-    userProfile: null, score: 0, stars: 0, userProgress: {}, avatar: '\u{1F478}',
+    userProfile: null, score: 0, userProgress: {}, avatar: '\u{1F478}',
     highScores: [], inventory: [], completedLevels: [], gameState: 'start', currentWordIndex: 0,
-    userInput: '', lives: 3, feedback: null, activeWords: [], gameMode: 'regular',
-    activePet: null, currentStreak: 0, currentLevel: null, showStoryIntro: false,
+    userInput: '', lives: 3, feedback: null, activeWords: [],
+    activePet: null, currentStreak: 0, currentLevel: null,
     dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
     equipped: {}, hasSeenStoryIntro: false, storyPath: null,
     hasCompletedOnboarding: false, onboardingStep: 0,
@@ -105,7 +94,6 @@ function setupLoggedInState() {
     state: {
       userProfile: PROFILE,
       score: 0,
-      stars: 0,
       userProgress: {},
       avatar: PROFILE.avatar,
       highScores: [],
@@ -124,7 +112,6 @@ function setupLoggedInState() {
   useGameStore.setState({
     userProfile: PROFILE,
     score: 0,
-    stars: 0,
     userProgress: {},
     avatar: PROFILE.avatar,
     highScores: [],

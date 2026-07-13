@@ -70,7 +70,6 @@ export function migrateFromLegacyStorage() {
   // Read all legacy data with safe parsing
   const userProfile = legacyGetJSON(LEGACY_KEYS.USER_PROFILE, null);
   const score = legacyGetNumber(LEGACY_KEYS.SCORE, 0);
-  const stars = legacyGetNumber(LEGACY_KEYS.STARS, 0);
   const userProgress = legacyGetJSON(LEGACY_KEYS.USER_PROGRESS, {});
   const highScores = legacyGetJSON(LEGACY_KEYS.HIGH_SCORES, []);
   const inventory = legacyGetJSON(LEGACY_KEYS.INVENTORY, []);
@@ -92,7 +91,6 @@ export function migrateFromLegacyStorage() {
   return {
     userProfile,
     score,
-    stars,
     userProgress,
     highScores,
     inventory,
@@ -112,7 +110,6 @@ export const createUserSlice = (set) => ({
   // State
   userProfile: null,
   score: 0,
-  stars: 0,
   userProgress: {},
   avatar: '\u{1F478}', // 👸
   highScores: [],
@@ -135,9 +132,6 @@ export const createUserSlice = (set) => ({
 
   subtractScore: (points) =>
     set((state) => ({ score: Math.max(0, state.score - points) })),
-
-  addStars: (count) =>
-    set((state) => ({ stars: state.stars + count })),
 
   updateWordProgress: (wordId, srsState) =>
     set((state) => ({
@@ -244,11 +238,9 @@ export const createGameSlice = (set) => ({
   lives: 3,
   feedback: null,
   activeWords: [],
-  gameMode: 'regular',
   activePet: null,
   currentStreak: 0,
   currentLevel: null,
-  showStoryIntro: false,
   // Points earned within the current level only (the persisted `score` is a
   // lifetime total AND the coin currency — useless for a leaderboard)
   levelScore: 0,
@@ -302,11 +294,9 @@ export const createGameSlice = (set) => ({
   setLives: (lives) => set({ lives }),
   setFeedback: (feedback) => set({ feedback }),
   setActiveWords: (activeWords) => set({ activeWords }),
-  setGameMode: (gameMode) => set({ gameMode }),
   setActivePet: (activePet) => set({ activePet }),
   setCurrentStreak: (currentStreak) => set({ currentStreak }),
   setCurrentLevel: (currentLevel) => set({ currentLevel }),
-  setShowStoryIntro: (showStoryIntro) => set({ showStoryIntro }),
 
   resetGame: () =>
     set({
@@ -316,11 +306,9 @@ export const createGameSlice = (set) => ({
       lives: 3,
       feedback: null,
       activeWords: [],
-      gameMode: 'regular',
       activePet: null,
       currentStreak: 0,
       currentLevel: null,
-      showStoryIntro: false,
       levelScore: 0,
       returnScreen: null,
     }),
@@ -451,7 +439,6 @@ export const useGameStore = create(
       partialize: (state) => ({
         userProfile: state.userProfile,
         score: state.score,
-        stars: state.stars,
         userProgress: state.userProgress,
         avatar: state.avatar,
         highScores: state.highScores,
@@ -467,8 +454,8 @@ export const useGameStore = create(
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         onboardingStep: state.onboardingStep,
         // Do NOT persist: gameState, currentWordIndex, lives, feedback,
-        // activeWords, gameMode, activePet, currentStreak, currentLevel,
-        // userInput, showStoryIntro (all ephemeral)
+        // activeWords, activePet, currentStreak, currentLevel,
+        // userInput (all ephemeral)
       }),
 
       onRehydrateStorage: () => {

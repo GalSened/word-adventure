@@ -19,7 +19,7 @@ import { initialWordData } from '../data/words';
 import { GRAMMAR_INJECTION_INTERVAL, GAME_CONFIG } from '../config/constants';
 import confetti from 'canvas-confetti';
 
-export function useGameLogic({ story, itemEffects, setTranscript }) {
+export function useGameLogic({ story, itemEffects }) {
     // Read all state from Zustand store
     const {
         userProfile,
@@ -64,7 +64,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                 setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
                 return;
             }
-            store.setGameMode('srs');
         } else {
             const level = typeof levelId === 'number' ? getLevelById(levelId) : null;
             if (level) {
@@ -91,7 +90,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                     wordsToPlay = initialWordData.filter(w => w.level === levelId);
                 }
             }
-            store.setGameMode('regular');
         }
 
         store.setCurrentLevel(levelId);
@@ -207,7 +205,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         if (store.currentWordIndex < store.activeWords.length - 1) {
             store.setCurrentWordIndex(store.currentWordIndex + 1);
             store.setUserInput('');
-            setTranscript('');
             store.setFeedback(null);
         } else {
             completeLevel(store);
@@ -262,7 +259,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
             const earnedScore = itemEffects.calculatePoints(GAME_CONFIG.SCORE_PER_CORRECT, store.currentStreak);
             store.addScore(earnedScore);
             store.addLevelScore(earnedScore);
-            store.addStars(GAME_CONFIG.STARS_PER_CORRECT);
 
             const newStreak = store.currentStreak + 1;
             store.setCurrentStreak(newStreak);
@@ -298,7 +294,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
                 if (s.currentWordIndex < s.activeWords.length - 1) {
                     s.setCurrentWordIndex(s.currentWordIndex + 1);
                     s.setUserInput('');
-                    setTranscript('');
                     s.setFeedback(null);
                 } else {
                     completeLevel(s);
@@ -469,17 +464,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         store.setGameState('start');
     };
 
-    // Adventure complete handler
-    const handleAdventureComplete = (earnedScore) => {
-        const store = useGameStore.getState();
-        // Score already added during encounters via store.addScore
-        // Just update daily stats and return to start
-        store.updateDailyStats({
-            dailyScore: store.dailyStats.dailyScore + earnedScore,
-        });
-        store.setGameState('start');
-    };
-
     return {
         t,
         startLevel,
@@ -491,7 +475,6 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         handlePetWalkComplete,
         handleMemoryComplete,
         handleAvatarSelect,
-        handleAdventureComplete,
         currentWord,
         scrambledContent,
         challengeType,

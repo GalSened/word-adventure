@@ -14,12 +14,12 @@ const PROFILE = { name: 'Test', gender: 'boy', avatar: '🧙' };
 
 function resetStore(overrides = {}) {
     useGameStore.setState({
-        userProfile: PROFILE, score: 0, stars: 0, userProgress: {},
+        userProfile: PROFILE, score: 0, userProgress: {},
         highScores: [], inventory: [], completedLevels: [],
         hintsAvailable: 0, skipsAvailable: 0, equipped: {},
         gameState: 'start', currentWordIndex: 0, activeWords: [],
         userInput: '', lives: 3, feedback: null, currentStreak: 0,
-        currentLevel: null, gameMode: 'regular',
+        currentLevel: null,
         levelScore: 0, returnScreen: null,
         dailyStats: { date: new Date().toDateString(), wordsPlayed: 0, maxStreak: 0, dailyScore: 0 },
         hasCompletedOnboarding: true, onboardingStep: 3,
@@ -33,7 +33,7 @@ function renderLogic() {
         const inventory = useGameStore((s) => s.inventory);
         const story = useStoryProgress(PROFILE);
         const itemEffects = useItemEffects(inventory);
-        return useGameLogic({ story, itemEffects, setTranscript: () => {} });
+        return useGameLogic({ story, itemEffects });
     });
 }
 
