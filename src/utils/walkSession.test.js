@@ -14,7 +14,10 @@ import {
     fetchRewards,
     routeFor,
     walkRewardMultiplier,
+    PET_ABILITIES,
+    petAbilityFor,
 } from './walkSession';
+import { getWalkablePets } from '../data/storeItems';
 import { initialWordData } from '../data/words';
 import { calculateNextReview } from './srs';
 
@@ -261,6 +264,39 @@ describe('walk rewards with bonus coins', () => {
     it('defaults to zero bonus for callers that never saw a coin', () => {
         expect(computeWalkRewards({ correctCount: 5, total: 5 }).coins)
             .toBe(computeWalkRewards({ correctCount: 5, total: 5, bonusCoins: 0 }).coins);
+    });
+});
+
+describe('pet abilities — every species walks differently', () => {
+    it('every walkable pet sold in the store has an ability with display fields', () => {
+        for (const pet of getWalkablePets()) {
+            const ability = PET_ABILITIES[pet.id];
+            expect(ability, `${pet.id} has no ability`).toBeTruthy();
+            expect(ability.icon).toBeTruthy();
+            expect(ability.label).toBeTruthy();
+            expect(ability.desc).toBeTruthy();
+        }
+    });
+
+    it('resolves the active pet to its ability, and legacy pets to none', () => {
+        expect(petAbilityFor({ id: 'cat' }).extraCoinSpots).toBe(2);
+        expect(petAbilityFor({ id: 'dragon' }).fetchCoinMult).toBe(2);
+        // saves from before activePet carried an id have only {name, icon}
+        expect(petAbilityFor({ name: 'כלבלב חמוד', icon: '🐕' })).toBeNull();
+        expect(petAbilityFor(undefined)).toBeNull();
+    });
+
+    it("the owl's wisdom makes each correct word worth more", () => {
+        const base = computeWalkRewards({ correctCount: 5, total: 5 });
+        const wise = computeWalkRewards({ correctCount: 5, total: 5, wordCoinValue: 50 });
+        expect(base.coins).toBe(5 * 40 + 100);
+        expect(wise.coins).toBe(5 * 50 + 100);
+    });
+
+    it("the phoenix guarantees the perfect bonus without faking perfection", () => {
+        const blessed = computeWalkRewards({ correctCount: 3, total: 5, guaranteePerfectBonus: true });
+        expect(blessed.coins).toBe(3 * 40 + 100);
+        expect(blessed.perfect).toBe(false); // the flag stays honest
     });
 });
 

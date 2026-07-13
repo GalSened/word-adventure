@@ -21,6 +21,7 @@ import {
     buildBonusCoinSpots,
     fetchRewards,
     routeFor,
+    petAbilityFor,
 } from '../utils/walkSession';
 import { ANIMATION_CONFIG } from '../config/constants';
 import { DogWalker, KidWalker, RoundTree, PineTree, PalmTree } from './WalkArt';
@@ -70,6 +71,8 @@ export default function PetWalkingGame({
     const isGirl = userProfile?.gender === 'girl';
     const reduceMotion = useReducedMotion();
     const petType = petTypeFromIcon(pet.icon);
+    // What this species is FOR — every pet walks differently
+    const ability = petAbilityFor(pet);
 
     // --- STORE WIRING (fresh reads via getState inside handlers) ---
     const petCare = useGameStore((s) => s.petCare);
@@ -95,9 +98,12 @@ export default function PetWalkingGame({
     );
 
     // A happy pet sniffs out bonus coins — decided by mood at the gate.
+    // Cat eyes add spots on top, even on a grumpy day.
     const bonusSpots = useMemo(
-        () => buildBonusCoinSpots(moodModifiers(useGameStore.getState().petCare).bonusSpots),
-        []
+        () => buildBonusCoinSpots(
+            moodModifiers(useGameStore.getState().petCare).bonusSpots + (ability?.extraCoinSpots || 0)
+        ),
+        [ability]
     );
 
     // Today's route rotates with completed walks: park → beach → forest → …
@@ -234,9 +240,11 @@ export default function PetWalkingGame({
         const catches = fetchCatchesRef.current;
         const reward = fetchRewards(catches, bestToy?.effect.happiness ?? 10);
         useGameStore.getState().boostPetHappiness(reward.happiness);
-        if (reward.coins > 0) {
-            bonusCoinsRef.current += reward.coins;
-            setCoinsEarned((c) => c + reward.coins);
+        // Dragon might: fetch coins count double
+        const fetchCoins = reward.coins * (ability?.fetchCoinMult || 1);
+        if (fetchCoins > 0) {
+            bonusCoinsRef.current += fetchCoins;
+            setCoinsEarned((c) => c + fetchCoins);
         }
         hapticFeedback('success');
         confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#4ade80', '#fbbf24'] });
@@ -445,15 +453,29 @@ export default function PetWalkingGame({
     }, []);
 
     // --- SUMMARY / REWARDS ---
+    // One math path for the summary AND the payout — they must never drift.
+    // Ability order: per-word value and guaranteed bonus inside the base,
+    // then the unicorn multiplier, then (at collect time) the xp boost.
+    const buildRewards = useCallback((correct, bonus) => {
+        const base = computeWalkRewards({
+            correctCount: correct,
+            total: walkPool.length,
+            bonusCoins: bonus,
+            wordCoinValue: ability?.wordCoinValue || 40,
+            guaranteePerfectBonus: !!ability?.guaranteePerfectBonus,
+        });
+        return {
+            ...base,
+            coins: Math.floor(base.coins * (ability?.coinMult || 1)),
+            treats: base.treats + (ability?.extraTreats || 0),
+        };
+    }, [walkPool.length, ability]);
+
     const finishWalk = useCallback(() => {
         if (rewardsAppliedRef.current) return;
         rewardsAppliedRef.current = true;
         const store = useGameStore.getState();
-        const rewards = computeWalkRewards({
-            correctCount: correctCountRef.current,
-            total: walkPool.length,
-            bonusCoins: bonusCoinsRef.current,
-        });
+        const rewards = buildRewards(correctCountRef.current, bonusCoinsRef.current);
         store.boostPetHappiness(rewards.happiness);
         store.recordWalkCompleted();
         if (rewards.treats > 0) {
@@ -464,7 +486,7 @@ export default function PetWalkingGame({
         }
         // Read equipped fresh: the payout must match what the summary showed
         onComplete(rewards.coins * walkRewardMultiplier(store.equipped));
-    }, [walkPool.length, onComplete]);
+    }, [buildRewards, onComplete]);
 
     // --- VISUAL HELPERS ---
     const walking = gameState === 'walking';
@@ -488,11 +510,7 @@ export default function PetWalkingGame({
 
     const moodEmoji = petCare.happiness >= 75 ? '😍' : petCare.happiness >= 40 ? '🙂' : '🥺';
     const hungryNow = moodModifiers(petCare).hungry;
-    const summaryRewards = computeWalkRewards({
-        correctCount,
-        total: walkPool.length,
-        bonusCoins: bonusCoinsRef.current,
-    });
+    const summaryRewards = buildRewards(correctCount, bonusCoinsRef.current);
 
     return (
         <div
@@ -1099,6 +1117,11 @@ export default function PetWalkingGame({
                             {rewardMult > 1 && (
                                 <p className="text-lg font-bold text-indigo-600 mb-2">
                                     🚀 בוסט התקדמות פעיל — כפול מטבעות!
+                                </p>
+                            )}
+                            {ability && (
+                                <p className="text-base font-bold text-teal-600 mb-2">
+                                    {ability.icon} {ability.label}: {ability.desc}
                                 </p>
                             )}
                             {summaryRewards.treats > 0 && (
