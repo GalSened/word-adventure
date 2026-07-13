@@ -3,27 +3,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PlayingScreen from './PlayingScreen';
 
-vi.mock('framer-motion', async () => {
-    const React = await import('react');
-    const MOTION_ONLY_PROPS = new Set([
-        'animate', 'initial', 'exit', 'variants', 'transition',
-        'whileHover', 'whileTap', 'whileFocus', 'whileInView',
-        'layout', 'layoutId', 'onAnimationComplete', 'drag', 'dragConstraints',
-    ]);
-    const motion = new Proxy({}, {
-        get: (_, tag) => React.forwardRef(({ children, ...props }, ref) => {
-            const htmlProps = Object.fromEntries(
-                Object.entries(props).filter(([key]) => !MOTION_ONLY_PROPS.has(key))
-            );
-            return React.createElement(tag, { ...htmlProps, ref }, children);
-        }),
-    });
-    return {
-        __esModule: true,
-        motion,
-        AnimatePresence: ({ children }) => children,
-    };
-});
+// Deliberately NO framer-motion mock here: the bug this file guards against
+// was an AnimatePresence exit animation keeping the overlay mounted after
+// the feedback state cleared. A pass-through mock would make the unmount
+// test pass even against the buggy code — only the real library can prove
+// the overlay leaves the DOM synchronously.
 
 vi.mock('../../utils/mobile', () => ({ hapticFeedback: vi.fn() }));
 vi.mock('../../utils/speech', () => ({
