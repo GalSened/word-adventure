@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
     WALK_MILESTONES,
     LANDMARKS,
+    WALK_ROUTES,
     WORLD_LENGTH,
     FETCH_CONFIG,
     buildWalkPool,
@@ -11,6 +12,7 @@ import {
     moodModifiers,
     buildBonusCoinSpots,
     fetchRewards,
+    routeFor,
 } from './walkSession';
 import { initialWordData } from '../data/words';
 import { calculateNextReview } from './srs';
@@ -101,6 +103,60 @@ describe('walk rewards', () => {
         const high = computeWalkRewards({ correctCount: 5, total: 5 });
         expect(high.happiness).toBeGreaterThan(low.happiness);
         expect(low.happiness).toBeGreaterThan(0); // a walk always cheers the pet up
+    });
+});
+
+describe('walk routes — a different journey each walk', () => {
+    it('offers at least 3 distinct routes', () => {
+        expect(WALK_ROUTES.length).toBeGreaterThanOrEqual(3);
+        expect(new Set(WALK_ROUTES.map(r => r.id)).size).toBe(WALK_ROUTES.length);
+    });
+
+    it('every route tells a complete story: named, 5 beats from gate to home', () => {
+        for (const route of WALK_ROUTES) {
+            expect(route.name, route.id).toBeTruthy();
+            expect(route.landmarks, route.id).toHaveLength(5);
+            expect(route.landmarks[0].at).toBe(0);
+            expect(route.landmarks[route.landmarks.length - 1].at).toBe(100);
+            const ats = route.landmarks.map(lm => lm.at);
+            expect([...ats]).toEqual([...ats].sort((a, b) => a - b));
+            for (const lm of route.landmarks) {
+                expect(lm.icon, `${route.id}/${lm.id}`).toBeTruthy();
+                expect(lm.line?.boy, `${route.id}/${lm.id}`).toBeTruthy();
+                expect(lm.line?.girl, `${route.id}/${lm.id}`).toBeTruthy();
+            }
+        }
+    });
+
+    it('every route has exactly one feeding beat and one play beat, mid-walk', () => {
+        for (const route of WALK_ROUTES) {
+            const feeds = route.landmarks.filter(lm => lm.role === 'feed');
+            const plays = route.landmarks.filter(lm => lm.role === 'play');
+            expect(feeds, route.id).toHaveLength(1);
+            expect(plays, route.id).toHaveLength(1);
+            expect(feeds[0].at).toBeGreaterThan(0);
+            expect(feeds[0].at).toBeLessThan(plays[0].at); // feed before play
+            expect(plays[0].at).toBeLessThan(100);
+        }
+    });
+
+    it('routes carry their own scenery flavor', () => {
+        for (const route of WALK_ROUTES) {
+            expect(Array.isArray(route.flora), route.id).toBe(true);
+            expect(route.flora.length, route.id).toBeGreaterThanOrEqual(4);
+            expect(['round', 'pine', 'palm']).toContain(route.tree);
+        }
+    });
+
+    it('rotates deterministically with completed walks and wraps around', () => {
+        expect(routeFor(0)).toBe(WALK_ROUTES[0]);
+        expect(routeFor(1)).toBe(WALK_ROUTES[1]);
+        expect(routeFor(WALK_ROUTES.length)).toBe(WALK_ROUTES[0]);
+        expect(routeFor(undefined)).toBe(WALK_ROUTES[0]); // legacy saves
+    });
+
+    it('keeps the legacy LANDMARKS export pointing at the first route', () => {
+        expect(LANDMARKS).toBe(WALK_ROUTES[0].landmarks);
     });
 });
 

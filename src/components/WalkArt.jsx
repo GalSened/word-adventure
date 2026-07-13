@@ -148,6 +148,26 @@ export function RoundTree({ className = '', style }) {
     );
 }
 
+export function PalmTree({ className = '', style }) {
+    return (
+        <svg viewBox="0 0 120 170" className={className} style={style} aria-hidden="true">
+            <ellipse cx="58" cy="164" rx="30" ry="5" fill="rgba(0,0,0,0.15)" />
+            {/* curved trunk */}
+            <path d="M52 160 Q46 110 60 62 L70 66 Q58 112 66 160 Z" fill="#8d6e63" />
+            <path d="M55 150 L64 150 M52 132 L62 132 M52 112 L62 114" stroke="#6d4c41" strokeWidth="2.5" />
+            {/* fronds */}
+            <path d="M64 62 Q30 44 10 58 Q34 30 64 52 Z" fill="#2e7d32" />
+            <path d="M64 60 Q44 24 18 22 Q52 10 68 50 Z" fill="#388e3c" />
+            <path d="M66 58 Q70 18 96 10 Q80 34 72 56 Z" fill="#43a047" />
+            <path d="M66 60 Q98 40 112 52 Q92 24 64 52 Z" fill="#2e7d32" />
+            <path d="M66 62 Q94 66 104 82 Q80 76 64 66 Z" fill="#388e3c" />
+            {/* coconuts */}
+            <circle cx="60" cy="60" r="6" fill="#5d4037" />
+            <circle cx="70" cy="64" r="5.5" fill="#6d4c41" />
+        </svg>
+    );
+}
+
 export function PineTree({ className = '', style }) {
     return (
         <svg viewBox="0 0 110 170" className={className} style={style} aria-hidden="true">

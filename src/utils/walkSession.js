@@ -21,57 +21,196 @@ export const WORLD_LENGTH =
     (100 / ANIMATION_CONFIG.PET_WALK_PROGRESS_INCREMENT) * ANIMATION_CONFIG.PET_WALK_SCROLL_SPEED;
 
 /**
- * Narrative beats along the path. `at` is walk progress (0-100).
- * The fountain doubles as the feeding moment and the meadow as the
- * toy/play moment — the component reads those ids.
+ * Walk routes — a different journey every walk, rotating with the number
+ * of completed walks. Each route is 5 narrative beats (`at` = progress
+ * 0-100); `role` drives the mechanics: 'feed' opens the feeding moment,
+ * 'play' opens the fetch minigame, 'story' is a passing banner. Each
+ * route also flavors the scenery (flora accents + dominant tree kind).
  */
-export const LANDMARKS = [
+export const WALK_ROUTES = [
     {
-        at: 0,
-        id: 'gate',
-        icon: '🏡',
-        line: {
-            boy: 'יוצאים לטיול! תחזיק חזק ברצועה...',
-            girl: 'יוצאים לטיול! תחזיקי חזק ברצועה...',
-        },
+        id: 'park',
+        name: 'הפארק הגדול',
+        tree: 'round',
+        flora: ['🌿', '🌾', '🌷', '🌻', '🌼', '🍄'],
+        landmarks: [
+            {
+                at: 0,
+                id: 'gate',
+                role: 'story',
+                icon: '🏡',
+                line: {
+                    boy: 'יוצאים לטיול בפארק! תחזיק חזק ברצועה...',
+                    girl: 'יוצאים לטיול בפארק! תחזיקי חזק ברצועה...',
+                },
+            },
+            {
+                at: 25,
+                id: 'fountain',
+                role: 'feed',
+                icon: '⛲',
+                line: {
+                    boy: 'הגעתם למזרקה! נראה שמישהו רעב...',
+                    girl: 'הגעתן למזרקה! נראה שמישהו רעב...',
+                },
+            },
+            {
+                at: 50,
+                id: 'bridge',
+                role: 'story',
+                icon: '🌉',
+                line: {
+                    boy: 'הגשר הישן! רואים מכאן את כל העיר.',
+                    girl: 'הגשר הישן! רואים מכאן את כל העיר.',
+                },
+            },
+            {
+                at: 70,
+                id: 'meadow',
+                role: 'play',
+                icon: '🌼',
+                line: {
+                    boy: 'אחו הפרחים! זמן מושלם למשחק.',
+                    girl: 'אחו הפרחים! זמן מושלם למשחק.',
+                },
+            },
+            {
+                at: 100,
+                id: 'home',
+                role: 'story',
+                icon: '🏡',
+                line: {
+                    boy: 'חוזרים הביתה... איזה טיול נהדר היה!',
+                    girl: 'חוזרות הביתה... איזה טיול נהדר היה!',
+                },
+            },
+        ],
     },
     {
-        at: 25,
-        id: 'fountain',
-        icon: '⛲',
-        line: {
-            boy: 'הגעתם למזרקה! נראה שמישהו רעב...',
-            girl: 'הגעתן למזרקה! נראה שמישהו רעב...',
-        },
+        id: 'beach',
+        name: 'חוף הים',
+        tree: 'palm',
+        flora: ['🐚', '⭐', '🌴', '🦀', '🌺', '🪸'],
+        landmarks: [
+            {
+                at: 0,
+                id: 'boardwalk',
+                role: 'story',
+                icon: '🏖️',
+                line: {
+                    boy: 'היום הולכים לים! מריחים את המלח באוויר?',
+                    girl: 'היום הולכות לים! מריחות את המלח באוויר?',
+                },
+            },
+            {
+                at: 25,
+                id: 'picnic',
+                role: 'feed',
+                icon: '🧺',
+                line: {
+                    boy: 'פיקניק על החול! מישהו כאן רעב מהגלים...',
+                    girl: 'פיקניק על החול! מישהו כאן רעב מהגלים...',
+                },
+            },
+            {
+                at: 50,
+                id: 'harbor',
+                role: 'story',
+                icon: '⛵',
+                line: {
+                    boy: 'הנמל הקטן! תראה את הסירות המפליגות.',
+                    girl: 'הנמל הקטן! תראי את הסירות המפליגות.',
+                },
+            },
+            {
+                at: 70,
+                id: 'cove',
+                role: 'play',
+                icon: '🐚',
+                line: {
+                    boy: 'מפרץ הצדפים! החול כאן מושלם למשחק.',
+                    girl: 'מפרץ הצדפים! החול כאן מושלם למשחק.',
+                },
+            },
+            {
+                at: 100,
+                id: 'home',
+                role: 'story',
+                icon: '🏡',
+                line: {
+                    boy: 'חוזרים הביתה עם חול בין האצבעות...',
+                    girl: 'חוזרות הביתה עם חול בין האצבעות...',
+                },
+            },
+        ],
     },
     {
-        at: 50,
-        id: 'bridge',
-        icon: '🌉',
-        line: {
-            boy: 'הגשר הישן! רואים מכאן את כל העיר.',
-            girl: 'הגשר הישן! רואים מכאן את כל העיר.',
-        },
-    },
-    {
-        at: 70,
-        id: 'meadow',
-        icon: '🌼',
-        line: {
-            boy: 'אחו הפרחים! זמן מושלם למשחק.',
-            girl: 'אחו הפרחים! זמן מושלם למשחק.',
-        },
-    },
-    {
-        at: 100,
-        id: 'home',
-        icon: '🏡',
-        line: {
-            boy: 'חוזרים הביתה... איזה טיול נהדר היה!',
-            girl: 'חוזרות הביתה... איזה טיול נהדר היה!',
-        },
+        id: 'forest',
+        name: 'היער הקסום',
+        tree: 'pine',
+        flora: ['🍄', '🌰', '🦉', '🌿', '🍁', '🪵'],
+        landmarks: [
+            {
+                at: 0,
+                id: 'trailhead',
+                role: 'story',
+                icon: '🌲',
+                line: {
+                    boy: 'נכנסים ליער הקסום... שקט, אולי נראה חיות!',
+                    girl: 'נכנסות ליער הקסום... שקט, אולי נראה חיות!',
+                },
+            },
+            {
+                at: 25,
+                id: 'campsite',
+                role: 'feed',
+                icon: '🏕️',
+                line: {
+                    boy: 'מחנה ביער! זמן להוציא משהו טעים מהתיק.',
+                    girl: 'מחנה ביער! זמן להוציא משהו טעים מהתיק.',
+                },
+            },
+            {
+                at: 50,
+                id: 'stream',
+                role: 'story',
+                icon: '🏞️',
+                line: {
+                    boy: 'נחל צלול! שומעים את המים מפכפכים?',
+                    girl: 'נחל צלול! שומעות את המים מפכפכים?',
+                },
+            },
+            {
+                at: 70,
+                id: 'clearing',
+                role: 'play',
+                icon: '🍄',
+                line: {
+                    boy: 'קרחת יער עם פטריות ענק! בוא נשחק כאן.',
+                    girl: 'קרחת יער עם פטריות ענק! בואי נשחק כאן.',
+                },
+            },
+            {
+                at: 100,
+                id: 'home',
+                role: 'story',
+                icon: '🏡',
+                line: {
+                    boy: 'יוצאים מהיער הביתה... איזו הרפתקה!',
+                    girl: 'יוצאות מהיער הביתה... איזו הרפתקה!',
+                },
+            },
+        ],
     },
 ];
+
+/** Pick today's route: rotates with completed walks, wraps forever. */
+export function routeFor(walksCompleted) {
+    return WALK_ROUTES[(walksCompleted ?? 0) % WALK_ROUTES.length];
+}
+
+/** Legacy alias — the park is the original (first) route. */
+export const LANDMARKS = WALK_ROUTES[0].landmarks;
 
 /**
  * Build the word pool for one walk.
