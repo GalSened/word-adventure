@@ -433,7 +433,7 @@ export function useStoryProgress(userProfile) {
             id: 'scholar',
             title: 'דרך החכם',
             icon: '📚',
-            description: 'ללמוד את כל המילים ולהיות אלוף המילים',
+            description: 'ללמוד את כל המילים של הממלכה',
             bonus: 'התקדמות מהירה יותר'
         }
     ], []);
