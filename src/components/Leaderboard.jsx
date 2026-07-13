@@ -14,7 +14,7 @@ export default function Leaderboard({ scores }) {
 
             <div className="p-4">
                 {sortedScores.length === 0 ? (
-                    <p className="text-center text-slate-400 py-4">עדיין אין אלופים... היי הראשונה!</p>
+                    <p className="text-center text-slate-400 py-4">עדיין אין שיאים... זה הזמן לקבוע שיא ראשון!</p>
                 ) : (
                     <div className="space-y-3">
                         {sortedScores.map((score, index) => (

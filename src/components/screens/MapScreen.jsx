@@ -19,7 +19,8 @@ export default function MapScreen({ story, onStartLevel, t, completedLevels = []
                 {t('בחר שלב', 'בחרי שלב')}
             </h2>
             <p className="text-center text-purple-600 mb-2">
-                📚 {story.progress.totalWordsLearned} מילים נלמדו
+                {/* למדת reads the same for boys and girls */}
+                📚 כבר למדת {story.progress.totalWordsLearned} מילים!
             </p>
 
             <div className="space-y-3">

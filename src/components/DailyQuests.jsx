@@ -2,27 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle } from 'lucide-react';
 
-export default function DailyQuests({ progress, gender = 'boy' }) {
-    const t = (male, female) => gender === 'boy' ? male : female;
-
+export default function DailyQuests({ progress }) {
+    // Quest texts use neutral infinitives, so no gender fork is needed here
     const quests = [
         {
             id: 'words_10',
-            text: `${t('השלם', 'השלימי')} 10 מילים`,
+            text: 'לענות נכון על 10 מילים',
             target: 10,
             current: progress.wordsPlayed,
             reward: 50
         },
         {
             id: 'score_1000',
-            text: `${t('הגע', 'הגיעי')} ל-1000 נקודות`,
+            text: 'להגיע ל-1000 נקודות',
             target: 1000,
             current: progress.dailyScore,
             reward: 100
         },
         {
             id: 'streak_5',
-            text: `${t('בצע', 'בצעי')} רצף של 5`,
+            text: 'לענות נכון 5 פעמים ברצף',
             target: 5,
             current: progress.maxStreak,
             reward: 75
@@ -31,7 +30,7 @@ export default function DailyQuests({ progress, gender = 'boy' }) {
 
     return (
         <div className="bg-white rounded-3xl p-6 shadow-lg border-2 border-orange-100">
-            <h3 className="text-2xl font-bold mb-4 text-orange-600">📜 {t('משימות יומיות', 'משימות יומיות')}</h3>
+            <h3 className="text-2xl font-bold mb-4 text-orange-600">📜 המשימות של היום</h3>
             <div className="space-y-4">
                 {quests.map(quest => {
                     const isCompleted = quest.current >= quest.target;

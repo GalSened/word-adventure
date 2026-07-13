@@ -74,7 +74,7 @@ class ErrorBoundary extends React.Component {
                             אופס! משהו השתבש
                         </h1>
                         <p className="text-slate-600 mb-6">
-                            נתקלנו בבעיה לא צפויה. אל דאגה, המידע שלך נשמר!
+                            משהו הסתבך לרגע, אבל הכול שמור — אפשר להמשיך לשחק!
                         </p>
 
                         {import.meta.env.DEV && this.state.error && (
@@ -108,7 +108,7 @@ class ErrorBoundary extends React.Component {
                                 aria-label="Try again"
                             >
                                 <RefreshCw size={20} />
-                                נסה שוב
+                                לנסות שוב
                             </button>
                         </div>
                     </div>

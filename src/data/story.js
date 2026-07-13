@@ -137,9 +137,9 @@ export const CHAPTERS = {
         },
 
         completion: {
-            boy: `מרלין מרשם! הוא נותן לך שרביט קסמים!
+            boy: `מרלין מתרשם! הוא נותן לך שרביט קסמים!
             עכשיו אתה מוכן להתמודד עם אתגרים גדולים יותר.`,
-            girl: `מרלין מרשם! הוא נותן לך שרביט קסמים!
+            girl: `מרלין מתרשם! הוא נותן לך שרביט קסמים!
             עכשיו את מוכנה להתמודד עם אתגרים גדולים יותר.`
         },
 
@@ -157,7 +157,7 @@ export const CHAPTERS = {
                 { trigger: 'correct', text: { boy: 'חוכמה רבה יש בך, צעיר!', girl: 'חוכמה רבה יש בך, צעירה!' } },
                 { trigger: 'wrong', text: { boy: 'הקסם דורש סבלנות. נסה שוב.', girl: 'הקסם דורש סבלנות. נסי שוב.' } },
                 { trigger: 'streak_5', text: 'מרשים! הכוח איתך!' },
-                { trigger: 'complete', text: 'קח את השרביט. תזדקק לו.' }
+                { trigger: 'complete', text: { boy: 'קח את השרביט. תזדקק לו.', girl: 'קחי את השרביט. תזדקקי לו.' } }
             ]
         }
     },
@@ -241,7 +241,7 @@ export const CHAPTERS = {
             dialogues: [
                 { trigger: 'start', text: '{name}, חיכינו לך אלף שנה!' },
                 { trigger: 'correct', text: 'החוכמה זורמת בך!' },
-                { trigger: 'wrong', text: 'גם החכמים טועים. המשך!' },
+                { trigger: 'wrong', text: { boy: 'גם החכמים טועים. המשך!', girl: 'גם החכמים טועים. המשיכי!' } },
                 { trigger: 'streak_5', text: { boy: 'אתה החכם הצעיר ביותר!', girl: 'את החכמה הצעירה ביותר!' } },
                 { trigger: 'complete', text: 'הממלכה ניצלה! תודה לך לנצח!' }
             ]
@@ -264,17 +264,17 @@ export const LEVEL_CHAPTERS = {
 
         intro: {
             boy: `ברוך הבא לשער הממלכה, גיבור צעיר!
-            החיות של הממלכה שכחו את שמותיהן באנגלית.
+            החיות של הממלכה שכחו את השמות שלהן באנגלית.
             עזור להן לזכור!`,
             girl: `ברוכה הבאה לשער הממלכה, גיבורה צעירה!
-            החיות של הממלכה שכחו את שמותיהן באנגלית.
+            החיות של הממלכה שכחו את השמות שלהן באנגלית.
             עזרי להן לזכור!`
         },
 
         completion: {
-            boy: `מדהים! החיות הראשונות זוכרות את שמותיהן!
+            boy: `מדהים! החיות הראשונות זוכרות את השמות שלהן!
             השער נפתח לפניך. ההרפתקה מתחילה!`,
-            girl: `מדהים! החיות הראשונות זוכרות את שמותיהן!
+            girl: `מדהים! החיות הראשונות זוכרות את השמות שלהן!
             השער נפתח לפנייך. ההרפתקה מתחילה!`
         },
 
@@ -286,7 +286,7 @@ export const LEVEL_CHAPTERS = {
                 { trigger: 'correct', text: { boy: 'נפלא! אתה לומד מהר!', girl: 'נפלא! את לומדת מהר!' } },
                 { trigger: 'wrong', text: { boy: 'לא נורא, נסה שוב!', girl: 'לא נורא, נסי שוב!' } },
                 { trigger: 'streak_3', text: '3 ברצף! כוכב! ⭐' },
-                { trigger: 'complete', text: 'השער נפתח! המשך הלאה!' }
+                { trigger: 'complete', text: { boy: 'השער נפתח! המשך הלאה!', girl: 'השער נפתח! המשיכי הלאה!' } }
             ]
         }
     },
@@ -308,10 +308,10 @@ export const LEVEL_CHAPTERS = {
         },
 
         completion: {
-            boy: `כל החיות בגן שמחות! הן שרות את שמותיהן.
-            המלכה שמעה על הצלחתך ומזמינה אותך למשתה!`,
-            girl: `כל החיות בגן שמחות! הן שרות את שמותיהן.
-            המלכה שמעה על הצלחתך ומזמינה אותך למשתה!`
+            boy: `כל החיות בגן שמחות! הן שרות את השמות שלהן.
+            המלכה שמעה על ההצלחה שלך ומזמינה אותך למשתה!`,
+            girl: `כל החיות בגן שמחות! הן שרות את השמות שלהן.
+            המלכה שמעה על ההצלחה שלך ומזמינה אותך למשתה!`
         },
 
         npc: {
@@ -356,7 +356,7 @@ export const LEVEL_CHAPTERS = {
             dialogues: [
                 { trigger: 'start', text: 'שלום {name}! המטבח צריך אותך!' },
                 { trigger: 'correct', text: 'טעים! עוד מנה מוכנה!' },
-                { trigger: 'wrong', text: 'אופס! בוא ננסה מתכון אחר.' },
+                { trigger: 'wrong', text: { boy: 'אופס! בוא ננסה מתכון אחר.', girl: 'אופס! בואי ננסה מתכון אחר.' } },
                 { trigger: 'streak_5', text: '5 ברצף! שף מקצועי! 👨‍🍳' },
                 { trigger: 'complete', text: 'המשתה מושלם! בתיאבון!' }
             ]
@@ -372,10 +372,10 @@ export const LEVEL_CHAPTERS = {
 
         intro: {
             boy: `הגעת לבית המשפחה המלכותי!
-            בני המשפחה צריכים שתלמד את שמותיהם באנגלית.
+            בני המשפחה צריכים שתלמד את השמות שלהם באנגלית.
             גם תלמד לספר עליהם במשפטים!`,
             girl: `הגעת לבית המשפחה המלכותי!
-            בני המשפחה צריכים שתלמדי את שמותיהם באנגלית.
+            בני המשפחה צריכים שתלמדי את השמות שלהם באנגלית.
             גם תלמדי לספר עליהם במשפטים!`
         },
 
@@ -390,7 +390,7 @@ export const LEVEL_CHAPTERS = {
             name: 'סבתא חכמה',
             icon: '👵',
             dialogues: [
-                { trigger: 'start', text: '{name}, בוא נכיר את המשפחה!' },
+                { trigger: 'start', text: { boy: '{name}, בוא נכיר את המשפחה!', girl: '{name}, בואי נכיר את המשפחה!' } },
                 { trigger: 'correct', text: { boy: 'חכם כמו סבא!', girl: 'חכמה כמו סבתא!' } },
                 { trigger: 'wrong', text: { boy: 'לא נורא, חביבי. נסה שוב!', girl: 'לא נורא, חביבתי. נסי שוב!' } },
                 { trigger: 'streak_3', text: '3 ברצף! גאה בך! ❤️' },
@@ -426,7 +426,7 @@ export const LEVEL_CHAPTERS = {
             name: 'הצייר',
             icon: '🎨',
             dialogues: [
-                { trigger: 'start', text: '{name}! בוא נצבע את הקשת!' },
+                { trigger: 'start', text: { boy: '{name}! בוא נצבע את הקשת!', girl: '{name}! בואי נצבע את הקשת!' } },
                 { trigger: 'correct', text: 'עוד צבע בקשת! יפה!' },
                 { trigger: 'wrong', text: 'הצבע הזה לא מתאים. עוד ניסיון!' },
                 { trigger: 'streak_5', text: '5 ברצף! אמן אמיתי! 🎨' },
@@ -534,7 +534,7 @@ export const LEVEL_CHAPTERS = {
             name: 'הרופא החכם',
             icon: '🧑‍⚕️',
             dialogues: [
-                { trigger: 'start', text: '{name}! בוא נלמד על הגוף!' },
+                { trigger: 'start', text: { boy: '{name}! בוא נלמד על הגוף!', girl: '{name}! בואי נלמד על הגוף!' } },
                 { trigger: 'correct', text: 'מושלם! עוד חלק נלמד!' },
                 { trigger: 'wrong', text: { boy: 'בדוק שוב, חבר!', girl: 'בדקי שוב, חברה!' } },
                 { trigger: 'streak_5', text: '5 ברצף! רופא מומחה! 🩺' },
@@ -574,7 +574,7 @@ export const LEVEL_CHAPTERS = {
                 { trigger: 'correct', text: 'מהלך מדהים!' },
                 { trigger: 'wrong', text: { boy: 'התאמן עוד! נסה שוב!', girl: 'התאמני עוד! נסי שוב!' } },
                 { trigger: 'streak_5', text: '5 ברצף! אלוף הזירה! ⚔️' },
-                { trigger: 'complete', text: 'ניצחון! אתה אלוף!' }
+                { trigger: 'complete', text: { boy: 'ניצחון! אתה אלוף!', girl: 'ניצחון! את אלופה!' } }
             ]
         }
     },
@@ -608,7 +608,7 @@ export const LEVEL_CHAPTERS = {
             dialogues: [
                 { trigger: 'start', text: '{name}... היער בוחן אותך.' },
                 { trigger: 'correct', text: 'היער מנצנץ! מילה חזרה!' },
-                { trigger: 'wrong', text: 'היער אפל... אבל אל תוותר!' },
+                { trigger: 'wrong', text: { boy: 'היער אפל... אבל אל תוותר!', girl: 'היער אפל... אבל אל תוותרי!' } },
                 { trigger: 'streak_5', text: '5 ברצף! כוח היער איתך! 🌲' },
                 { trigger: 'complete', text: 'היער חי שוב! תודה!' }
             ]
@@ -644,9 +644,9 @@ export const LEVEL_CHAPTERS = {
             dialogues: [
                 { trigger: 'start', text: '{name}, שמעתי הרבה עליך.' },
                 { trigger: 'correct', text: 'חוכמה רבה!' },
-                { trigger: 'wrong', text: 'גם חכמים טועים. המשך!' },
+                { trigger: 'wrong', text: { boy: 'גם חכמים טועים. המשך!', girl: 'גם חכמות טועות. המשיכי!' } },
                 { trigger: 'streak_5', text: { boy: '5 ברצף! אתה חכם כמו מורה!', girl: '5 ברצף! את חכמה כמו מורה!' } },
-                { trigger: 'complete', text: 'מוכן לפסגה!' }
+                { trigger: 'complete', text: { boy: 'מוכן לפסגה!', girl: 'מוכנה לפסגה!' } }
             ]
         }
     },
@@ -678,9 +678,9 @@ export const LEVEL_CHAPTERS = {
             name: 'הקוסם האפל',
             icon: '🧙‍♂️',
             dialogues: [
-                { trigger: 'start', text: 'אה, {name}! חשבת שתנצח אותי?' },
+                { trigger: 'start', text: { boy: 'אה, {name}! חשבת שתנצח אותי?', girl: 'אה, {name}! חשבת שתנצחי אותי?' } },
                 { trigger: 'correct', text: 'לא! איך ידעת?!' },
-                { trigger: 'wrong', text: 'הא! ידעתי שלא תצליח!' },
+                { trigger: 'wrong', text: { boy: 'הא! ידעתי שלא תצליח!', girl: 'הא! ידעתי שלא תצליחי!' } },
                 { trigger: 'streak_5', text: 'בלתי אפשרי! 5 ברצף?!' },
                 { trigger: 'complete', text: 'נוצחתי... המילים חופשיות!' }
             ]
@@ -716,7 +716,7 @@ export const LEVEL_CHAPTERS = {
             name: 'המורה הקסומה',
             icon: '🧑‍🏫',
             dialogues: [
-                { trigger: 'start', text: 'ברוך הבא לכיתה, {name}! השיעור מתחיל.' },
+                { trigger: 'start', text: { boy: 'ברוך הבא לכיתה, {name}! השיעור מתחיל.', girl: 'ברוכה הבאה לכיתה, {name}! השיעור מתחיל.' } },
                 { trigger: 'correct', text: { boy: 'תשובה מצוינת! אתה תלמיד מבריק!', girl: 'תשובה מצוינת! את תלמידה מבריקה!' } },
                 { trigger: 'wrong', text: { boy: 'זה בסדר לטעות — ככה לומדים! נסה שוב.', girl: 'זה בסדר לטעות — ככה לומדים! נסי שוב.' } },
                 { trigger: 'streak_3', text: '3 ברצף! הכיתה מוחאת כפיים! 👏' },
@@ -788,7 +788,7 @@ export const LEVEL_CHAPTERS = {
             name: 'שופט הטורניר',
             icon: '🏅',
             dialogues: [
-                { trigger: 'start', text: 'המתחרה {name} נכנס לזירה! שיהיה בהצלחה!' },
+                { trigger: 'start', text: { boy: 'המתחרה {name} נכנס לזירה! שיהיה בהצלחה!', girl: 'המתחרה {name} נכנסת לזירה! שיהיה בהצלחה!' } },
                 { trigger: 'correct', text: 'פגיעה במרכז! נקודה מלאה! 🎯' },
                 { trigger: 'wrong', text: { boy: 'החטאה קטנה — אלוף לא מוותר!', girl: 'החטאה קטנה — אלופה לא מוותרת!' } },
                 { trigger: 'streak_5', text: '5 פגיעות ברצף! הקהל משתגע! 🔥' },
@@ -826,7 +826,7 @@ export const LEVEL_CHAPTERS = {
             name: 'המלכה הזקנה',
             icon: '👵',
             dialogues: [
-                { trigger: 'start', text: '{name}, הממלכה כולה צופה בך. הראה לנו אגדה!' },
+                { trigger: 'start', text: { boy: '{name}, הממלכה כולה צופה בך. הראה לנו אגדה!', girl: '{name}, הממלכה כולה צופה בך. הראי לנו אגדה!' } },
                 { trigger: 'correct', text: 'מילה של אגדה! הכתר מתקרב!' },
                 { trigger: 'wrong', text: { boy: 'גם אגדות טועות לפעמים. המשך!', girl: 'גם אגדות טועות לפעמים. המשיכי!' } },
                 { trigger: 'streak_5', text: 'הכס זוהר! 5 ברצף! ✨' },
@@ -862,7 +862,7 @@ export const LEVEL_CHAPTERS = {
             name: 'החייט הקסום',
             icon: '🪡',
             dialogues: [
-                { trigger: 'start', text: 'ברוך הבא לארון, {name}! בוא נתפור מילים.' },
+                { trigger: 'start', text: { boy: 'ברוך הבא לארון, {name}! בוא נתפור מילים.', girl: 'ברוכה הבאה לארון, {name}! בואי נתפור מילים.' } },
                 { trigger: 'correct', text: 'תפירה מושלמת! עוד בגד מוכן!' },
                 { trigger: 'wrong', text: { boy: 'החוט הסתבך קצת — נסה שוב!', girl: 'החוט הסתבך קצת — נסי שוב!' } },
                 { trigger: 'streak_3', text: '3 ברצף! המספריים רוקדים! ✂️' },
@@ -898,7 +898,7 @@ export const LEVEL_CHAPTERS = {
             name: 'קוסמת העננים',
             icon: '🌦️',
             dialogues: [
-                { trigger: 'start', text: '{name}, השמיים מחכים לך! בוא נרגיע את הסערה.' },
+                { trigger: 'start', text: { boy: '{name}, השמיים מחכים לך! בוא נרגיע את הסערה.', girl: '{name}, השמיים מחכים לך! בואי נרגיע את הסערה.' } },
                 { trigger: 'correct', text: 'ענן אחד התפזר! השמש מציצה!' },
                 { trigger: 'wrong', text: { boy: 'טיפת גשם קטנה — נסה שוב!', girl: 'טיפת גשם קטנה — נסי שוב!' } },
                 { trigger: 'streak_3', text: '3 ברצף! הקשת מתחילה להופיע! 🌈' },
@@ -960,9 +960,9 @@ export const LEVEL_CHAPTERS = {
         },
 
         completion: {
-            boy: `כל הצעצועים זוכרים את שמם ורוקדים!
+            boy: `כל הצעצועים זוכרים את השמות שלהם ורוקדים!
             הם בחרו בך לחבר הכי טוב שלהם. 🎈`,
-            girl: `כל הצעצועים זוכרים את שמם ורוקדים!
+            girl: `כל הצעצועים זוכרים את השמות שלהם ורוקדים!
             הם בחרו בך לחברה הכי טובה שלהם. 🎈`
         },
 
@@ -970,7 +970,7 @@ export const LEVEL_CHAPTERS = {
             name: 'בובת הקפיץ',
             icon: '🤹',
             dialogues: [
-                { trigger: 'start', text: 'קפיץ קפוץ, {name}! בוא נעיר את הצעצועים!' },
+                { trigger: 'start', text: { boy: 'קפיץ קפוץ, {name}! בוא נעיר את הצעצועים!', girl: 'קפיץ קפוץ, {name}! בואי נעיר את הצעצועים!' } },
                 { trigger: 'correct', text: 'עוד צעצוע נזכר בשמו וקם לשחק!' },
                 { trigger: 'wrong', text: { boy: 'אופס, הקפיץ קפץ הצידה — נסה שוב!', girl: 'אופס, הקפיץ קפץ הצידה — נסי שוב!' } },
                 { trigger: 'streak_3', text: '3 ברצף! מסיבת צעצועים! 🎉' },
@@ -1012,7 +1012,7 @@ export const LEVEL_CHAPTERS = {
                 { trigger: 'correct', text: 'העולם כולו מריע! עוד מילה מושלמת!' },
                 { trigger: 'wrong', text: { boy: 'גם אלופי עולם נושמים עמוק וממשיכים!', girl: 'גם אלופות עולם נושמות עמוק וממשיכות!' } },
                 { trigger: 'streak_5', text: '5 ברצף! זיקוקים מעל האצטדיון! 🎆' },
-                { trigger: 'complete', text: 'תרועות! אלוף העולם של המילים נולד! 🌍' }
+                { trigger: 'complete', text: { boy: 'תרועות! אלוף העולם של המילים נולד! 🌍', girl: 'תרועות! אלופת העולם של המילים נולדה! 🌍' } }
             ]
         }
     },
@@ -1042,7 +1042,7 @@ export const PET_EVOLUTION = {
                 icon: '🐕',
                 wordsRequired: 0,
                 ability: 'מלווה אותך בהרפתקה',
-                dialogue: 'הב הב! בוא נלמד יחד!'
+                dialogue: 'הב הב! ללמוד יחד זה הכי כיף!'
             },
             {
                 level: 2,
@@ -1072,7 +1072,7 @@ export const PET_EVOLUTION = {
     },
 
     unicorn: {
-        name: 'חד קרן',
+        name: 'חד-קרן',
         icon: '🦄',
         stages: [
             {
@@ -1085,7 +1085,7 @@ export const PET_EVOLUTION = {
             },
             {
                 level: 2,
-                name: 'חד קרן צעיר',
+                name: 'חד-קרן צעיר',
                 icon: '🦄',
                 wordsRequired: 30,
                 ability: 'יכול לעוף קצת',
@@ -1093,7 +1093,7 @@ export const PET_EVOLUTION = {
             },
             {
                 level: 3,
-                name: 'חד קרן מופלא',
+                name: 'חד-קרן מופלא',
                 icon: '🦄',
                 wordsRequired: 80,
                 ability: 'קסם ריפוי',
@@ -1101,11 +1101,11 @@ export const PET_EVOLUTION = {
             },
             {
                 level: 4,
-                name: 'חד קרן שמימי',
+                name: 'חד-קרן שמימי',
                 icon: '🦄',
                 wordsRequired: 150,
                 ability: 'טלפורטציה',
-                dialogue: 'בוא נעוף לכוכבים!'
+                dialogue: 'עפים לכוכבים ביחד!'
             }
         ]
     },
@@ -1128,7 +1128,7 @@ export const PET_EVOLUTION = {
                 icon: '🐉',
                 wordsRequired: 30,
                 ability: 'יורק אש קטנה',
-                dialogue: 'תראה! אני יכול לירוק אש!'
+                dialogue: 'וואו! אני כבר יורק אש אמיתית!'
             },
             {
                 level: 3,
@@ -1171,7 +1171,7 @@ export const MYSTERIES = {
         { id: 'perfect_level', name: 'מושלם!', icon: '💎', condition: 'complete_level_no_mistakes', reward: 200 },
         { id: 'speed_demon', name: 'מהיר כברק', icon: '⚡', condition: 'answer_under_3_seconds', reward: 50 },
         { id: 'comeback_kid', name: 'חזרה מנצחת', icon: '🔥', condition: 'win_with_1_life', reward: 150 },
-        { id: 'word_master', name: 'אדון המילים', icon: '📚', condition: 'learn_50_words', reward: 500 },
+        { id: 'word_master', name: 'קוסם המילים', icon: '📚', condition: 'learn_50_words', reward: 500 },
         { id: 'streak_champion', name: 'אלוף הרצפים', icon: '🏆', condition: 'streak_of_20', reward: 300 },
     ],
 
@@ -1207,15 +1207,15 @@ export const ENCOURAGEMENT = {
         'לא נורא, בפעם הבאה! 🌈',
         'טעויות זה חלק מהלמידה 📚',
         'אל תוותרו! 🔥',
-        'אפשר! 💫',
+        'עוד ניסיון קטן! 💫',
     ],
 
     streak: {
         3: ['3 ברצף! אש! 🔥', 'מתחמם פה! 🌡️'],
         5: ['5 ברצף! סופר! 🦸', 'בלתי ניתן לעצירה! 🚀'],
         10: ['10 ברצף! אגדי! 👑', 'מכונה! 🤖'],
-        15: ['15 ברצף! על-אנושי! 🌟', 'מאסטר! 🎓'],
-        20: ['20 ברצף! אלוהי! ✨', 'אין כמוך! 🏆'],
+        15: ['15 ברצף! על-אנושי! 🌟', 'אין עליך! 🎓'],
+        20: ['20 ברצף! לא ייאמן! ✨', 'אין כמוך! 🏆'],
     },
 
     lowLives: [

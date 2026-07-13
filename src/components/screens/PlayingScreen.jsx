@@ -48,7 +48,7 @@ export default function PlayingScreen({
                         key={i}
                         fill={i <= lives ? "#ef4444" : "none"}
                         className={i <= lives ? "text-red-500" : "text-slate-300"}
-                        aria-label={i <= lives ? "חיה פעילה" : "חיה אבודה"}
+                        aria-label={i <= lives ? "לב מלא" : "לב ריק"}
                     />
                 ))}
 
@@ -59,7 +59,7 @@ export default function PlayingScreen({
                                 onClick={onUseHint}
                                 disabled={!!feedback}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-xl font-bold text-sm shadow-sm hover:bg-amber-200 disabled:opacity-40 transition-colors"
-                                aria-label="השתמש ברמז"
+                                aria-label="שימוש ברמז"
                             >
                                 <Lightbulb size={16} /> {hintsAvailable}
                             </button>
@@ -69,7 +69,7 @@ export default function PlayingScreen({
                                 onClick={onSkipWord}
                                 disabled={!!feedback}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-sky-100 text-sky-700 rounded-xl font-bold text-sm shadow-sm hover:bg-sky-200 disabled:opacity-40 transition-colors"
-                                aria-label="דלג על המילה"
+                                aria-label="דילוג על המילה"
                             >
                                 <SkipForward size={16} /> {skipsAvailable}
                             </button>

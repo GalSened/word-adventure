@@ -80,7 +80,7 @@ export const AVATAR_OPTIONS = [
 // Pet configuration
 export const PET_CONFIG = {
     dog: { name: 'כלבלב', icon: '🐕' },
-    unicorn: { name: 'חד קרן', icon: '🦄' },
+    unicorn: { name: 'חד-קרן', icon: '🦄' },
     dragon: { name: 'דרקון', icon: '🐉' }
 };
 
