@@ -1177,6 +1177,166 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </div>
           </button>
           <button
+            aria-label="ארון הבגדים הקסום - נעול"
+            class="relative w-full bg-gradient-to-r from-pink-400 to-fuchsia-600 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                17
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  ארון הבגדים הקסום
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The Magic Wardrobe
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              👗
+            </div>
+          </button>
+          <button
+            aria-label="ממלכת מזג האוויר - נעול"
+            class="relative w-full bg-gradient-to-r from-sky-400 to-indigo-600 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                18
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  ממלכת מזג האוויר
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The Weather Kingdom
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              ⛅
+            </div>
+          </button>
+          <button
+            aria-label="אצטדיון הגיבורים - נעול"
+            class="relative w-full bg-gradient-to-r from-green-500 to-emerald-700 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                19
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  אצטדיון הגיבורים
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  Heroes Stadium
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              ⚽
+            </div>
+          </button>
+          <button
+            aria-label="ארץ הצעצועים - נעול"
+            class="relative w-full bg-gradient-to-r from-amber-400 to-orange-600 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                20
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  ארץ הצעצועים
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  Toyland
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              🧸
+            </div>
+          </button>
+          <button
+            aria-label="אליפות העולם של המילים - נעול"
+            class="relative w-full bg-gradient-to-r from-indigo-500 to-purple-800 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center transition-all opacity-40 cursor-not-allowed grayscale"
+            disabled=""
+          >
+            <div
+              class="flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black"
+              >
+                21
+              </div>
+              <div>
+                <h3
+                  class="text-xl font-bold"
+                >
+                  אליפות העולם של המילים
+                </h3>
+                <p
+                  class="text-sm opacity-80"
+                >
+                  The World Word Championship
+                </p>
+              </div>
+            </div>
+            <div
+              class="text-4xl"
+            >
+              🌍
+            </div>
+          </button>
+          <button
             class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-5 rounded-2xl text-right shadow-lg flex justify-between items-center hover:scale-[1.02] hover:shadow-xl transition-all"
           >
             <div
@@ -1756,7 +1916,7 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
           >
             0
             /
-            261
+            424
              
             מילים נשלטו
           </div>
