@@ -121,15 +121,72 @@ export function milestoneDue(progress, servedCount) {
  * End-of-walk rewards.
  * Coins are the shared currency (score); treats drop into the inventory
  * for future feedings; happiness always rises a little — walks are fun
- * even on a bad word day.
+ * even on a bad word day. `bonusCoins` carries coins tapped along the
+ * path and fetch-game winnings straight into the payout.
  */
-export function computeWalkRewards({ correctCount, total }) {
+export function computeWalkRewards({ correctCount, total, bonusCoins = 0 }) {
     const perfect = total > 0 && correctCount === total;
     return {
-        coins: correctCount * 40 + (perfect ? 100 : 0),
+        coins: correctCount * 40 + (perfect ? 100 : 0) + bonusCoins,
         treats: Math.floor(correctCount / 3),
         happiness: 8 + correctCount * 4,
         perfect,
+    };
+}
+
+/** Below this satiety the pet is hungry: slower walk + a food thought bubble. */
+export const HUNGRY_THRESHOLD = 30;
+/** At or above this happiness the pet sniffs out bonus coins on the path. */
+export const HAPPY_THRESHOLD = 70;
+
+/**
+ * How the pet's care state changes THIS walk. Computed live each frame so
+ * feeding a hungry pet at the fountain visibly restores its pace.
+ *
+ * @param {Object|undefined} petCare - { satiety, happiness } (legacy saves may lack it)
+ * @returns {{hungry: boolean, speedMult: number, bonusSpots: number}}
+ */
+export function moodModifiers(petCare) {
+    const satiety = petCare?.satiety ?? 70;
+    const happiness = petCare?.happiness ?? 70;
+    const hungry = satiety < HUNGRY_THRESHOLD;
+    return {
+        hungry,
+        speedMult: hungry ? 0.75 : 1,
+        bonusSpots: happiness >= HAPPY_THRESHOLD ? 4 : 0,
+    };
+}
+
+/**
+ * Deterministic bonus-coin positions (walk progress 0-100), stepped across
+ * the walk and kept ≥3 away from every word milestone so a coin never
+ * competes with a question.
+ */
+export function buildBonusCoinSpots(count) {
+    const spots = [];
+    for (let candidate = 8; spots.length < count && candidate < 96; candidate += 9) {
+        if (WALK_MILESTONES.every(m => Math.abs(m - candidate) >= 3)) {
+            spots.push(candidate);
+        }
+    }
+    return spots;
+}
+
+/** Fetch minigame tuning: catches to win and how long the ball stays in play. */
+export const FETCH_CONFIG = { catchesTarget: 3, timeoutMs: 9000 };
+
+/**
+ * Fetch minigame payout. Full catches pay the toy's full happiness value;
+ * fewer catches pay proportionally less but never zero — the dog always
+ * enjoys the game. Coins reward the kid's own catching.
+ */
+export function fetchRewards(catches, toyHappiness) {
+    const c = Math.max(0, Math.min(catches, FETCH_CONFIG.catchesTarget));
+    return {
+        coins: c * 15,
+        happiness: Math.round(
+            toyHappiness * (0.4 + (0.6 * c) / FETCH_CONFIG.catchesTarget)
+        ),
     };
 }
 

@@ -12,33 +12,49 @@ import { calculateNextReview } from '../utils/srs';
 import {
     LANDMARKS,
     WORLD_LENGTH,
+    FETCH_CONFIG,
     buildWalkPool,
     milestoneDue,
     computeWalkRewards,
     skyPhaseFor,
+    moodModifiers,
+    buildBonusCoinSpots,
+    fetchRewards,
 } from '../utils/walkSession';
 import { ANIMATION_CONFIG } from '../config/constants';
+import { DogWalker, KidWalker, RoundTree, PineTree } from './WalkArt';
 
-const FLORA = ['🌳', '🌲', '🌿', '🌾', '🌷', '🌻'];
+const FLORA = ['🌿', '🌾', '🌷', '🌻', '🌼', '🍄'];
 const FAUNA = ['🦋', '🐦', '🐝'];
 
-// Pet emoji representations with walking animation
-const PET_EMOJIS = {
-    dog: { idle: '🐕', walk: ['🐕', '🐕‍🦺', '🐕'], sniff: '🐶', happy: '🐶' },
-    cat: { idle: '🐱', walk: ['🐱', '🐈', '🐱'], sniff: '😺', happy: '😸' },
-    unicorn: { idle: '🦄', walk: ['🦄', '🐴', '🦄'], sniff: '🦄', happy: '🦄' },
-    dragon: { idle: '🐉', walk: ['🐉', '🐲', '🐉'], sniff: '🐉', happy: '🐲' },
-    owl: { idle: '🦉', walk: ['🦉', '🦉', '🦉'], sniff: '🦉', happy: '🦉' },
-    phoenix: { idle: '🔥', walk: ['🔥', '🔥', '🔥'], sniff: '🔥', happy: '🔥' },
+// Stable stage glyphs for non-dog pets (no frame swapping — the old
+// emoji-cycling gait made the characters visibly flicker).
+const PET_STAGE_EMOJI = {
+    dog: '🐕',
+    cat: '🐱',
+    unicorn: '🦄',
+    dragon: '🐉',
+    owl: '🦉',
+    phoenix: '🔥',
 };
 
-const AVATAR_WALK_FRAMES = {
-    girl: ['👸', '🚶‍♀️', '👸'],
-    boy: ['🤴', '🚶‍♂️', '🤴'],
-};
+// Deterministic bounce paths for the fetch minigame — a fresh path per catch
+// so the ball "escapes" somewhere new each time the kid grabs it.
+const BALL_PATHS = [
+    { x: ['5vw', '70vw', '30vw', '80vw', '5vw'], y: [0, -180, -40, -220, 0] },
+    { x: ['80vw', '20vw', '60vw', '10vw', '80vw'], y: [-30, -200, 0, -160, -30] },
+    { x: ['40vw', '85vw', '15vw', '55vw', '40vw'], y: [-100, -20, -240, -60, -100] },
+];
+
+// Fixed character layout inside the stage box (px, from its bottom-left).
+const STAGE = { left: 16, width: 640, height: 300 };
+const KID = { left: 60, bottom: 34, width: 118 };
+const DOG = { left: 300, bottom: 0, width: 180 };
+// Leash anchors in stage SVG coordinates (y measured from the top of the box)
+const LEASH = { hand: [168, 158], mid: [300, 268], collar: [430, 216] };
 
 function petTypeFromIcon(icon) {
-    const match = Object.entries(PET_EMOJIS).find(([type]) =>
+    const match = Object.entries(PET_STAGE_EMOJI).find(([type]) =>
         STORE_ITEMS[type]?.icon === icon
     );
     return match ? match[0] : 'dog';
@@ -75,29 +91,47 @@ export default function PetWalkingGame({
         []
     );
 
+    // A happy pet sniffs out bonus coins — decided by mood at the gate.
+    const bonusSpots = useMemo(
+        () => buildBonusCoinSpots(moodModifiers(useGameStore.getState().petCare).bonusSpots),
+        []
+    );
+
     // --- STATE ---
-    // walking | found | correct | wrong | feeding | playing | summary
+    // walking | found | correct | wrong | feeding | playing | fetchGame | summary
     const [gameState, setGameState] = useState('walking');
-    const [progress, setProgress] = useState(0);
+    const [progress, setProgress] = useState(0); // integer 0-100, for HUD/phase only
     const [coinsEarned, setCoinsEarned] = useState(0);
-    const [walkFrame, setWalkFrame] = useState(0);
     const [currentWord, setCurrentWord] = useState(null);
     const [options, setOptions] = useState([]);
     const [banner, setBanner] = useState(null); // { icon, text }
     const [correctCount, setCorrectCount] = useState(0);
+    const [collectedSpots, setCollectedSpots] = useState(() => new Set());
+    const [fetchCatches, setFetchCatches] = useState(0);
 
     // --- LOOP-OWNED REFS ---
     const sceneOffsetRef = useRef(0);
-    const [, setSceneRenderTrigger] = useState(0);
-    const petPosRef = useRef({ x: 400, y: 0, bobOffset: 0 });
-    const avatarPosRef = useRef({ x: 100, y: 0 });
     const animationFrameRef = useRef(null);
     const progressRef = useRef(0);
+    const progressIntRef = useRef(0);
     const servedRef = useRef(0); // word encounters served
     const landmarksSeenRef = useRef(new Set());
     const summaryShownRef = useRef(false);
     const rewardsAppliedRef = useRef(false);
     const correctCountRef = useRef(0);
+    const bonusCoinsRef = useRef(0); // tapped path coins + fetch winnings
+    const fetchTimeoutRef = useRef(null);
+    const fetchCatchesRef = useRef(0);
+    const collectedSpotsRef = useRef(new Set()); // tap-race guard for coins
+
+    // Scroll layers, moved imperatively each frame (GPU transforms — no
+    // React re-render churn, which caused visible scenery judder).
+    const hillsFarRef = useRef(null);
+    const hillsNearRef = useRef(null);
+    const pathRef = useRef(null);
+    const backLayerRef = useRef(null);
+    const mainLayerRef = useRef(null);
+    const frontLayerRef = useRef(null);
 
     // Decay once per walk: walking is hungry work.
     // Ref-guarded — StrictMode double-invokes mount effects in dev.
@@ -108,20 +142,37 @@ export default function PetWalkingGame({
         useGameStore.getState().decayPetCare();
     }, []);
 
-    // --- PROCEDURAL SCENERY (deterministic per mount) ---
-    const worldObjects = useMemo(() => {
-        return Array.from({ length: 48 }).map((_, i) => ({
-            id: i,
-            icon:
-                i % 7 === 3
-                    ? FAUNA[i % FAUNA.length]
-                    : FLORA[(i * 13) % FLORA.length],
-            x: i * 260 + ((i * 97) % 120),
-            y: (i * 31) % 20,
-            scale: 0.5 + ((i * 53) % 100) / 80,
-            depth: ((i * 71) % 100) / 100,
-        }));
-    }, []);
+    // --- PROCEDURAL SCENERY (deterministic, laid out once in world coords) ---
+    // Two parallax bands; children are static, only the container moves.
+    const backObjects = useMemo(
+        () =>
+            Array.from({ length: 27 }).map((_, i) => ({
+                id: `b${i}`,
+                kind: i % 4 === 1 ? 'pine' : i % 4 === 3 ? 'flora' : 'round',
+                icon: FLORA[(i * 13) % FLORA.length],
+                x: i * 450 + ((i * 97) % 160),
+                scale: 0.55 + ((i * 53) % 100) / 170,
+            })),
+        []
+    );
+    const frontObjects = useMemo(
+        () =>
+            Array.from({ length: 30 }).map((_, i) => ({
+                id: `f${i}`,
+                kind:
+                    i % 8 === 5
+                        ? 'lamp'
+                        : i % 7 === 3
+                            ? 'fauna'
+                            : i % 4 === 1
+                                ? (i % 2 === 0 ? 'round' : 'pine')
+                                : 'flora',
+                icon: i % 7 === 3 ? FAUNA[i % FAUNA.length] : FLORA[(i * 11) % FLORA.length],
+                x: i * 520 + ((i * 71) % 200),
+                scale: 0.8 + ((i * 37) % 100) / 130,
+            })),
+        []
+    );
 
     const stars = useMemo(
         () =>
@@ -148,6 +199,47 @@ export default function PetWalkingGame({
         setOptions(seededShuffle([word, ...distractors], word.id));
     }, [walkPool]);
 
+    // --- FETCH MINIGAME (meadow) ---
+    const resolveFetch = useCallback(() => {
+        if (fetchTimeoutRef.current) {
+            clearTimeout(fetchTimeoutRef.current);
+            fetchTimeoutRef.current = null;
+        }
+        const catches = fetchCatchesRef.current;
+        const reward = fetchRewards(catches, bestToy?.effect.happiness ?? 10);
+        useGameStore.getState().boostPetHappiness(reward.happiness);
+        if (reward.coins > 0) {
+            bonusCoinsRef.current += reward.coins;
+            setCoinsEarned((c) => c + reward.coins);
+        }
+        hapticFeedback('success');
+        confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#4ade80', '#fbbf24'] });
+        setBanner({
+            icon: '🎾',
+            text:
+                catches >= FETCH_CONFIG.catchesTarget
+                    ? 'תפיסה מושלמת! ' + pet.name + ' באושר עילאי!'
+                    : pet.name + ' רץ והביא את הצעצוע בעצמו!',
+        });
+        setGameState('walking');
+        setTimeout(() => setBanner(null), 2400);
+    }, [bestToy, pet.name]);
+
+    const catchBall = useCallback(() => {
+        if (fetchCatchesRef.current >= FETCH_CONFIG.catchesTarget) return;
+        fetchCatchesRef.current += 1;
+        setFetchCatches(fetchCatchesRef.current);
+        hapticFeedback('medium');
+        if (fetchCatchesRef.current >= FETCH_CONFIG.catchesTarget) {
+            resolveFetch();
+        }
+    }, [resolveFetch]);
+
+    // Never leave a fetch timer running past unmount
+    useEffect(() => () => {
+        if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
+    }, []);
+
     const triggerLandmark = useCallback((landmark) => {
         landmarksSeenRef.current.add(landmark.id);
         const text = isGirl ? landmark.line.girl : landmark.line.boy;
@@ -156,38 +248,60 @@ export default function PetWalkingGame({
         if (landmark.id === 'fountain') {
             setGameState('feeding');
         } else if (landmark.id === 'meadow' && bestToy) {
-            setGameState('playing');
-            // Auto-resolved play moment
-            setTimeout(() => {
-                useGameStore.getState().boostPetHappiness(bestToy.effect.happiness);
-                hapticFeedback('success');
-                setGameState('walking');
-            }, 2600);
+            if (reduceMotion) {
+                // Reduced motion: calm auto-resolved play moment
+                setGameState('playing');
+                setTimeout(() => {
+                    useGameStore.getState().boostPetHappiness(bestToy.effect.happiness);
+                    hapticFeedback('success');
+                    setGameState('walking');
+                }, 2600);
+            } else {
+                fetchCatchesRef.current = 0;
+                setFetchCatches(0);
+                setGameState('fetchGame');
+                fetchTimeoutRef.current = setTimeout(resolveFetch, FETCH_CONFIG.timeoutMs);
+            }
         } else {
             // Non-blocking story beat
             setTimeout(() => setBanner(null), 2800);
         }
-    }, [isGirl, bestToy]);
+    }, [isGirl, bestToy, reduceMotion, resolveFetch]);
 
     // --- GAME LOOP ---
     useEffect(() => {
         let isActive = true;
-        let frameCount = 0;
 
-        const animate = (currentTime) => {
+        const animate = () => {
             if (!isActive) return;
 
             if (gameState === 'walking') {
-                sceneOffsetRef.current += ANIMATION_CONFIG.PET_WALK_SCROLL_SPEED;
-
-                petPosRef.current.bobOffset = Math.sin(currentTime * 0.003) * 15;
-                petPosRef.current.x = 400 + Math.sin(currentTime * 0.001) * 30;
+                // Hungry pet drags its paws; scroll and progress scale together
+                // so world-position math (landmarks, coins) stays in sync.
+                const { speedMult } = moodModifiers(useGameStore.getState().petCare);
+                sceneOffsetRef.current += ANIMATION_CONFIG.PET_WALK_SCROLL_SPEED * speedMult;
 
                 progressRef.current = Math.min(
                     100,
-                    progressRef.current + ANIMATION_CONFIG.PET_WALK_PROGRESS_INCREMENT
+                    progressRef.current + ANIMATION_CONFIG.PET_WALK_PROGRESS_INCREMENT * speedMult
                 );
-                setProgress(progressRef.current);
+
+                // Move the world: one GPU transform per layer, zero re-renders.
+                const w = window.innerWidth;
+                const o = sceneOffsetRef.current;
+                if (hillsFarRef.current) hillsFarRef.current.style.transform = `translate3d(${-((o * 0.1) % (w * 0.5))}px,0,0)`;
+                if (hillsNearRef.current) hillsNearRef.current.style.transform = `translate3d(${-((o * 0.25) % (w * 0.5))}px,0,0)`;
+                if (pathRef.current) pathRef.current.style.transform = `translate3d(${-(o % 260)}px,0,0)`;
+                if (backLayerRef.current) backLayerRef.current.style.transform = `translate3d(${-o * 0.8}px,0,0)`;
+                if (mainLayerRef.current) mainLayerRef.current.style.transform = `translate3d(${-o}px,0,0)`;
+                if (frontLayerRef.current) frontLayerRef.current.style.transform = `translate3d(${-o * 1.2}px,0,0)`;
+
+                // React only needs whole-percent updates (HUD + sky phase).
+                const intProgress = Math.floor(progressRef.current);
+                if (intProgress !== progressIntRef.current) {
+                    progressIntRef.current = intProgress;
+                    setProgress(intProgress);
+                }
 
                 // Word encounters at fixed milestones — deterministic journey
                 if (milestoneDue(progressRef.current, servedRef.current)) {
@@ -212,10 +326,6 @@ export default function PetWalkingGame({
                     setGameState('summary');
                     return;
                 }
-
-                frameCount++;
-                if (frameCount % 5 === 0) setWalkFrame((prev) => (prev + 1) % 3);
-                if (frameCount % 2 === 0) setSceneRenderTrigger((prev) => prev + 1);
             }
 
             animationFrameRef.current = requestAnimationFrame(animate);
@@ -292,6 +402,16 @@ export default function PetWalkingGame({
         setGameState('walking');
     }, []);
 
+    // --- BONUS COINS (happy-pet finds) ---
+    const collectCoin = useCallback((spot) => {
+        if (collectedSpotsRef.current.has(spot)) return;
+        collectedSpotsRef.current.add(spot);
+        setCollectedSpots(new Set(collectedSpotsRef.current));
+        bonusCoinsRef.current += 10;
+        setCoinsEarned((c) => c + 10);
+        hapticFeedback('light');
+    }, []);
+
     // --- SUMMARY / REWARDS ---
     const finishWalk = useCallback(() => {
         if (rewardsAppliedRef.current) return;
@@ -300,6 +420,7 @@ export default function PetWalkingGame({
         const rewards = computeWalkRewards({
             correctCount: correctCountRef.current,
             total: walkPool.length,
+            bonusCoins: bonusCoinsRef.current,
         });
         store.boostPetHappiness(rewards.happiness);
         store.recordWalkCompleted();
@@ -313,35 +434,32 @@ export default function PetWalkingGame({
     }, [walkPool.length, onComplete]);
 
     // --- VISUAL HELPERS ---
-    const petEmoji = PET_EMOJIS[petType];
-    const getCurrentPetEmoji = () => {
-        if (gameState === 'found') return petEmoji.sniff;
-        if (gameState === 'feeding' || gameState === 'playing') return petEmoji.happy;
-        if (gameState === 'walking') return petEmoji.walk[walkFrame];
-        return petEmoji.idle;
-    };
-    const getCurrentAvatarEmoji = () => {
-        const frames = AVATAR_WALK_FRAMES[isGirl ? 'girl' : 'boy'];
-        if (gameState === 'walking') return frames[walkFrame];
-        return isGirl ? '👸' : '🤴';
-    };
+    const walking = gameState === 'walking';
+    const dogMood =
+        gameState === 'feeding' || gameState === 'playing' || gameState === 'fetchGame' || gameState === 'correct'
+            ? 'happy'
+            : 'walk';
 
-    const getLeashPath = useCallback(() => {
-        const handX = avatarPosRef.current.x + 100;
-        const handY = 520;
-        const collarX = petPosRef.current.x + 40;
-        const collarY = 580 + petPosRef.current.bobOffset;
-        const distance = Math.abs(collarX - handX);
-        const midX = (handX + collarX) / 2;
-        const sag = distance * 0.4 + (gameState === 'walking' ? Math.sin(Date.now() / 300) * 8 : 15);
-        const midY = Math.max(handY, collarY) + sag;
-        return `M ${handX} ${handY} Q ${midX} ${midY} ${collarX} ${collarY}`;
-    }, [gameState]);
+    // The orb slides down (or the moon up) within each phase — no modulo jumps.
+    const phaseSpan = phase.id === 'day' ? [0, 40] : phase.id === 'sunset' ? [40, 75] : [75, 100];
+    const orbFrac = Math.max(0, Math.min(1, (progress - phaseSpan[0]) / (phaseSpan[1] - phaseSpan[0])));
+    const orbTop = phase.id === 'night' ? 36 - orbFrac * 26 : 6 + orbFrac * 30;
 
-    // Sun/moon arcs down toward the horizon as the walk progresses
-    const orbTop = 6 + (progress % 40) * 0.9;
+    const hazeColor =
+        phase.id === 'day'
+            ? 'rgba(255,255,255,0.35)'
+            : phase.id === 'sunset'
+                ? 'rgba(255,171,64,0.35)'
+                : 'rgba(30,27,75,0.55)';
+    const nightDim = phase.id === 'night' ? 'brightness(0.62) saturate(0.85)' : 'none';
 
     const moodEmoji = petCare.happiness >= 75 ? '😍' : petCare.happiness >= 40 ? '🙂' : '🥺';
+    const hungryNow = moodModifiers(petCare).hungry;
+    const summaryRewards = computeWalkRewards({
+        correctCount,
+        total: walkPool.length,
+        bonusCoins: bonusCoinsRef.current,
+    });
 
     return (
         <div
@@ -353,13 +471,36 @@ export default function PetWalkingGame({
             {/* Sky — crossfades between day/sunset/night with walk progress */}
             <div className={`absolute inset-0 bg-gradient-to-b ${phase.sky} transition-all duration-[3000ms]`} />
 
-            {/* Sun / moon */}
+            {/* Sun / moon with a real glow */}
             <div
-                className="absolute right-[12%] text-7xl transition-all duration-[2000ms] drop-shadow-xl"
+                className="absolute right-[12%] transition-all duration-[2000ms]"
                 style={{ top: `${orbTop}%` }}
                 aria-hidden="true"
             >
-                {phase.orb}
+                {phase.id === 'night' ? (
+                    <div
+                        className="relative w-20 h-20 rounded-full bg-slate-100"
+                        style={{ boxShadow: '0 0 44px 14px rgba(226,232,240,0.5)' }}
+                    >
+                        <div className="absolute w-4 h-4 rounded-full bg-slate-300/70" style={{ top: '22%', left: '28%' }} />
+                        <div className="absolute w-3 h-3 rounded-full bg-slate-300/60" style={{ top: '55%', left: '55%' }} />
+                        <div className="absolute w-2 h-2 rounded-full bg-slate-300/60" style={{ top: '38%', left: '64%' }} />
+                    </div>
+                ) : (
+                    <div
+                        className={reduceMotion ? 'w-24 h-24 rounded-full' : 'sun-pulse w-24 h-24 rounded-full'}
+                        style={{
+                            background:
+                                phase.id === 'sunset'
+                                    ? 'radial-gradient(circle, #ffd54f 0%, #ff8f00 72%)'
+                                    : 'radial-gradient(circle, #fff59d 0%, #ffb300 75%)',
+                            boxShadow:
+                                phase.id === 'sunset'
+                                    ? '0 0 60px 22px rgba(255,143,0,0.45)'
+                                    : '0 0 70px 26px rgba(255,193,7,0.4)',
+                        }}
+                    />
+                )}
             </div>
 
             {/* Stars (night only) */}
@@ -377,10 +518,27 @@ export default function PetWalkingGame({
                 </div>
             )}
 
+            {/* Drifting clouds until nightfall */}
+            {!phase.stars && (
+                <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                    {[0, 1, 2].map((i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute text-6xl opacity-80"
+                            style={{ top: `${8 + i * 9}%` }}
+                            animate={reduceMotion ? {} : { x: ['110vw', '-20vw'] }}
+                            transition={{ duration: 60 + i * 25, repeat: Infinity, ease: 'linear', delay: i * -30 }}
+                        >
+                            ☁️
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+
             {/* Far hills (SVG silhouettes, slow parallax) */}
             <svg
-                className="absolute bottom-[28vh] w-[220%] h-[30vh] opacity-50 transition-all duration-[3000ms]"
-                style={{ transform: `translateX(${-((sceneOffsetRef.current * 0.1) % (window.innerWidth * 0.5))}px)` }}
+                ref={hillsFarRef}
+                className="absolute bottom-[28vh] w-[220%] h-[30vh] opacity-50 transition-colors duration-[3000ms] will-change-transform"
                 viewBox="0 0 1200 200"
                 preserveAspectRatio="none"
                 aria-hidden="true"
@@ -391,8 +549,8 @@ export default function PetWalkingGame({
                 />
             </svg>
             <svg
-                className="absolute bottom-[24vh] w-[220%] h-[26vh] opacity-70 transition-all duration-[3000ms]"
-                style={{ transform: `translateX(${-((sceneOffsetRef.current * 0.25) % (window.innerWidth * 0.5))}px)` }}
+                ref={hillsNearRef}
+                className="absolute bottom-[24vh] w-[220%] h-[26vh] opacity-70 transition-colors duration-[3000ms] will-change-transform"
                 viewBox="0 0 1200 200"
                 preserveAspectRatio="none"
                 aria-hidden="true"
@@ -402,6 +560,143 @@ export default function PetWalkingGame({
                     fill={phase.hills}
                 />
             </svg>
+
+            {/* Horizon haze */}
+            <div
+                className="absolute bottom-[30vh] w-full h-[9vh] pointer-events-none transition-all duration-[3000ms]"
+                style={{ background: `linear-gradient(to top, ${hazeColor}, transparent)` }}
+                aria-hidden="true"
+            />
+
+            {/* Ground */}
+            <div className={`absolute bottom-0 w-full h-[35vh] bg-gradient-to-t ${phase.ground} transition-all duration-[3000ms] shadow-[0_-20px_40px_rgba(0,0,0,0.2)]`} aria-hidden="true" />
+
+            {/* Distant scenery band (slow parallax) */}
+            <div
+                ref={backLayerRef}
+                className="absolute inset-0 pointer-events-none will-change-transform transition-[filter] duration-[3000ms]"
+                style={{ filter: nightDim }}
+                aria-hidden="true"
+            >
+                {backObjects.map((obj) => (
+                    <div
+                        key={obj.id}
+                        className="absolute bottom-[29vh] opacity-80"
+                        style={{ left: obj.x, transform: `scale(${obj.scale})`, transformOrigin: 'bottom center', filter: 'blur(1px)' }}
+                    >
+                        {obj.kind === 'pine' ? (
+                            <PineTree style={{ width: 80 }} />
+                        ) : obj.kind === 'round' ? (
+                            <RoundTree style={{ width: 92 }} />
+                        ) : (
+                            <span className="text-5xl leading-none">{obj.icon}</span>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* Stone path */}
+            <div
+                className="absolute bottom-[16vh] w-full h-[7vh] overflow-hidden"
+                style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.06))' }}
+                aria-hidden="true"
+            >
+                <div
+                    ref={pathRef}
+                    className="h-full w-[200%] will-change-transform"
+                    style={{
+                        backgroundImage:
+                            'radial-gradient(ellipse 46px 15px at 40px 55%, rgba(255,255,255,0.3) 60%, transparent 62%),' +
+                            'radial-gradient(ellipse 34px 12px at 128px 28%, rgba(255,255,255,0.22) 60%, transparent 62%),' +
+                            'radial-gradient(ellipse 40px 13px at 208px 72%, rgba(255,255,255,0.26) 60%, transparent 62%)',
+                        backgroundSize: '260px 100%',
+                    }}
+                />
+            </div>
+
+            {/* World landmarks + bonus coins (true-speed layer) */}
+            <div
+                ref={mainLayerRef}
+                className="absolute inset-0 pointer-events-none will-change-transform"
+            >
+                {LANDMARKS.filter((lm) => lm.at > 0).map((lm) => (
+                    <div
+                        key={lm.id}
+                        className="absolute bottom-[21vh]"
+                        style={{ left: (lm.at / 100) * WORLD_LENGTH + 500 }}
+                        aria-hidden="true"
+                    >
+                        <span className="text-[9rem] leading-none drop-shadow-2xl">{lm.icon}</span>
+                    </div>
+                ))}
+
+                {bonusSpots
+                    .filter((s) => !collectedSpots.has(s))
+                    .map((spot) => (
+                        <motion.button
+                            key={spot}
+                            onClick={() => collectCoin(spot)}
+                            className="absolute bottom-[26vh] text-6xl drop-shadow-xl pointer-events-auto cursor-pointer"
+                            style={{ left: (spot / 100) * WORLD_LENGTH + 500 }}
+                            animate={reduceMotion ? {} : { y: [0, -16, 0], scale: [1, 1.1, 1] }}
+                            transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+                            whileTap={{ scale: 1.6, opacity: 0 }}
+                            aria-label="מטבע בונוס"
+                        >
+                            🪙
+                        </motion.button>
+                    ))}
+            </div>
+
+            {/* Near scenery band (fast parallax, in front of the path) */}
+            <div
+                ref={frontLayerRef}
+                className="absolute inset-0 pointer-events-none will-change-transform transition-[filter] duration-[3000ms] z-30"
+                style={{ filter: nightDim }}
+                aria-hidden="true"
+            >
+                {frontObjects.map((obj) => (
+                    <div
+                        key={obj.id}
+                        className="absolute bottom-[13vh]"
+                        style={{ left: obj.x, transform: `scale(${obj.scale})`, transformOrigin: 'bottom center' }}
+                    >
+                        {obj.kind === 'lamp' ? (
+                            <div className="flex flex-col items-center h-48">
+                                <div
+                                    className={`w-6 h-6 rounded-full transition-all duration-1000 ${
+                                        phase.stars
+                                            ? 'bg-yellow-300 shadow-[0_0_30px_16px_rgba(253,224,71,0.55)]'
+                                            : 'bg-slate-300'
+                                    }`}
+                                />
+                                <div className="w-1.5 flex-1 bg-slate-700 rounded-full" />
+                            </div>
+                        ) : obj.kind === 'round' ? (
+                            <RoundTree style={{ width: 120 }} />
+                        ) : obj.kind === 'pine' ? (
+                            <PineTree style={{ width: 105 }} />
+                        ) : (
+                            <span className="text-6xl leading-none drop-shadow-lg">{obj.icon}</span>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* Fireflies at night */}
+            {phase.stars && !reduceMotion && (
+                <div className="absolute inset-0 pointer-events-none z-30" aria-hidden="true">
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute w-2 h-2 rounded-full bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
+                            style={{ left: `${15 + i * 14}%`, bottom: '30vh' }}
+                            animate={{ y: [0, -40, 10, -20, 0], x: [0, 20, -15, 10, 0], opacity: [0.3, 1, 0.5, 1, 0.3] }}
+                            transition={{ duration: 6 + i, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* HUD */}
             <div className="absolute top-0 w-full p-4 md:p-6 z-50 flex justify-between items-start pointer-events-none">
@@ -424,7 +719,7 @@ export default function PetWalkingGame({
                     <div
                         className="w-56 md:w-64 h-3 bg-black/30 rounded-full overflow-hidden border border-white/10"
                         role="progressbar"
-                        aria-valuenow={Math.round(progress)}
+                        aria-valuenow={progress}
                         aria-valuemin="0"
                         aria-valuemax="100"
                         aria-label="Walk progress"
@@ -454,125 +749,84 @@ export default function PetWalkingGame({
                 </div>
             </div>
 
-            {/* Ground */}
-            <div className={`absolute bottom-0 w-full h-[35vh] bg-gradient-to-t ${phase.ground} transition-all duration-[3000ms] shadow-[0_-20px_40px_rgba(0,0,0,0.2)]`} aria-hidden="true" />
-
-            {/* Path stripe */}
-            <div className="absolute bottom-[16vh] w-full h-[6vh] bg-black/10 overflow-hidden" aria-hidden="true">
-                <div
-                    className="h-1/2 mt-[1.5vh] w-[200%] opacity-60"
-                    style={{
-                        backgroundImage: 'repeating-linear-gradient(to right, rgba(255,255,255,0.7) 0 40px, transparent 40px 110px)',
-                        transform: `translateX(${-(sceneOffsetRef.current % 110)}px)`,
-                    }}
-                />
-            </div>
-
-            {/* World landmarks approach as you walk */}
-            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                {LANDMARKS.filter((lm) => lm.at > 0).map((lm) => {
-                    const worldX = (lm.at / 100) * WORLD_LENGTH + 500;
-                    const x = worldX - sceneOffsetRef.current;
-                    if (x < -300 || x > window.innerWidth + 300) return null;
-                    return (
-                        <div
-                            key={lm.id}
-                            className="absolute bottom-[22vh] will-change-transform"
-                            style={{ transform: `translate3d(${x}px, 0, 0)` }}
-                        >
-                            <span className="text-[9rem] leading-none drop-shadow-2xl">{lm.icon}</span>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Decor objects */}
-            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                {worldObjects.map((obj) => {
-                    const realX = obj.x - sceneOffsetRef.current * (obj.depth > 0.5 ? 1.2 : 0.8);
-                    const wrapWidth = 3600;
-                    const loopX = ((realX % wrapWidth) + wrapWidth) % wrapWidth - 200;
-                    const isFront = obj.depth > 0.5;
-                    return (
-                        <div
-                            key={obj.id}
-                            className="absolute bottom-[20vh] will-change-transform flex items-end justify-center"
-                            style={{
-                                transform: `translate3d(${loopX}px, ${obj.y}px, 0) scale(${obj.scale})`,
-                                zIndex: isFront ? 30 : 10,
-                                filter: isFront ? 'none' : 'blur(2px)',
-                                opacity: isFront ? 1 : 0.7,
-                            }}
-                        >
-                            <span className="text-[7rem] leading-none drop-shadow-lg">{obj.icon}</span>
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Fireflies at night */}
-            {phase.stars && !reduceMotion && (
-                <div className="absolute inset-0 pointer-events-none z-30" aria-hidden="true">
-                    {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <motion.div
-                            key={i}
-                            className="absolute w-2 h-2 rounded-full bg-yellow-300 shadow-[0_0_8px_rgba(253,224,71,0.9)]"
-                            style={{ left: `${15 + i * 14}%`, bottom: '30vh' }}
-                            animate={{ y: [0, -40, 10, -20, 0], x: [0, 20, -15, 10, 0], opacity: [0.3, 1, 0.5, 1, 0.3] }}
-                            transition={{ duration: 6 + i, repeat: Infinity, ease: 'easeInOut' }}
+            {/* Characters — rigged SVG walkers on a fixed stage, gait via CSS */}
+            <div
+                className={`absolute z-40 pointer-events-none ${walking ? '' : 'walk-paused'}`}
+                style={{ left: STAGE.left, bottom: '21vh', width: STAGE.width, height: STAGE.height }}
+            >
+                {/* Leash: static curve with a gentle sway — no per-frame recompute */}
+                <svg
+                    className="absolute inset-0 w-full h-full overflow-visible"
+                    viewBox={`0 0 ${STAGE.width} ${STAGE.height}`}
+                    aria-hidden="true"
+                >
+                    <g className={reduceMotion ? '' : 'leash-sway'}>
+                        <path
+                            d={`M ${LEASH.hand[0]} ${LEASH.hand[1]} Q ${LEASH.mid[0]} ${LEASH.mid[1]} ${LEASH.collar[0]} ${LEASH.collar[1]}`}
+                            fill="none"
+                            stroke="#5D4037"
+                            strokeWidth="6"
+                            strokeLinecap="round"
                         />
-                    ))}
-                </div>
-            )}
-
-            {/* Characters */}
-            <div className="absolute inset-0 z-40 pointer-events-none">
-                <svg className="absolute inset-0 w-full h-full overflow-visible drop-shadow-md z-50" aria-hidden="true">
-                    <path d={getLeashPath()} fill="none" stroke="#5D4037" strokeWidth="6" strokeLinecap="round" />
-                    <path d={getLeashPath()} fill="none" stroke="#8D6E63" strokeWidth="3" strokeLinecap="round" strokeDasharray="5,5" />
+                        <path
+                            d={`M ${LEASH.hand[0]} ${LEASH.hand[1]} Q ${LEASH.mid[0]} ${LEASH.mid[1]} ${LEASH.collar[0]} ${LEASH.collar[1]}`}
+                            fill="none"
+                            stroke="#8D6E63"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeDasharray="5,5"
+                        />
+                    </g>
                 </svg>
 
-                <motion.div
-                    className="absolute bottom-[25vh] z-40"
-                    style={{ left: avatarPosRef.current.x, fontSize: '8rem' }}
-                    animate={{ y: gameState === 'walking' && !reduceMotion ? [0, -5, 0] : 0 }}
-                    transition={{ duration: 0.4, repeat: gameState === 'walking' && !reduceMotion ? Infinity : 0, ease: 'easeInOut' }}
+                <div
+                    className="absolute"
+                    style={{ left: KID.left, bottom: KID.bottom, width: KID.width }}
                     role="img"
                     aria-label="Your character"
                 >
-                    {getCurrentAvatarEmoji()}
-                </motion.div>
+                    <KidWalker gender={isGirl ? 'girl' : 'boy'} style={{ width: '100%' }} />
+                </div>
 
-                <motion.div
-                    className="absolute bottom-[23vh] z-40"
-                    style={{ left: petPosRef.current.x, fontSize: '7rem' }}
-                    animate={{
-                        y: gameState === 'walking' ? petPosRef.current.bobOffset : 0,
-                        rotate: gameState === 'found' && !reduceMotion ? [0, -5, 5, 0] : 0,
-                    }}
-                    transition={{
-                        y: { type: 'spring', stiffness: 200, damping: 10 },
-                        rotate: { duration: 0.5, repeat: gameState === 'found' ? Infinity : 0 },
-                    }}
+                <div
+                    className="absolute"
+                    style={{ left: DOG.left, bottom: DOG.bottom, width: DOG.width }}
                     role="img"
                     aria-label={pet.name}
                 >
-                    {getCurrentPetEmoji()}
+                    {petType === 'dog' ? (
+                        <DogWalker mood={dogMood} style={{ width: '100%' }} />
+                    ) : (
+                        <div className="walk-bob text-8xl leading-none drop-shadow-xl">
+                            {PET_STAGE_EMOJI[petType]}
+                        </div>
+                    )}
+
+                    {hungryNow && walking && (
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute -top-14 left-32 bg-white/90 rounded-2xl px-3 py-1.5 text-4xl shadow-lg border-2 border-amber-300"
+                            aria-label="הכלב רעב"
+                        >
+                            🍖
+                        </motion.div>
+                    )}
                     {gameState === 'found' && (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-12 left-8 text-5xl drop-shadow-lg">
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute -top-12 left-24 text-5xl drop-shadow-lg">
                             🔍
                         </motion.div>
                     )}
                     {gameState === 'playing' && bestToy && (
                         <motion.div
-                            className="absolute -top-8 -left-16 text-6xl"
+                            className="absolute -top-8 -left-8 text-6xl"
                             animate={{ x: [-80, 60, -10, 0], y: [-60, -120, -30, 0], rotate: [0, 360, 720, 720] }}
                             transition={{ duration: 2.4, ease: 'easeInOut' }}
                         >
                             {bestToy.icon}
                         </motion.div>
                     )}
-                </motion.div>
+                </div>
             </div>
 
             {/* Story banner */}
@@ -725,6 +979,45 @@ export default function PetWalkingGame({
                 )}
             </AnimatePresence>
 
+            {/* Fetch minigame at the meadow — tap the bouncing toy */}
+            <AnimatePresence>
+                {gameState === 'fetchGame' && bestToy && (
+                    <motion.div
+                        className="absolute inset-0 z-[60]"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <div className="absolute top-24 inset-x-0 flex justify-center pointer-events-none px-4">
+                            <div className="bg-white/90 backdrop-blur-md rounded-3xl px-6 py-3 shadow-2xl border-2 border-white flex items-center gap-3">
+                                <span className="text-4xl">🎾</span>
+                                <span className="text-lg md:text-xl font-bold text-slate-700">
+                                    {isGirl ? 'תפסי את הצעצוע!' : 'תפוס את הצעצוע!'}{' '}
+                                    <span className="text-emerald-600 font-black" dir="ltr">
+                                        {fetchCatches}/{FETCH_CONFIG.catchesTarget}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <motion.button
+                            key={fetchCatches}
+                            onClick={catchBall}
+                            className="absolute bottom-[32vh] text-8xl drop-shadow-2xl cursor-pointer"
+                            style={{ left: 0 }}
+                            animate={{
+                                x: BALL_PATHS[fetchCatches % BALL_PATHS.length].x,
+                                y: BALL_PATHS[fetchCatches % BALL_PATHS.length].y,
+                            }}
+                            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                            aria-label="לתפוס את הצעצוע"
+                        >
+                            {bestToy.icon}
+                        </motion.button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Walk summary */}
             <AnimatePresence>
                 {gameState === 'summary' && (
@@ -752,7 +1045,7 @@ export default function PetWalkingGame({
                                 </div>
                                 <div className="bg-amber-50 rounded-2xl p-3">
                                     <div className="text-3xl">🪙</div>
-                                    <div className="text-xl font-black text-amber-700">{computeWalkRewards({ correctCount, total: walkPool.length }).coins}</div>
+                                    <div className="text-xl font-black text-amber-700">{summaryRewards.coins}</div>
                                     <div className="text-xs font-bold text-slate-500">מטבעות</div>
                                 </div>
                                 <div className="bg-pink-50 rounded-2xl p-3">
@@ -762,9 +1055,9 @@ export default function PetWalkingGame({
                                 </div>
                             </div>
 
-                            {computeWalkRewards({ correctCount, total: walkPool.length }).treats > 0 && (
+                            {summaryRewards.treats > 0 && (
                                 <p className="text-lg font-bold text-amber-600 mb-4">
-                                    🦴 מצאתם {computeWalkRewards({ correctCount, total: walkPool.length }).treats} עצמות בדרך!
+                                    🦴 מצאתם {summaryRewards.treats} עצמות בדרך!
                                 </p>
                             )}
 

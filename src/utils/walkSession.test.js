@@ -3,10 +3,14 @@ import {
     WALK_MILESTONES,
     LANDMARKS,
     WORLD_LENGTH,
+    FETCH_CONFIG,
     buildWalkPool,
     milestoneDue,
     computeWalkRewards,
     skyPhaseFor,
+    moodModifiers,
+    buildBonusCoinSpots,
+    fetchRewards,
 } from './walkSession';
 import { initialWordData } from '../data/words';
 import { calculateNextReview } from './srs';
@@ -97,6 +101,109 @@ describe('walk rewards', () => {
         const high = computeWalkRewards({ correctCount: 5, total: 5 });
         expect(high.happiness).toBeGreaterThan(low.happiness);
         expect(low.happiness).toBeGreaterThan(0); // a walk always cheers the pet up
+    });
+});
+
+describe('mood modifiers — pet care matters mechanically', () => {
+    it('a hungry pet walks slower and asks for food', () => {
+        const mods = moodModifiers({ satiety: 20, happiness: 50 });
+        expect(mods.hungry).toBe(true);
+        expect(mods.speedMult).toBeLessThan(1);
+        expect(mods.speedMult).toBeGreaterThan(0);
+    });
+
+    it('a well-fed pet walks at full speed', () => {
+        const mods = moodModifiers({ satiety: 70, happiness: 50 });
+        expect(mods.hungry).toBe(false);
+        expect(mods.speedMult).toBe(1);
+    });
+
+    it('a happy pet sniffs out bonus coins; a glum pet does not', () => {
+        expect(moodModifiers({ satiety: 70, happiness: 80 }).bonusSpots).toBeGreaterThan(0);
+        expect(moodModifiers({ satiety: 70, happiness: 40 }).bonusSpots).toBe(0);
+    });
+
+    it('threshold boundaries: satiety 30 is not hungry, happiness 70 earns bonus', () => {
+        expect(moodModifiers({ satiety: 30, happiness: 70 })).toMatchObject({
+            hungry: false,
+            speedMult: 1,
+        });
+        expect(moodModifiers({ satiety: 30, happiness: 70 }).bonusSpots).toBeGreaterThan(0);
+    });
+
+    it('tolerates a missing petCare payload (legacy saves)', () => {
+        const mods = moodModifiers(undefined);
+        expect(mods.speedMult).toBe(1);
+        expect(mods.hungry).toBe(false);
+    });
+});
+
+describe('bonus coin spots', () => {
+    it('returns the requested number of unique, sorted, in-walk positions', () => {
+        const spots = buildBonusCoinSpots(4);
+        expect(spots).toHaveLength(4);
+        expect(new Set(spots).size).toBe(4);
+        expect([...spots]).toEqual([...spots].sort((a, b) => a - b));
+        for (const s of spots) {
+            expect(s).toBeGreaterThan(0);
+            expect(s).toBeLessThan(100);
+        }
+    });
+
+    it('keeps clear of word milestones so coins never cover a question', () => {
+        for (const s of buildBonusCoinSpots(4)) {
+            for (const m of WALK_MILESTONES) {
+                expect(Math.abs(s - m)).toBeGreaterThanOrEqual(3);
+            }
+        }
+    });
+
+    it('is deterministic — same walk, same coins', () => {
+        expect(buildBonusCoinSpots(4)).toEqual(buildBonusCoinSpots(4));
+    });
+
+    it('returns nothing for a zero request', () => {
+        expect(buildBonusCoinSpots(0)).toEqual([]);
+    });
+});
+
+describe('fetch minigame rewards', () => {
+    it('has a sane config: a reachable target and a forgiving timeout', () => {
+        expect(FETCH_CONFIG.catchesTarget).toBeGreaterThanOrEqual(1);
+        expect(FETCH_CONFIG.timeoutMs).toBeGreaterThan(3000);
+    });
+
+    it('full catches pay the toy\'s full happiness; fewer catches pay less but never zero', () => {
+        const toyHappiness = 20;
+        const full = fetchRewards(FETCH_CONFIG.catchesTarget, toyHappiness);
+        const none = fetchRewards(0, toyHappiness);
+        expect(full.happiness).toBe(toyHappiness);
+        expect(none.happiness).toBeGreaterThan(0); // the dog still had fun
+        expect(none.happiness).toBeLessThan(full.happiness);
+    });
+
+    it('coins scale with catches and zero catches pay no coins', () => {
+        expect(fetchRewards(0, 20).coins).toBe(0);
+        expect(fetchRewards(1, 20).coins).toBeGreaterThan(0);
+        expect(fetchRewards(FETCH_CONFIG.catchesTarget, 20).coins)
+            .toBeGreaterThan(fetchRewards(1, 20).coins);
+    });
+
+    it('clamps catches above the target', () => {
+        expect(fetchRewards(99, 20)).toEqual(fetchRewards(FETCH_CONFIG.catchesTarget, 20));
+    });
+});
+
+describe('walk rewards with bonus coins', () => {
+    it('adds tapped bonus coins to the final payout', () => {
+        const base = computeWalkRewards({ correctCount: 3, total: 5 });
+        const withBonus = computeWalkRewards({ correctCount: 3, total: 5, bonusCoins: 30 });
+        expect(withBonus.coins).toBe(base.coins + 30);
+    });
+
+    it('defaults to zero bonus for callers that never saw a coin', () => {
+        expect(computeWalkRewards({ correctCount: 5, total: 5 }).coins)
+            .toBe(computeWalkRewards({ correctCount: 5, total: 5, bonusCoins: 0 }).coins);
     });
 });
 
