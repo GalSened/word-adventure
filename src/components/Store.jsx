@@ -169,12 +169,13 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
 
                         <p className="text-slate-600 mb-4">{selectedItem.description}</p>
 
-                        {/* Effect description */}
-                        {selectedItem.effect && (
-                            <div className="bg-purple-50 rounded-xl p-3 mb-4">
-                                <p className="text-purple-700 font-medium flex items-center justify-center gap-2">
-                                    <Sparkles size={16} />
-                                    {selectedItem.effect.bonus || selectedItem.effect.type}
+                        {/* How to use it in the game — every item explains itself */}
+                        {selectedItem.usage && (
+                            <div className="bg-purple-50 rounded-xl p-3 mb-4 text-right" dir="rtl">
+                                <p className="text-purple-700 font-medium text-sm leading-relaxed">
+                                    <Sparkles size={16} className="inline ml-1 -mt-0.5" />
+                                    <span className="font-bold">איך משתמשים? </span>
+                                    {selectedItem.usage}
                                 </p>
                             </div>
                         )}

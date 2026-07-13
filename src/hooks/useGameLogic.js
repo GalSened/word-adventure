@@ -254,7 +254,9 @@ export function useGameLogic({ story, itemEffects }) {
         }
         if (correctLen >= target.length) return; // already complete
 
-        const revealed = target.slice(0, correctLen + 1);
+        // hint_master (equipped booster) upgrades every hint to two tokens
+        const revealCount = itemEffects.getHintQuality() === 'detailed' ? 2 : 1;
+        const revealed = target.slice(0, Math.min(target.length, correctLen + revealCount));
         store.setUserInput(isSentence ? revealed.join(' ') : revealed.join(''));
         store.consumeHint();
         hapticFeedback('light');

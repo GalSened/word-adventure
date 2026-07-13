@@ -13,6 +13,7 @@ import {
     buildBonusCoinSpots,
     fetchRewards,
     routeFor,
+    walkRewardMultiplier,
 } from './walkSession';
 import { initialWordData } from '../data/words';
 import { calculateNextReview } from './srs';
@@ -260,6 +261,18 @@ describe('walk rewards with bonus coins', () => {
     it('defaults to zero bonus for callers that never saw a coin', () => {
         expect(computeWalkRewards({ correctCount: 5, total: 5 }).coins)
             .toBe(computeWalkRewards({ correctCount: 5, total: 5, bonusCoins: 0 }).coins);
+    });
+});
+
+describe('walk reward multiplier — the progress boost has real value', () => {
+    it('doubles when xp_boost is equipped in its booster slot', () => {
+        expect(walkRewardMultiplier({ booster_xp_boost: 'xp_boost' })).toBe(2);
+    });
+
+    it('is 1 with no equipment, other equipment, or no equipped map at all', () => {
+        expect(walkRewardMultiplier({})).toBe(1);
+        expect(walkRewardMultiplier({ booster_double_points: 'double_points', theme: 'theme_ocean' })).toBe(1);
+        expect(walkRewardMultiplier(undefined)).toBe(1);
     });
 });
 
