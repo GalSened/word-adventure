@@ -96,6 +96,51 @@ describe('consumable counters', () => {
     });
 });
 
+describe('pet care', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        resetStore();
+        useGameStore.setState({ petCare: { satiety: 70, happiness: 70, walksCompleted: 0 } });
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('feeding raises satiety and happiness, clamped at 100', () => {
+        const s = () => useGameStore.getState();
+        s().feedPet(25);
+        expect(s().petCare.satiety).toBe(95);
+        s().feedPet(25);
+        expect(s().petCare.satiety).toBe(100); // clamp
+        expect(s().petCare.happiness).toBeGreaterThan(70);
+    });
+
+    it('happiness boosts clamp at both ends', () => {
+        const s = () => useGameStore.getState();
+        s().boostPetHappiness(50);
+        expect(s().petCare.happiness).toBe(100);
+        s().boostPetHappiness(-500);
+        expect(s().petCare.happiness).toBe(0);
+    });
+
+    it('starting a walk makes the pet hungrier and record-keeps completions', () => {
+        const s = () => useGameStore.getState();
+        s().decayPetCare();
+        expect(s().petCare.satiety).toBeLessThan(70);
+        expect(s().petCare.satiety).toBeGreaterThanOrEqual(0);
+        s().recordWalkCompleted();
+        expect(s().petCare.walksCompleted).toBe(1);
+    });
+
+    it('pet care survives a reload (persisted)', () => {
+        useGameStore.getState().feedPet(10);
+        flushPendingWrites();
+        const persisted = JSON.parse(localStorage.getItem(STORE_KEY)).state;
+        expect(persisted.petCare.satiety).toBe(80);
+    });
+});
+
 describe('avatar defaults from gender', () => {
     beforeEach(() => {
         vi.useFakeTimers();
