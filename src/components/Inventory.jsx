@@ -348,9 +348,10 @@ export default function Inventory({
                                     <span>{item.name}</span>
                                     <button
                                         onClick={() => onUnequip?.(item)}
-                                        className="hover:bg-white/20 rounded p-0.5"
+                                        aria-label={`הסר ${item.name}`}
+                                        className="hover:bg-white/20 rounded-lg p-2 -my-1.5"
                                     >
-                                        <X size={14} />
+                                        <X size={16} />
                                     </button>
                                 </div>
                             ))}

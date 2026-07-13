@@ -279,6 +279,58 @@ describe('inventory close returns to an in-progress level', () => {
     });
 });
 
+describe('feedback lifecycle — no stuck overlays', () => {
+    it('dropping to the last life shows a warning that clears and releases the game', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word, word], currentWordIndex: 0,
+            lives: 2, userInput: 'ZZZ',
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // wrong → lives 2→1 (low-lives path)
+        expect(useGameStore.getState().feedback).not.toBeNull(); // warning visible
+        act(() => vi.advanceTimersByTime(10000));
+        const s = useGameStore.getState();
+        expect(s.feedback).toBeNull(); // overlay MUST release — this is the soft-lock
+        expect(s.gameState).toBe('playing');
+        expect(s.lives).toBe(1);
+    });
+
+    it('the delayed streak message never pops after leaving the level', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word, word], currentWordIndex: 0,
+            currentStreak: 2, userInput: word.word.toUpperCase(),
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // correct → streak 3 → delayed dialogue at 800ms
+        act(() => useGameStore.getState().setGameState('start')); // player leaves immediately
+        act(() => vi.advanceTimersByTime(10000));
+        expect(useGameStore.getState().feedback).toBeNull();
+        expect(useGameStore.getState().gameState).toBe('start');
+    });
+
+    it('a stale clear timer does not wipe newer feedback from another screen', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word, word], currentWordIndex: 0,
+            lives: 3, userInput: 'ZZZ', score: 5000,
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // wrong → clear scheduled at +1000ms
+        act(() => useGameStore.getState().setGameState('start'));
+        act(() => vi.advanceTimersByTime(800));
+        act(() => result.current.handleBuy(STORE_ITEMS.crown)); // new success feedback at t=800
+        act(() => vi.advanceTimersByTime(250)); // t=1050 — old timer already fired
+        const fb = useGameStore.getState().feedback;
+        expect(fb).not.toBeNull(); // purchase confirmation must survive the stale clear
+        expect(fb.type).toBe('success');
+    });
+});
+
 describe('level-complete navigation guard', () => {
     it('does not yank the player to levelComplete if they left mid-transition', () => {
         vi.useFakeTimers();

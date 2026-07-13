@@ -23,12 +23,15 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
         class="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md"
       >
         <div
-          class="flex gap-2"
+          class="flex gap-1"
         >
-          <button>
+          <button
+            aria-label="מסך הבית"
+            class="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"
+          >
             <svg
               aria-hidden="true"
-              class="lucide lucide-house text-purple-600"
+              class="lucide lucide-house"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -48,7 +51,8 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
             </svg>
           </button>
           <button
-            class="text-yellow-600"
+            aria-label="חנות ההפתעות"
+            class="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -75,7 +79,8 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
             </svg>
           </button>
           <button
-            class="text-blue-600"
+            aria-label="התיק שלי"
+            class="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -157,212 +162,35 @@ exports[`WordAdventure Snapshot Tests > renders gameOver state after losing all 
         </div>
       </div>
       <div
-        class="max-w-xl mx-auto"
+        class="text-center py-10 bg-white rounded-3xl shadow-xl"
       >
         <div
-          class="relative flex justify-center gap-2 mb-6"
+          aria-label="Game Over"
+          class="text-8xl mb-4"
+          role="img"
         >
-          <svg
-            aria-label="חיה פעילה"
-            class="lucide lucide-heart text-red-500"
-            fill="#ef4444"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"
-            />
-          </svg>
-          <svg
-            aria-label="חיה אבודה"
-            class="lucide lucide-heart text-slate-300"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"
-            />
-          </svg>
-          <svg
-            aria-label="חיה אבודה"
-            class="lucide lucide-heart text-slate-300"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"
-            />
-          </svg>
+          😢
         </div>
-        <div
-          class="bg-white rounded-3xl p-8 shadow-2xl text-center border-b-8 border-purple-100 relative overflow-hidden"
+        <h2
+          class="text-4xl font-bold mb-6"
         >
-          <div
-            class="text-center"
+          אוי לא!
+        </h2>
+        <div
+          class="flex justify-center gap-4"
+        >
+          <button
+            aria-label="Go to main menu"
+            class="px-6 py-3 bg-slate-100 rounded-xl font-bold hover:bg-slate-200 transition-colors"
           >
-            <span
-              class="text-slate-400 text-sm tracking-widest font-bold"
-            >
-              תרגם
-               את ה
-              מילה
-            </span>
-            <div
-              class="flex items-center justify-center gap-3 my-6"
-            >
-              <h2
-                class="text-6xl font-black text-slate-800 leading-tight"
-              >
-                חתול
-              </h2>
-            </div>
-            <p
-              class="text-slate-500 text-lg mt-2 mb-4 leading-relaxed"
-              dir="rtl"
-            >
-              🐱 חיה שאוהבת חלב
-            </p>
-            <div
-              class="w-full"
-            >
-              <div
-                class="relative mb-4"
-              >
-                <div
-                  class="min-h-[60px] bg-white border-4 border-slate-100 rounded-2xl p-4 flex flex-wrap items-center justify-center gap-1"
-                  dir="ltr"
-                >
-                  <span
-                    class="inline-flex items-center justify-center font-bold font-mono w-10 h-12 text-2xl bg-purple-100 text-purple-700 rounded-lg"
-                  >
-                    C
-                  </span>
-                  <span
-                    class="inline-flex items-center justify-center font-bold font-mono w-10 h-12 text-2xl bg-purple-100 text-purple-700 rounded-lg"
-                  >
-                    T
-                  </span>
-                </div>
-                <div
-                  class="absolute left-2 top-1/2 -translate-y-1/2 flex gap-2"
-                >
-                  <button
-                    class="p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 disabled:opacity-30 active:scale-90 transition-transform"
-                    disabled=""
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-delete"
-                      fill="none"
-                      height="20"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"
-                      />
-                      <path
-                        d="m12 9 6 6"
-                      />
-                      <path
-                        d="m18 9-6 6"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    class="p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 disabled:opacity-30 active:scale-90 transition-transform"
-                    disabled=""
-                  >
-                    <svg
-                      aria-hidden="true"
-                      class="lucide lucide-rotate-ccw"
-                      fill="none"
-                      height="20"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      viewBox="0 0 24 24"
-                      width="20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"
-                      />
-                      <path
-                        d="M3 3v5h5"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div
-                class="flex flex-wrap justify-center gap-2 mb-6"
-                dir="ltr"
-              >
-                <button
-                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-slate-200 text-slate-400 opacity-40 scale-90"
-                  disabled=""
-                >
-                  C
-                </button>
-                <button
-                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-slate-200 text-slate-400 opacity-40 scale-90"
-                  disabled=""
-                >
-                  T
-                </button>
-                <button
-                  class="font-bold font-mono shadow-md transition-all active:shadow-sm w-14 h-16 text-3xl rounded-xl bg-gradient-to-b from-yellow-300 to-yellow-400 text-yellow-800 hover:from-yellow-400 hover:to-yellow-500"
-                  disabled=""
-                >
-                  A
-                </button>
-              </div>
-              <button
-                class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:shadow-md transition-shadow"
-                disabled=""
-              >
-                בדיקה ✓
-              </button>
-            </div>
-          </div>
-          <div
-            aria-live="assertive"
-            class="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-md z-20"
-            role="alert"
+            לתפריט
+          </button>
+          <button
+            aria-label="Play again"
+            class="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors"
           >
-            <div
-              class="text-center font-bold text-3xl text-red-500"
-            >
-              זהירות! החיים יקרים! 💔
-            </div>
-          </div>
+            שחק שוב
+          </button>
         </div>
       </div>
     </div>
@@ -393,12 +221,15 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
         class="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md"
       >
         <div
-          class="flex gap-2"
+          class="flex gap-1"
         >
-          <button>
+          <button
+            aria-label="מסך הבית"
+            class="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"
+          >
             <svg
               aria-hidden="true"
-              class="lucide lucide-house text-purple-600"
+              class="lucide lucide-house"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -418,7 +249,8 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
             </svg>
           </button>
           <button
-            class="text-yellow-600"
+            aria-label="חנות ההפתעות"
+            class="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -445,7 +277,8 @@ exports[`WordAdventure Snapshot Tests > renders levelComplete state after answer
             </svg>
           </button>
           <button
-            class="text-blue-600"
+            aria-label="התיק שלי"
+            class="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -667,12 +500,15 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
         class="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md"
       >
         <div
-          class="flex gap-2"
+          class="flex gap-1"
         >
-          <button>
+          <button
+            aria-label="מסך הבית"
+            class="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"
+          >
             <svg
               aria-hidden="true"
-              class="lucide lucide-house text-purple-600"
+              class="lucide lucide-house"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -692,7 +528,8 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </svg>
           </button>
           <button
-            class="text-yellow-600"
+            aria-label="חנות ההפתעות"
+            class="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -719,7 +556,8 @@ exports[`WordAdventure Snapshot Tests > renders map state after clicking world m
             </svg>
           </button>
           <button
-            class="text-blue-600"
+            aria-label="התיק שלי"
+            class="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -1384,12 +1222,15 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
         class="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md"
       >
         <div
-          class="flex gap-2"
+          class="flex gap-1"
         >
-          <button>
+          <button
+            aria-label="מסך הבית"
+            class="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"
+          >
             <svg
               aria-hidden="true"
-              class="lucide lucide-house text-purple-600"
+              class="lucide lucide-house"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -1409,7 +1250,8 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
             </svg>
           </button>
           <button
-            class="text-yellow-600"
+            aria-label="חנות ההפתעות"
+            class="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -1436,7 +1278,8 @@ exports[`WordAdventure Snapshot Tests > renders playing state after navigating t
             </svg>
           </button>
           <button
-            class="text-blue-600"
+            aria-label="התיק שלי"
+            class="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -1735,12 +1578,15 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
         class="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md"
       >
         <div
-          class="flex gap-2"
+          class="flex gap-1"
         >
-          <button>
+          <button
+            aria-label="מסך הבית"
+            class="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"
+          >
             <svg
               aria-hidden="true"
-              class="lucide lucide-house text-purple-600"
+              class="lucide lucide-house"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -1760,7 +1606,8 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
             </svg>
           </button>
           <button
-            class="text-yellow-600"
+            aria-label="חנות ההפתעות"
+            class="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
@@ -1787,7 +1634,8 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
             </svg>
           </button>
           <button
-            class="text-blue-600"
+            aria-label="התיק שלי"
+            class="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"
           >
             <svg
               aria-hidden="true"
