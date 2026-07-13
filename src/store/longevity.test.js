@@ -116,13 +116,18 @@ describe('longevity: months of play', () => {
     });
 
     it('daily stats reset stamps the new day and zeroes counters', () => {
-        vi.setSystemTime(new Date('2026-07-12T23:50:00'));
+        // EVERY date in this test must come from the mocked clock. The first
+        // version stamped "yesterday" from the real clock, which made the test
+        // a calendar bomb: it failed in CI the moment the real date reached
+        // the hardcoded "next morning" (2026-07-13, run 20 on main).
         const s = () => useGameStore.getState();
+        vi.setSystemTime(new Date('2030-01-01T23:50:00'));
+        s().resetDailyStats(); // stamp "yesterday" under the mocked clock
         s().updateDailyStats({ wordsPlayed: 30, dailyScore: 4500, maxStreak: 12 });
         expect(s().dailyStats.wordsPlayed).toBe(30);
 
         // Next morning — the WordAdventure date-rollover effect calls resetDailyStats
-        vi.setSystemTime(new Date('2026-07-13T07:00:00'));
+        vi.setSystemTime(new Date('2030-01-02T07:00:00'));
         expect(s().dailyStats.date).not.toBe(new Date().toDateString());
         s().resetDailyStats();
         const fresh = s().dailyStats;
