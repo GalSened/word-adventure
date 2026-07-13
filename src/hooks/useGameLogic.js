@@ -314,6 +314,11 @@ export function useGameLogic({ story, itemEffects }) {
                 if (s.currentWordIndex < s.activeWords.length - 1) {
                     s.setCurrentWordIndex(s.currentWordIndex + 1);
                     s.setUserInput('');
+                    // Deliberately unconditional: whatever gameplay message is
+                    // up (success or a mid-delay streak celebration) must not
+                    // outlive the advance, or its overlay would block input on
+                    // the next word. Off-screen feedback can't exist here —
+                    // this timer only runs while still playing.
                     s.setFeedback(null);
                 } else {
                     completeLevel(s);
