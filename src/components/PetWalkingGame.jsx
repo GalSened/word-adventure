@@ -122,6 +122,7 @@ export default function PetWalkingGame({
     const bonusCoinsRef = useRef(0); // tapped path coins + fetch winnings
     const fetchTimeoutRef = useRef(null);
     const fetchCatchesRef = useRef(0);
+    const fetchResolvedRef = useRef(false); // timeout-vs-last-tap double-resolve guard
     const collectedSpotsRef = useRef(new Set()); // tap-race guard for coins
 
     // Scroll layers, moved imperatively each frame (GPU transforms — no
@@ -201,6 +202,9 @@ export default function PetWalkingGame({
 
     // --- FETCH MINIGAME (meadow) ---
     const resolveFetch = useCallback(() => {
+        // The 9s timeout and the winning tap can race — pay out exactly once.
+        if (fetchResolvedRef.current) return;
+        fetchResolvedRef.current = true;
         if (fetchTimeoutRef.current) {
             clearTimeout(fetchTimeoutRef.current);
             fetchTimeoutRef.current = null;
@@ -226,6 +230,7 @@ export default function PetWalkingGame({
     }, [bestToy, pet.name]);
 
     const catchBall = useCallback(() => {
+        if (fetchResolvedRef.current) return; // game already paid out
         if (fetchCatchesRef.current >= FETCH_CONFIG.catchesTarget) return;
         fetchCatchesRef.current += 1;
         setFetchCatches(fetchCatchesRef.current);
@@ -254,9 +259,14 @@ export default function PetWalkingGame({
                 setTimeout(() => {
                     useGameStore.getState().boostPetHappiness(bestToy.effect.happiness);
                     hapticFeedback('success');
+                    setBanner(null);
                     setGameState('walking');
                 }, 2600);
             } else {
+                // The fetch instruction pill takes the banner's spot — clear
+                // the story line so the two never stack.
+                setBanner(null);
+                fetchResolvedRef.current = false;
                 fetchCatchesRef.current = 0;
                 setFetchCatches(0);
                 setGameState('fetchGame');
@@ -1055,6 +1065,11 @@ export default function PetWalkingGame({
                                 </div>
                             </div>
 
+                            {summaryRewards.perfect && (
+                                <p className="text-lg font-bold text-purple-600 mb-2">
+                                    ✨ טיול מושלם! בונוס +100 🪙
+                                </p>
+                            )}
                             {summaryRewards.treats > 0 && (
                                 <p className="text-lg font-bold text-amber-600 mb-4">
                                     🦴 מצאתם {summaryRewards.treats} עצמות בדרך!
