@@ -10,7 +10,6 @@ import { generateDistractors } from '../utils/distractorGenerator';
 import { seededShuffle } from '../utils/seededRandom';
 import { calculateNextReview } from '../utils/srs';
 import {
-    LANDMARKS,
     WORLD_LENGTH,
     FETCH_CONFIG,
     buildWalkPool,
@@ -20,12 +19,13 @@ import {
     moodModifiers,
     buildBonusCoinSpots,
     fetchRewards,
+    routeFor,
 } from '../utils/walkSession';
 import { ANIMATION_CONFIG } from '../config/constants';
-import { DogWalker, KidWalker, RoundTree, PineTree } from './WalkArt';
+import { DogWalker, KidWalker, RoundTree, PineTree, PalmTree } from './WalkArt';
 
-const FLORA = ['🌿', '🌾', '🌷', '🌻', '🌼', '🍄'];
 const FAUNA = ['🦋', '🐦', '🐝'];
+const ROUTE_TREES = { round: RoundTree, pine: PineTree, palm: PalmTree };
 
 // Stable stage glyphs for non-dog pets (no frame swapping — the old
 // emoji-cycling gait made the characters visibly flicker).
@@ -97,6 +97,25 @@ export default function PetWalkingGame({
         []
     );
 
+    // Today's route rotates with completed walks: park → beach → forest → …
+    const route = useMemo(
+        () => routeFor(useGameStore.getState().petCare.walksCompleted),
+        []
+    );
+    const RouteTree = ROUTE_TREES[route.tree] || RoundTree;
+
+    // Phone-first: the character stage is laid out at 640px and scaled
+    // down to fit narrow screens (the game is played on phones).
+    const [stageScale, setStageScale] = useState(() =>
+        Math.min(1, (window.innerWidth - 24) / STAGE.width)
+    );
+    useEffect(() => {
+        const onResize = () =>
+            setStageScale(Math.min(1, (window.innerWidth - 24) / STAGE.width));
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
     // --- STATE ---
     // walking | found | correct | wrong | feeding | playing | fetchGame | summary
     const [gameState, setGameState] = useState('walking');
@@ -149,12 +168,12 @@ export default function PetWalkingGame({
         () =>
             Array.from({ length: 27 }).map((_, i) => ({
                 id: `b${i}`,
-                kind: i % 4 === 1 ? 'pine' : i % 4 === 3 ? 'flora' : 'round',
-                icon: FLORA[(i * 13) % FLORA.length],
+                kind: i % 4 === 3 ? 'flora' : 'tree',
+                icon: route.flora[(i * 13) % route.flora.length],
                 x: i * 450 + ((i * 97) % 160),
                 scale: 0.55 + ((i * 53) % 100) / 170,
             })),
-        []
+        [route]
     );
     const frontObjects = useMemo(
         () =>
@@ -166,13 +185,13 @@ export default function PetWalkingGame({
                         : i % 7 === 3
                             ? 'fauna'
                             : i % 4 === 1
-                                ? (i % 2 === 0 ? 'round' : 'pine')
+                                ? 'tree'
                                 : 'flora',
-                icon: i % 7 === 3 ? FAUNA[i % FAUNA.length] : FLORA[(i * 11) % FLORA.length],
+                icon: i % 7 === 3 ? FAUNA[i % FAUNA.length] : route.flora[(i * 11) % route.flora.length],
                 x: i * 520 + ((i * 71) % 200),
                 scale: 0.8 + ((i * 37) % 100) / 130,
             })),
-        []
+        [route]
     );
 
     const stars = useMemo(
@@ -250,9 +269,9 @@ export default function PetWalkingGame({
         const text = isGirl ? landmark.line.girl : landmark.line.boy;
         setBanner({ icon: landmark.icon, text });
 
-        if (landmark.id === 'fountain') {
+        if (landmark.role === 'feed') {
             setGameState('feeding');
-        } else if (landmark.id === 'meadow' && bestToy) {
+        } else if (landmark.role === 'play' && bestToy) {
             if (reduceMotion) {
                 // Reduced motion: calm auto-resolved play moment
                 setGameState('playing');
@@ -319,7 +338,7 @@ export default function PetWalkingGame({
                 }
 
                 // Story landmarks
-                for (const lm of LANDMARKS) {
+                for (const lm of route.landmarks) {
                     if (
                         lm.at > 0 && lm.at < 100 &&
                         progressRef.current >= lm.at &&
@@ -346,15 +365,15 @@ export default function PetWalkingGame({
             isActive = false;
             if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
         };
-    }, [gameState, triggerWord, triggerLandmark]);
+    }, [gameState, triggerWord, triggerLandmark, route]);
 
     // Show the opening story beat once
     useEffect(() => {
-        const gate = LANDMARKS[0];
+        const gate = route.landmarks[0];
         setBanner({ icon: gate.icon, text: isGirl ? gate.line.girl : gate.line.boy });
         const t = setTimeout(() => setBanner(null), 2800);
         return () => clearTimeout(t);
-    }, [isGirl]);
+    }, [isGirl, route]);
 
     // --- ANSWERS (real SRS, single gentle attempt) ---
     const handleAnswer = useCallback(
@@ -594,10 +613,8 @@ export default function PetWalkingGame({
                         className="absolute bottom-[29vh] opacity-80"
                         style={{ left: obj.x, transform: `scale(${obj.scale})`, transformOrigin: 'bottom center', filter: 'blur(1px)' }}
                     >
-                        {obj.kind === 'pine' ? (
-                            <PineTree style={{ width: 80 }} />
-                        ) : obj.kind === 'round' ? (
-                            <RoundTree style={{ width: 92 }} />
+                        {obj.kind === 'tree' ? (
+                            <RouteTree style={{ width: 88 }} />
                         ) : (
                             <span className="text-5xl leading-none">{obj.icon}</span>
                         )}
@@ -629,14 +646,14 @@ export default function PetWalkingGame({
                 ref={mainLayerRef}
                 className="absolute inset-0 pointer-events-none will-change-transform"
             >
-                {LANDMARKS.filter((lm) => lm.at > 0).map((lm) => (
+                {route.landmarks.filter((lm) => lm.at > 0).map((lm) => (
                     <div
                         key={lm.id}
                         className="absolute bottom-[21vh]"
                         style={{ left: (lm.at / 100) * WORLD_LENGTH + 500 }}
                         aria-hidden="true"
                     >
-                        <span className="text-[9rem] leading-none drop-shadow-2xl">{lm.icon}</span>
+                        <span className="text-[6.5rem] md:text-[9rem] leading-none drop-shadow-2xl">{lm.icon}</span>
                     </div>
                 ))}
 
@@ -682,10 +699,8 @@ export default function PetWalkingGame({
                                 />
                                 <div className="w-1.5 flex-1 bg-slate-700 rounded-full" />
                             </div>
-                        ) : obj.kind === 'round' ? (
-                            <RoundTree style={{ width: 120 }} />
-                        ) : obj.kind === 'pine' ? (
-                            <PineTree style={{ width: 105 }} />
+                        ) : obj.kind === 'tree' ? (
+                            <RouteTree style={{ width: 112 }} />
                         ) : (
                             <span className="text-6xl leading-none drop-shadow-lg">{obj.icon}</span>
                         )}
@@ -727,7 +742,7 @@ export default function PetWalkingGame({
                         <Star className="text-yellow-400 fill-yellow-400" size={20} /> {coinsEarned}
                     </div>
                     <div
-                        className="w-56 md:w-64 h-3 bg-black/30 rounded-full overflow-hidden border border-white/10"
+                        className="w-36 sm:w-56 md:w-64 h-3 bg-black/30 rounded-full overflow-hidden border border-white/10"
                         role="progressbar"
                         aria-valuenow={progress}
                         aria-valuemin="0"
@@ -746,13 +761,13 @@ export default function PetWalkingGame({
                 <div className="bg-black/30 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-white shadow-lg flex flex-col gap-1 text-sm font-bold">
                     <div className="flex items-center gap-2" aria-label={`Happiness ${petCare.happiness}`}>
                         <span>❤️</span>
-                        <div className="w-20 h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div className="w-12 sm:w-20 h-2 bg-white/20 rounded-full overflow-hidden">
                             <div className="h-full bg-pink-400 rounded-full transition-all duration-700" style={{ width: `${petCare.happiness}%` }} />
                         </div>
                     </div>
                     <div className="flex items-center gap-2" aria-label={`Satiety ${petCare.satiety}`}>
                         <span>🦴</span>
-                        <div className="w-20 h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div className="w-12 sm:w-20 h-2 bg-white/20 rounded-full overflow-hidden">
                             <div className="h-full bg-amber-400 rounded-full transition-all duration-700" style={{ width: `${petCare.satiety}%` }} />
                         </div>
                     </div>
@@ -762,7 +777,14 @@ export default function PetWalkingGame({
             {/* Characters — rigged SVG walkers on a fixed stage, gait via CSS */}
             <div
                 className={`absolute z-40 pointer-events-none ${walking ? '' : 'walk-paused'}`}
-                style={{ left: STAGE.left, bottom: '21vh', width: STAGE.width, height: STAGE.height }}
+                style={{
+                    left: STAGE.left,
+                    bottom: '21vh',
+                    width: STAGE.width,
+                    height: STAGE.height,
+                    transform: `scale(${stageScale})`,
+                    transformOrigin: 'bottom left',
+                }}
             >
                 {/* Leash: static curve with a gentle sway — no per-frame recompute */}
                 <svg
@@ -948,7 +970,7 @@ export default function PetWalkingGame({
                             role="dialog"
                             aria-label="Feeding time"
                         >
-                            <div className="text-7xl mb-2">⛲</div>
+                            <div className="text-7xl mb-2">{route.landmarks.find((lm) => lm.role === 'feed')?.icon ?? '⛲'}</div>
                             <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-1">
                                 {pet.name} רעב! {moodEmoji}
                             </h2>
