@@ -123,7 +123,7 @@ export function useGameLogic({ story, itemEffects }) {
         if (petId) {
             const item = STORE_ITEMS[petId];
             if (item && item.walkable) {
-                store.setActivePet({ name: item.name, icon: item.icon });
+                store.setActivePet({ id: item.id, name: item.name, icon: item.icon });
                 store.setGameState('petWalking');
                 return;
             }
@@ -461,7 +461,7 @@ export function useGameLogic({ story, itemEffects }) {
         const item = STORE_ITEMS[petId];
         if (item) {
             const store = useGameStore.getState();
-            store.setActivePet({ name: item.name, icon: item.icon });
+            store.setActivePet({ id: item.id, name: item.name, icon: item.icon });
             store.setGameState('petWalking');
         }
     };

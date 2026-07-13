@@ -263,14 +263,40 @@ export function milestoneDue(progress, servedCount) {
  * even on a bad word day. `bonusCoins` carries coins tapped along the
  * path and fetch-game winnings straight into the payout.
  */
-export function computeWalkRewards({ correctCount, total, bonusCoins = 0 }) {
+export function computeWalkRewards({
+    correctCount,
+    total,
+    bonusCoins = 0,
+    wordCoinValue = 40,
+    guaranteePerfectBonus = false,
+}) {
     const perfect = total > 0 && correctCount === total;
     return {
-        coins: correctCount * 40 + (perfect ? 100 : 0) + bonusCoins,
+        coins: correctCount * wordCoinValue + (perfect || guaranteePerfectBonus ? 100 : 0) + bonusCoins,
         treats: Math.floor(correctCount / 3),
         happiness: 8 + correctCount * 4,
         perfect,
     };
+}
+
+/**
+ * Every walkable species walks differently — the ability is what a pet's
+ * price actually buys. Data-driven: the walk reads the effect fields
+ * (extraTreats / extraCoinSpots / wordCoinValue / fetchCoinMult / coinMult /
+ * guaranteePerfectBonus) and the summary shows icon+label+desc.
+ */
+export const PET_ABILITIES = {
+    dog: { icon: '🦴', label: 'אף לעצמות', desc: 'מוצא עצם נוספת בכל טיול', extraTreats: 1 },
+    cat: { icon: '🪙', label: 'עיני חתול', desc: 'מריחה עוד 2 מטבעות על השביל — תמיד', extraCoinSpots: 2 },
+    owl: { icon: '📚', label: 'חכמת הינשוף', desc: 'כל מילה נכונה שווה 50 מטבעות במקום 40', wordCoinValue: 50 },
+    dragon: { icon: '🔥', label: 'עוצמת דרקון', desc: 'מטבעות משחק הכדור — כפול!', fetchCoinMult: 2 },
+    unicorn: { icon: '✨', label: 'קסם חד-קרן', desc: '25% יותר מטבעות בסוף כל טיול', coinMult: 1.25 },
+    phoenix: { icon: '🌟', label: 'ברכת עוף החול', desc: 'בונוס הטיול המושלם — מובטח, תמיד', guaranteePerfectBonus: true },
+};
+
+/** Resolve the active pet to its ability; legacy saves without an id get none. */
+export function petAbilityFor(activePet) {
+    return PET_ABILITIES[activePet?.id] || null;
 }
 
 /**
