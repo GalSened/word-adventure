@@ -686,7 +686,163 @@ export const LEVEL_CHAPTERS = {
             ]
         }
     },
+
+    // --- Epilogue arc: the kingdom rebuilds after the wizard's defeat ---
+
+    level_13: {
+        title: 'בית הספר הקסום',
+        subtitle: 'The Magic School',
+        character: '🏫',
+        color: 'from-sky-400 to-blue-600',
+        unlockRequirement: 12,
+
+        intro: {
+            boy: `הקוסם האפל נוצח, והממלכה חוגגת!
+            בית הספר הקסום נפתח מחדש אחרי שנים.
+            עזור לתלמידים לזכור את מילות בית הספר!`,
+            girl: `הקוסם האפל נוצח, והממלכה חוגגת!
+            בית הספר הקסום נפתח מחדש אחרי שנים.
+            עזרי לתלמידים לזכור את מילות בית הספר!`
+        },
+
+        completion: {
+            boy: `הפעמון מצלצל! בית הספר חזר לחיים,
+            והכול בזכותך! המורה גאה בך! 🏫`,
+            girl: `הפעמון מצלצל! בית הספר חזר לחיים,
+            והכול בזכותך! המורה גאה בך! 🏫`
+        },
+
+        npc: {
+            name: 'המורה הקסומה',
+            icon: '🧑‍🏫',
+            dialogues: [
+                { trigger: 'start', text: 'ברוך הבא לכיתה, {name}! השיעור מתחיל.' },
+                { trigger: 'correct', text: { boy: 'תשובה מצוינת! אתה תלמיד מבריק!', girl: 'תשובה מצוינת! את תלמידה מבריקה!' } },
+                { trigger: 'wrong', text: { boy: 'זה בסדר לטעות — ככה לומדים! נסה שוב.', girl: 'זה בסדר לטעות — ככה לומדים! נסי שוב.' } },
+                { trigger: 'streak_3', text: '3 ברצף! הכיתה מוחאת כפיים! 👏' },
+                { trigger: 'complete', text: 'השיעור הסתיים בהצטיינות! 🎓' }
+            ]
+        }
+    },
+
+    level_14: {
+        title: 'מסע הדרכים',
+        subtitle: 'The Great Journey',
+        character: '🚂',
+        color: 'from-slate-400 to-zinc-600',
+        unlockRequirement: 13,
+
+        intro: {
+            boy: `הדרכים בין ערי הממלכה נפתחות מחדש!
+            רכבות, מטוסים וספינות מחכים לצאת.
+            למד את מילות התחבורה כדי להניע אותם!`,
+            girl: `הדרכים בין ערי הממלכה נפתחות מחדש!
+            רכבות, מטוסים וספינות מחכים לצאת.
+            למדי את מילות התחבורה כדי להניע אותם!`
+        },
+
+        completion: {
+            boy: `כל הדרכים פתוחות! הרכבת שורקת לכבודך,
+            והממלכה כולה מחוברת שוב! 🚂`,
+            girl: `כל הדרכים פתוחות! הרכבת שורקת לכבודך,
+            והממלכה כולה מחוברת שוב! 🚂`
+        },
+
+        npc: {
+            name: 'מנהל התחנה',
+            icon: '👨‍✈️',
+            dialogues: [
+                { trigger: 'start', text: 'כל העולים! {name}, המסע יוצא לדרך!' },
+                { trigger: 'correct', text: 'קדימה! עוד תחנה נפתחה!' },
+                { trigger: 'wrong', text: { boy: 'עצירה קטנה — בדוק את המפה ונסה שוב!', girl: 'עצירה קטנה — בדקי את המפה ונסי שוב!' } },
+                { trigger: 'streak_3', text: 'קיטור מלא! 3 ברצף! 🚂' },
+                { trigger: 'complete', text: 'הגענו ליעד! מסע מושלם!' }
+            ]
+        }
+    },
+
+    level_15: {
+        title: 'אתגר האלופים',
+        subtitle: 'Champions Challenge',
+        character: '🎯',
+        color: 'from-fuchsia-500 to-purple-700',
+        unlockRequirement: 14,
+
+        intro: {
+            boy: `הממלכה עורכת טורניר גדול לכבוד הניצחון!
+            אלופים מכל הערים באו להתחרות.
+            הראה להם מה זה אלוף אמיתי!`,
+            girl: `הממלכה עורכת טורניר גדול לכבוד הניצחון!
+            אלופים מכל הערים באו להתחרות.
+            הראי להם מה זו אלופה אמיתית!`
+        },
+
+        completion: {
+            boy: `הקהל צועק את שמך! ניצחת בטורניר!
+            מקום ראשון על הפודיום! 🏅`,
+            girl: `הקהל צועק את שמך! ניצחת בטורניר!
+            מקום ראשון על הפודיום! 🏅`
+        },
+
+        npc: {
+            name: 'שופט הטורניר',
+            icon: '🏅',
+            dialogues: [
+                { trigger: 'start', text: 'המתחרה {name} נכנס לזירה! שיהיה בהצלחה!' },
+                { trigger: 'correct', text: 'פגיעה במרכז! נקודה מלאה! 🎯' },
+                { trigger: 'wrong', text: { boy: 'החטאה קטנה — אלוף לא מוותר!', girl: 'החטאה קטנה — אלופה לא מוותרת!' } },
+                { trigger: 'streak_5', text: '5 פגיעות ברצף! הקהל משתגע! 🔥' },
+                { trigger: 'complete', text: 'יש לנו אלוף חדש בממלכה!' }
+            ]
+        }
+    },
+
+    level_16: {
+        title: 'כתר האגדות',
+        subtitle: 'The Legendary Crown',
+        character: '👑',
+        color: 'from-yellow-400 to-amber-700',
+        unlockRequirement: 15,
+
+        intro: {
+            boy: `היום הגדול הגיע: טקס כתר האגדות!
+            רק מי ששולט בכל מילות הממלכה
+            ראוי לשבת על כס האגדה. זה אתה?`,
+            girl: `היום הגדול הגיע: טקס כתר האגדות!
+            רק מי ששולטת בכל מילות הממלכה
+            ראויה לשבת על כס האגדה. זו את?`
+        },
+
+        completion: {
+            boy: `הכתר מונח על ראשך!
+            מהיום יספרו עליך אגדות בכל הממלכה.
+            {name} — אגדת המילים! 👑`,
+            girl: `הכתר מונח על ראשך!
+            מהיום יספרו עלייך אגדות בכל הממלכה.
+            {name} — אגדת המילים! 👑`
+        },
+
+        npc: {
+            name: 'המלכה הזקנה',
+            icon: '👵',
+            dialogues: [
+                { trigger: 'start', text: '{name}, הממלכה כולה צופה בך. הראה לנו אגדה!' },
+                { trigger: 'correct', text: 'מילה של אגדה! הכתר מתקרב!' },
+                { trigger: 'wrong', text: { boy: 'גם אגדות טועות לפעמים. המשך!', girl: 'גם אגדות טועות לפעמים. המשיכי!' } },
+                { trigger: 'streak_5', text: 'הכס זוהר! 5 ברצף! ✨' },
+                { trigger: 'complete', text: 'קומו לכבוד אגדת המילים החדשה! 👑' }
+            ]
+        }
+    },
 };
+
+/**
+ * Unified chapter lookup: legacy difficulty chapters + per-level chapters.
+ * Every runtime lookup MUST go through this map — LEVEL_CHAPTERS sat
+ * unreferenced for months because lookups only consulted CHAPTERS, so no
+ * per-level story was ever shown.
+ */
+export const ALL_CHAPTERS = { ...CHAPTERS, ...LEVEL_CHAPTERS };
 
 // ============================================
 // PET EVOLUTION SYSTEM
@@ -949,14 +1105,14 @@ export const canPetEvolve = (petId, wordsLearned) => {
  * Get chapter by level
  */
 export const getChapter = (level) => {
-    return CHAPTERS[level] || null;
+    return ALL_CHAPTERS[level] || null;
 };
 
 /**
  * Check if a chapter is unlocked
  */
 export const isChapterUnlocked = (level, wordsLearned) => {
-    const chapter = CHAPTERS[level];
+    const chapter = ALL_CHAPTERS[level];
     if (!chapter) return false;
     return wordsLearned >= chapter.unlockRequirement;
 };
@@ -970,7 +1126,7 @@ export const isChapterUnlocked = (level, wordsLearned) => {
  * @param {string} gender - Player gender ('boy' or 'girl'), defaults to 'boy'
  */
 export const getNPCDialogue = (level, trigger, playerName, gender = 'boy') => {
-    const chapter = CHAPTERS[level];
+    const chapter = ALL_CHAPTERS[level];
     if (!chapter || !chapter.npc) return null;
 
     const dialogue = chapter.npc.dialogues.find(d => d.trigger === trigger);
