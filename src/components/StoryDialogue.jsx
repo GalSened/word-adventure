@@ -19,7 +19,13 @@ export default function StoryDialogue({ dialogue, onDismiss }) {
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1, rotate: [0, -5, 5, 0] }}
-                            transition={{ type: 'spring', bounce: 0.5 }}
+                            // Springs support only two keyframes — the 4-frame
+                            // rotate wiggle needs its own tween or motion throws
+                            transition={{
+                                type: 'spring',
+                                bounce: 0.5,
+                                rotate: { type: 'tween', duration: 0.6, ease: 'easeInOut' },
+                            }}
                             className="text-8xl mb-4"
                         >
                             {dialogue.npc?.icon}

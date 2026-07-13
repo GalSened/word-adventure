@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { safeGetJSON, safeSetJSON } from '../utils/storage';
 import {
-    CHAPTERS,
+    ALL_CHAPTERS,
     PET_EVOLUTION,
     MYSTERIES,
     ENCOURAGEMENT,
@@ -173,7 +173,7 @@ export function useStoryProgress(userProfile) {
      * Start a chapter
      */
     const startChapter = useCallback((level) => {
-        const chapter = CHAPTERS[level];
+        const chapter = ALL_CHAPTERS[level];
         if (!chapter) return false;
 
         // Check if chapter is unlocked
@@ -183,11 +183,12 @@ export function useStoryProgress(userProfile) {
 
         updateProgress({ currentChapter: level });
 
-        // Show intro dialogue if not seen
+        // Show intro dialogue if not seen ({name} appears in some chapter texts)
         if (!progress.seenIntros.includes(level)) {
-            const introText = userProfile?.gender === 'girl'
+            const introText = (userProfile?.gender === 'girl'
                 ? chapter.intro.girl
-                : chapter.intro.boy;
+                : chapter.intro.boy
+            ).replace('{name}', userProfile?.name || '');
 
             setCurrentDialogue({
                 type: 'chapter_intro',
@@ -208,7 +209,7 @@ export function useStoryProgress(userProfile) {
      * Complete a chapter
      */
     const completeChapter = useCallback((level, wasPerfect = false) => {
-        const chapter = CHAPTERS[level];
+        const chapter = ALL_CHAPTERS[level];
         if (!chapter) return;
 
         const updates = {
@@ -231,10 +232,11 @@ export function useStoryProgress(userProfile) {
 
         updateProgress(updates);
 
-        // Show completion dialogue
-        const completionText = userProfile?.gender === 'girl'
+        // Show completion dialogue ({name} appears in some chapter texts)
+        const completionText = (userProfile?.gender === 'girl'
             ? chapter.completion.girl
-            : chapter.completion.boy;
+            : chapter.completion.boy
+        ).replace('{name}', userProfile?.name || '');
 
         setCurrentDialogue({
             type: 'chapter_complete',
@@ -349,11 +351,11 @@ export function useStoryProgress(userProfile) {
         const gender = userProfile?.gender || 'boy';
 
         // NPC dialogue for current chapter
-        if (level && CHAPTERS[level]) {
+        if (level && ALL_CHAPTERS[level]) {
             const npcDialogue = getNPCDialogue(level, trigger, name, gender);
             if (npcDialogue) {
                 return {
-                    npc: CHAPTERS[level].npc,
+                    npc: ALL_CHAPTERS[level].npc,
                     text: npcDialogue
                 };
             }
@@ -400,7 +402,7 @@ export function useStoryProgress(userProfile) {
      * Get list of unlocked chapters
      */
     const getUnlockedChapters = useCallback(() => {
-        return Object.entries(CHAPTERS)
+        return Object.entries(ALL_CHAPTERS)
             .filter(([level]) => isChapterUnlocked(level, progress.totalWordsLearned))
             .map(([level, chapter]) => ({
                 level,
