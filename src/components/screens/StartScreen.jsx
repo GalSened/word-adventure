@@ -5,6 +5,7 @@ import Leaderboard from '../Leaderboard';
 import { useGameStore } from '../../store/gameStore';
 import { initialWordData } from '../../data/words';
 import { STORE_ITEMS } from '../../data/storeItems';
+import { moodModifiers } from '../../utils/walkSession';
 
 /**
  * StartScreen component - Main menu with game mode selection
@@ -25,6 +26,7 @@ export default function StartScreen({
     const ownedPetId = inventory.find((id) => STORE_ITEMS[id]?.walkable);
     const walkPet = ownedPetId ? STORE_ITEMS[ownedPetId] : null;
     const petMood = petCare.happiness >= 75 ? '😍' : petCare.happiness >= 40 ? '🙂' : '🥺';
+    const petHungry = Boolean(walkPet) && moodModifiers(petCare).hungry;
 
     // The big walk is the heart of the game: a fresh player adopts a free
     // starter dog on first tap and goes straight out the door
@@ -97,11 +99,28 @@ export default function StartScreen({
                                     : t('אמץ כלבלב חינם וצא להרפתקה הראשונה שלכם!',
                                         'אמצי כלבלב חינם וצאי להרפתקה הראשונה שלכן!')}
                             </div>
+                            {walkPet && (
+                                <div
+                                    className="mt-3 flex items-center gap-3 text-base font-bold bg-white/20 rounded-2xl px-4 py-1.5 w-fit"
+                                    aria-label={`מצב החיה: אושר ${petCare.happiness}, שובע ${petCare.satiety}`}
+                                >
+                                    <span>❤️ {petCare.happiness}%</span>
+                                    <span>🦴 {petCare.satiety}%</span>
+                                    {petCare.walksCompleted > 0 && (
+                                        <span>🐾 {petCare.walksCompleted} טיולים</span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div className="text-6xl md:text-7xl" aria-hidden="true">
                             {walkPet ? walkPet.icon : '🐕'}
                         </div>
                     </div>
+                    {petHungry && (
+                        <div className="absolute top-3 left-3 bg-amber-100 text-amber-800 border-2 border-amber-300 rounded-full px-4 py-1.5 text-sm font-black shadow-md">
+                            🍖 {walkPet.name} רעב — יש חטיפים בחנות!
+                        </div>
+                    )}
                 </button>
 
                 <button
