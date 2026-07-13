@@ -18,7 +18,13 @@ const CATEGORY_LABELS = {
     home: { emoji: '\uD83C\uDFE0', name: '\u05D1\u05D9\u05EA' },
     emotions: { emoji: '\uD83D\uDE0A', name: '\u05E8\u05D2\u05E9\u05D5\u05EA' },
     professions: { emoji: '\uD83D\uDC69\u200D\u2695\uFE0F', name: '\u05DE\u05E7\u05E6\u05D5\u05E2\u05D5\u05EA' },
+    school: { emoji: '\uD83C\uDFEB', name: '\u05D1\u05D9\u05EA \u05E1\u05E4\u05E8' },
+    transport: { emoji: '\uD83D\uDE97', name: '\u05EA\u05D7\u05D1\u05D5\u05E8\u05D4' },
 };
+
+// A category added to the word data without a label here must never crash
+// the screen \u2014 fall back to a generic book label with the raw key.
+const labelFor = (cat) => CATEGORY_LABELS[cat] || { emoji: '\uD83D\uDCDA', name: cat };
 
 /**
  * Mastery band colors and labels
@@ -106,7 +112,7 @@ export default function WordBookScreen({ onClose }) {
             {/* Category tabs - horizontal scrollable */}
             <div className="overflow-x-auto flex gap-2 pb-2 mb-4 scrollbar-hide">
                 {WORD_CATEGORIES.map((cat) => {
-                    const label = CATEGORY_LABELS[cat];
+                    const label = labelFor(cat);
                     const isActive = cat === activeCategory;
                     return (
                         <button

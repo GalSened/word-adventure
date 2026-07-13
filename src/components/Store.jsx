@@ -115,7 +115,7 @@ export default function Store({ coins, inventory, onBuy, onClose, gender = 'boy'
                                 handleBuy(item);
                             }}
                             disabled={!affordable}
-                            className={`px-3 py-1.5 rounded-xl font-bold text-sm flex items-center gap-1 transition-colors ${
+                            className={`px-3.5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-1 transition-colors ${
                                 affordable
                                     ? 'bg-purple-600 text-white hover:bg-purple-700'
                                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'

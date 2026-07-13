@@ -76,10 +76,10 @@ export default function WordAdventure() {
             </div>
             <div className="relative z-10 max-w-4xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md">
-                    <div className="flex gap-2">
-                        <button onClick={() => setGameState('start')}><Home className="text-purple-600" /></button>
-                        <button onClick={openStore} className="text-yellow-600"><ShoppingBag /></button>
-                        <button onClick={openInventory} className="text-blue-600"><Backpack /></button>
+                    <div className="flex gap-1">
+                        <button onClick={() => setGameState('start')} aria-label="מסך הבית" className="p-2.5 rounded-xl text-purple-600 hover:bg-purple-50 active:scale-90 transition-transform"><Home /></button>
+                        <button onClick={openStore} aria-label="חנות ההפתעות" className="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"><ShoppingBag /></button>
+                        <button onClick={openInventory} aria-label="התיק שלי" className="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"><Backpack /></button>
                     </div>
                     <div className="flex gap-4 font-bold text-lg">
                         <span className="flex items-center gap-1 text-yellow-600"><Trophy size={18} /> {score}</span>

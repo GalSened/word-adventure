@@ -19,6 +19,23 @@ import { initialWordData } from '../data/words';
 import { GRAMMAR_INJECTION_INTERVAL, GAME_CONFIG } from '../config/constants';
 import confetti from 'canvas-confetti';
 
+/**
+ * Show feedback and schedule its own removal. The clear only fires if the
+ * feedback is still the exact object we set — a stale timer must never wipe
+ * newer feedback set by another screen (e.g. a store purchase toast), and
+ * every message is guaranteed a matching clear so the blocking feedback
+ * overlay in PlayingScreen can never get stuck.
+ */
+function showTransientFeedback(feedback, duration, { onlyWhilePlaying = false } = {}) {
+    const store = useGameStore.getState();
+    if (onlyWhilePlaying && store.gameState !== 'playing') return;
+    store.setFeedback(feedback);
+    setTimeout(() => {
+        const s = useGameStore.getState();
+        if (s.feedback === feedback) s.setFeedback(null);
+    }, duration);
+}
+
 export function useGameLogic({ story, itemEffects }) {
     // Read all state from Zustand store
     const {
@@ -35,21 +52,18 @@ export function useGameLogic({ story, itemEffects }) {
         const store = useGameStore.getState();
 
         if (!item.stackable && store.inventory.includes(item.id)) {
-            store.setFeedback({ type: 'warning', message: `${item.name} כבר ברשותך!` });
-            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+            showTransientFeedback({ type: 'warning', message: `${item.name} כבר ברשותך!` }, GAME_CONFIG.FEEDBACK_DURATION);
             return;
         }
 
         if (store.score < item.price) {
-            store.setFeedback({ type: 'error', message: 'אין מספיק מטבעות! 💰' });
-            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+            showTransientFeedback({ type: 'error', message: 'אין מספיק מטבעות! 💰' }, GAME_CONFIG.FEEDBACK_DURATION);
             return;
         }
 
         store.subtractScore(item.price);
         store.setInventory([...store.inventory, item.id]);
-        store.setFeedback({ type: 'success', message: `רכשת ${item.name}! 🎉` });
-        setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+        showTransientFeedback({ type: 'success', message: `רכשת ${item.name}! 🎉` }, GAME_CONFIG.FEEDBACK_DURATION);
     };
 
     const startLevel = (levelId) => {
@@ -60,8 +74,7 @@ export function useGameLogic({ story, itemEffects }) {
             // Keep existing review mode logic
             wordsToPlay = buildReviewSession(initialWordData, store.userProgress);
             if (wordsToPlay.length === 0) {
-                store.setFeedback({ type: 'success', message: 'אין מילים לחזרה כרגע! כל הכבוד! 🎉' });
-                setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+                showTransientFeedback({ type: 'success', message: 'אין מילים לחזרה כרגע! כל הכבוד! 🎉' }, GAME_CONFIG.FEEDBACK_DURATION);
                 return;
             }
         } else {
@@ -272,7 +285,7 @@ export function useGameLogic({ story, itemEffects }) {
             hapticFeedback('success');
 
             const dialogue = story.getDialogue('correct');
-            store.setFeedback({ type: 'success', message: dialogue?.text || 'מושלם! 🌟' });
+            showTransientFeedback({ type: 'success', message: dialogue?.text || 'מושלם! 🌟' }, GAME_CONFIG.FEEDBACK_DURATION);
 
             story.recordWordLearned();
 
@@ -280,7 +293,14 @@ export function useGameLogic({ story, itemEffects }) {
                 const streakDialogue = story.getDialogue('streak', { streak: newStreak });
                 if (streakDialogue) {
                     setTimeout(() => {
-                        useGameStore.getState().setFeedback({ type: 'success', message: streakDialogue.text });
+                        // The player may have left the level during the delay —
+                        // never pop gameplay feedback on another screen, and
+                        // always schedule a matching clear
+                        showTransientFeedback(
+                            { type: 'success', message: streakDialogue.text },
+                            GAME_CONFIG.FEEDBACK_DURATION,
+                            { onlyWhilePlaying: true }
+                        );
                     }, 800);
                 }
                 story.recordStreak(newStreak);
@@ -306,8 +326,7 @@ export function useGameLogic({ story, itemEffects }) {
             }
 
             if (itemEffects.shouldProtectStreak() && store.currentStreak > 0) {
-                store.setFeedback({ type: 'warning', message: '🛡️ המגן הציל את הרצף שלך!' });
-                setTimeout(() => useGameStore.getState().setFeedback(null), 1500);
+                showTransientFeedback({ type: 'warning', message: '🛡️ המגן הציל את הרצף שלך!' }, GAME_CONFIG.FEEDBACK_DURATION);
                 return;
             }
 
@@ -320,20 +339,19 @@ export function useGameLogic({ story, itemEffects }) {
                 store.setGameState('gameOver');
             } else {
                 store.setLives(newLives);
-                if (newLives === 1) {
-                    const lowLivesDialogue = story.getDialogue('low_lives');
-                    if (lowLivesDialogue) {
-                        setTimeout(() => {
-                            useGameStore.getState().setFeedback({ type: 'error', message: lowLivesDialogue.text });
-                        }, 1200);
-                    }
-                }
             }
 
-            const wrongDialogue = story.getDialogue('wrong');
-            store.setFeedback({ type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` });
+            // On the last life the low-lives warning IS the wrong-answer
+            // message (shown a bit longer so it registers). A second delayed
+            // setter here used to fire after the clear and freeze the game
+            // behind a feedback overlay that nothing ever removed.
+            const lowLivesDialogue = newLives === 1 ? story.getDialogue('low_lives') : null;
+            const wrongDialogue = lowLivesDialogue || story.getDialogue('wrong');
+            showTransientFeedback(
+                { type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` },
+                lowLivesDialogue ? GAME_CONFIG.FEEDBACK_DURATION : GAME_CONFIG.ERROR_FEEDBACK_DURATION
+            );
             hapticFeedback('error');
-            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.ERROR_FEEDBACK_DURATION);
         }
     };
 
@@ -365,8 +383,7 @@ export function useGameLogic({ story, itemEffects }) {
         };
 
         const showFeedback = (type, message) => {
-            useGameStore.getState().setFeedback({ type, message });
-            setTimeout(() => useGameStore.getState().setFeedback(null), GAME_CONFIG.FEEDBACK_DURATION);
+            showTransientFeedback({ type, message }, GAME_CONFIG.FEEDBACK_DURATION);
         };
 
         const effect = itemEffects.useConsumable(item, removeOne);

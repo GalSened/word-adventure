@@ -304,6 +304,10 @@ describe('WordAdventure Snapshot Tests', () => {
       })
     }
 
+    // Guard against the low-lives feedback soft-lock: if the overlay sticks,
+    // the third wrong answer hits disabled buttons and the game freezes on
+    // the playing screen instead of ever reaching gameOver.
+    expect(useGameStore.getState().gameState).toBe('gameOver')
     expect(container).toMatchSnapshot()
   })
 })
