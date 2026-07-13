@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Heart, Lightbulb, SkipForward } from 'lucide-react';
 import ChallengeDispatcher from '../challenges/ChallengeDispatcher';
 
@@ -93,31 +93,33 @@ export default function PlayingScreen({
                     onCheck={handleCheck}
                 />
 
-                {/* Feedback Overlay */}
-                <AnimatePresence>
-                    {feedback && (
-                        <motion.div
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-md z-20"
-                            role="alert"
-                            aria-live="assertive"
+                {/* Feedback Overlay — tap-transparent and removed synchronously.
+                    Its removal must NOT depend on an exit animation: rAF is
+                    throttled in backgrounded/occluded tabs and on phone PWAs
+                    resumed from standby, which left this overlay visibly stuck
+                    (and swallowing taps) long after the feedback state cleared.
+                    Input is already gated by the challenges' disabled prop. */}
+                {feedback && (
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-md z-20 pointer-events-none"
+                        role="alert"
+                        aria-live="assertive"
+                    >
+                        <div
+                            className={`text-center font-bold text-3xl ${
+                                feedback.type === 'success'
+                                    ? 'text-green-600'
+                                    : feedback.type === 'warning'
+                                    ? 'text-amber-500'
+                                    : 'text-red-500'
+                            }`}
                         >
-                            <div
-                                className={`text-center font-bold text-3xl ${
-                                    feedback.type === 'success'
-                                        ? 'text-green-600'
-                                        : feedback.type === 'warning'
-                                        ? 'text-amber-500'
-                                        : 'text-red-500'
-                                }`}
-                            >
-                                {feedback.message}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            {feedback.message}
+                        </div>
+                    </motion.div>
+                )}
             </div>
         </motion.div>
     );

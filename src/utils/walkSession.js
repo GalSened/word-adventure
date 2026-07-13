@@ -50,8 +50,8 @@ export const WALK_ROUTES = [
                 role: 'feed',
                 icon: '⛲',
                 line: {
-                    boy: 'הגעתם למזרקה! נראה שמישהו רעב...',
-                    girl: 'הגעתן למזרקה! נראה שמישהו רעב...',
+                    boy: 'הגעתם למזרקה! מישהו פה נהיה רעב...',
+                    girl: 'הגעתם למזרקה! מישהו פה נהיה רעב...',
                 },
             },
             {
@@ -70,8 +70,8 @@ export const WALK_ROUTES = [
                 role: 'play',
                 icon: '🌼',
                 line: {
-                    boy: 'אחו הפרחים! זמן מושלם למשחק.',
-                    girl: 'אחו הפרחים! זמן מושלם למשחק.',
+                    boy: 'שדה פרחים ענק! בדיוק המקום למשחק.',
+                    girl: 'שדה פרחים ענק! בדיוק המקום למשחק.',
                 },
             },
             {
@@ -80,8 +80,8 @@ export const WALK_ROUTES = [
                 role: 'story',
                 icon: '🏡',
                 line: {
-                    boy: 'חוזרים הביתה... איזה טיול נהדר היה!',
-                    girl: 'חוזרות הביתה... איזה טיול נהדר היה!',
+                    boy: 'חוזרים הביתה... איזה כיף היה!',
+                    girl: 'חוזרים הביתה... איזה כיף היה!',
                 },
             },
         ],
@@ -98,8 +98,8 @@ export const WALK_ROUTES = [
                 role: 'story',
                 icon: '🏖️',
                 line: {
-                    boy: 'היום הולכים לים! מריחים את המלח באוויר?',
-                    girl: 'היום הולכות לים! מריחות את המלח באוויר?',
+                    boy: 'היום הולכים לים! אתה מריח את הים באוויר?',
+                    girl: 'היום הולכים לים! את מריחה את הים באוויר?',
                 },
             },
             {
@@ -108,8 +108,8 @@ export const WALK_ROUTES = [
                 role: 'feed',
                 icon: '🧺',
                 line: {
-                    boy: 'פיקניק על החול! מישהו כאן רעב מהגלים...',
-                    girl: 'פיקניק על החול! מישהו כאן רעב מהגלים...',
+                    boy: 'פיקניק על החוף! מישהו פה נהיה רעב...',
+                    girl: 'פיקניק על החוף! מישהו פה נהיה רעב...',
                 },
             },
             {
@@ -118,8 +118,8 @@ export const WALK_ROUTES = [
                 role: 'story',
                 icon: '⛵',
                 line: {
-                    boy: 'הנמל הקטן! תראה את הסירות המפליגות.',
-                    girl: 'הנמל הקטן! תראי את הסירות המפליגות.',
+                    boy: 'הנמל הקטן! תראה כמה סירות יש בים.',
+                    girl: 'הנמל הקטן! תראי כמה סירות יש בים.',
                 },
             },
             {
@@ -128,8 +128,8 @@ export const WALK_ROUTES = [
                 role: 'play',
                 icon: '🐚',
                 line: {
-                    boy: 'מפרץ הצדפים! החול כאן מושלם למשחק.',
-                    girl: 'מפרץ הצדפים! החול כאן מושלם למשחק.',
+                    boy: 'מפרץ הצדפים! בוא נשחק כאן על החול.',
+                    girl: 'מפרץ הצדפים! בואי נשחק כאן על החול.',
                 },
             },
             {
@@ -139,7 +139,7 @@ export const WALK_ROUTES = [
                 icon: '🏡',
                 line: {
                     boy: 'חוזרים הביתה עם חול בין האצבעות...',
-                    girl: 'חוזרות הביתה עם חול בין האצבעות...',
+                    girl: 'חוזרים הביתה עם חול בין האצבעות...',
                 },
             },
         ],
@@ -157,7 +157,7 @@ export const WALK_ROUTES = [
                 icon: '🌲',
                 line: {
                     boy: 'נכנסים ליער הקסום... שקט, אולי נראה חיות!',
-                    girl: 'נכנסות ליער הקסום... שקט, אולי נראה חיות!',
+                    girl: 'נכנסים ליער הקסום... שקט, אולי נראה חיות!',
                 },
             },
             {
@@ -176,8 +176,8 @@ export const WALK_ROUTES = [
                 role: 'story',
                 icon: '🏞️',
                 line: {
-                    boy: 'נחל צלול! שומעים את המים מפכפכים?',
-                    girl: 'נחל צלול! שומעות את המים מפכפכים?',
+                    boy: 'נחל קטן! שומעים את המים זורמים?',
+                    girl: 'נחל קטן! שומעים את המים זורמים?',
                 },
             },
             {
@@ -197,7 +197,7 @@ export const WALK_ROUTES = [
                 icon: '🏡',
                 line: {
                     boy: 'יוצאים מהיער הביתה... איזו הרפתקה!',
-                    girl: 'יוצאות מהיער הביתה... איזו הרפתקה!',
+                    girl: 'יוצאים מהיער הביתה... איזו הרפתקה!',
                 },
             },
         ],
@@ -330,6 +330,19 @@ export function moodModifiers(petCare) {
         speedMult: hungry ? 0.75 : 1,
         bonusSpots: happiness >= HAPPY_THRESHOLD ? 4 : 0,
     };
+}
+
+/**
+ * A hungry pet with an empty treat bag cannot keep walking — the feeding
+ * stop sends the pair home instead of dragging a hungry dog on. With treats
+ * in the bag (or a fed pet) the walk continues as usual.
+ *
+ * @param {boolean} hungry - moodModifiers(petCare).hungry at the feed stop
+ * @param {number} treatCount - how many treats the bag holds right now
+ * @returns {boolean} true when the walk must end here and head home
+ */
+export function mustHeadHome(hungry, treatCount) {
+    return hungry && treatCount === 0;
 }
 
 /**
