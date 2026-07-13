@@ -7,6 +7,15 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Take over stale clients immediately: the new SW activates without
+      // waiting, claims open pages, and drops old-version caches — combined
+      // with the registerSW reload in main.jsx this is the "hard refresh"
+      // that keeps installed phone PWAs on the latest deploy.
+      workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+      },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'הרפתקת המילים',

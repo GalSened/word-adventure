@@ -22,6 +22,7 @@ import {
     fetchRewards,
     routeFor,
     petAbilityFor,
+    mustHeadHome,
 } from '../utils/walkSession';
 import { ANIMATION_CONFIG } from '../config/constants';
 import { DogWalker, KidWalker, RoundTree, PineTree, PalmTree } from './WalkArt';
@@ -136,6 +137,7 @@ export default function PetWalkingGame({
     const [correctCount, setCorrectCount] = useState(0);
     const [collectedSpots, setCollectedSpots] = useState(() => new Set());
     const [fetchCatches, setFetchCatches] = useState(0);
+    const [wentHomeHungry, setWentHomeHungry] = useState(false);
 
     // --- LOOP-OWNED REFS ---
     const sceneOffsetRef = useRef(0);
@@ -252,12 +254,12 @@ export default function PetWalkingGame({
             icon: '🎾',
             text:
                 catches >= FETCH_CONFIG.catchesTarget
-                    ? 'תפיסה מושלמת! ' + pet.name + ' באושר עילאי!'
+                    ? 'תפיסה מושלמת! ' + pet.name + ' קופץ משמחה!'
                     : pet.name + ' רץ והביא את הצעצוע בעצמו!',
         });
         setGameState('walking');
         setTimeout(() => setBanner(null), 2400);
-    }, [bestToy, pet.name]);
+    }, [bestToy, pet.name, ability]);
 
     const catchBall = useCallback(() => {
         if (fetchResolvedRef.current) return; // game already paid out
@@ -418,7 +420,7 @@ export default function PetWalkingGame({
                 setGameState('walking');
             }, isCorrect ? 1800 : 2200);
         },
-        [currentWord]
+        [currentWord, ability]
     );
 
     // --- FEEDING ---
@@ -442,6 +444,14 @@ export default function PetWalkingGame({
     const skipFeeding = useCallback(() => {
         setBanner(null);
         setGameState('walking');
+    }, []);
+
+    // A hungry pet with an empty treat bag can't be dragged onward — the
+    // feed stop ends the walk and heads home with whatever was earned so far.
+    const goHomeHungry = useCallback(() => {
+        setWentHomeHungry(true);
+        setBanner(null);
+        setGameState('summary');
     }, []);
 
     // --- BONUS COINS (happy-pet finds) ---
@@ -996,12 +1006,14 @@ export default function PetWalkingGame({
                         >
                             <div className="text-7xl mb-2">{route.landmarks.find((lm) => lm.role === 'feed')?.icon ?? '⛲'}</div>
                             <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-1">
-                                {pet.name} רעב! {moodEmoji}
+                                {pet.name} רעב! 🍖
                             </h2>
                             <p className="text-lg text-slate-500 font-bold mb-6">
                                 {ownedTreats.length > 0
                                     ? (isGirl ? 'תני לו חטיף מהתיק!' : 'תן לו חטיף מהתיק!')
-                                    : 'אין חטיפים בתיק... אפשר לקנות בחנות ההפתעות! 🛍️'}
+                                    : mustHeadHome(hungryNow, ownedTreats.length)
+                                        ? 'אין חטיפים בתיק, והוא רעב מדי בשביל להמשיך... בפעם הבאה כדאי לקנות חטיפים בחנות ההפתעות! 🛍️'
+                                        : 'אין חטיפים בתיק... אפשר לקנות בחנות ההפתעות! 🛍️'}
                             </p>
 
                             {ownedTreats.length > 0 && (
@@ -1024,12 +1036,21 @@ export default function PetWalkingGame({
                                 </div>
                             )}
 
-                            <button
-                                onClick={skipFeeding}
-                                className="text-slate-400 font-bold underline hover:text-slate-600"
-                            >
-                                {ownedTreats.length > 0 ? 'אולי אחר כך' : 'ממשיכים בטיול'}
-                            </button>
+                            {mustHeadHome(hungryNow, ownedTreats.length) ? (
+                                <button
+                                    onClick={goHomeHungry}
+                                    className="w-full py-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-2xl font-black text-lg shadow-md hover:shadow-lg transition-shadow"
+                                >
+                                    חוזרים הביתה 🏡
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={skipFeeding}
+                                    className="text-slate-400 font-bold underline hover:text-slate-600"
+                                >
+                                    {ownedTreats.length > 0 ? 'אולי אחר כך' : 'ממשיכים בטיול'}
+                                </button>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}
@@ -1092,6 +1113,15 @@ export default function PetWalkingGame({
                         >
                             <div className="text-7xl mb-2">🏡</div>
                             <h2 className="text-3xl font-black text-slate-800 mb-4">חזרתם הביתה!</h2>
+
+                            {wentHomeHungry && (
+                                <p className="text-lg font-bold text-amber-600 mb-4">
+                                    {pet.name} היה רעב מדי בשביל להמשיך 🥺
+                                    <span className="block text-sm text-slate-500 mt-1">
+                                        קנו חטיפים בחנות ההפתעות לפני הטיול הבא! 🛍️
+                                    </span>
+                                </p>
+                            )}
 
                             <div className="grid grid-cols-3 gap-3 mb-6 text-center">
                                 <div className="bg-purple-50 rounded-2xl p-3">

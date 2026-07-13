@@ -16,6 +16,8 @@ import {
     walkRewardMultiplier,
     PET_ABILITIES,
     petAbilityFor,
+    mustHeadHome,
+    HUNGRY_THRESHOLD,
 } from './walkSession';
 import { getWalkablePets } from '../data/storeItems';
 import { initialWordData } from '../data/words';
@@ -327,5 +329,22 @@ describe('day-night arc', () => {
             expect(phase.accent).toBeTruthy();
             expect(typeof phase.stars).toBe('boolean');
         }
+    });
+});
+
+describe('hungry walk gate', () => {
+    it('a hungry pet with no treats in the bag must head home', () => {
+        const hungryCare = { satiety: HUNGRY_THRESHOLD - 1, happiness: 50 };
+        expect(mustHeadHome(moodModifiers(hungryCare).hungry, 0)).toBe(true);
+    });
+
+    it('treats in the bag keep the walk going even when hungry', () => {
+        const hungryCare = { satiety: HUNGRY_THRESHOLD - 1, happiness: 50 };
+        expect(mustHeadHome(moodModifiers(hungryCare).hungry, 2)).toBe(false);
+    });
+
+    it('a fed pet keeps walking with an empty bag', () => {
+        const fedCare = { satiety: 80, happiness: 50 };
+        expect(mustHeadHome(moodModifiers(fedCare).hungry, 0)).toBe(false);
     });
 });
