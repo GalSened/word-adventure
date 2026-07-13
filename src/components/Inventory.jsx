@@ -231,12 +231,13 @@ export default function Inventory({
 
                         <p className="text-slate-600 mb-4">{selectedItem.description}</p>
 
-                        {/* Effect description */}
-                        {selectedItem.effect && (
-                            <div className="bg-purple-50 rounded-xl p-3 mb-4">
-                                <p className="text-purple-700 font-medium flex items-center justify-center gap-2">
-                                    <Sparkles size={16} />
-                                    {selectedItem.effect.bonus || getEffectDescription(selectedItem.effect)}
+                        {/* How to use it in the game — every item explains itself */}
+                        {selectedItem.usage && (
+                            <div className="bg-purple-50 rounded-xl p-3 mb-4 text-right" dir="rtl">
+                                <p className="text-purple-700 font-medium text-sm leading-relaxed">
+                                    <Sparkles size={16} className="inline ml-1 -mt-0.5" />
+                                    <span className="font-bold">איך משתמשים? </span>
+                                    {selectedItem.usage}
                                 </p>
                             </div>
                         )}
@@ -296,25 +297,6 @@ export default function Inventory({
                 </motion.div>
             </motion.div>
         );
-    };
-
-    // Get effect description
-    const getEffectDescription = (effect) => {
-        switch (effect.type) {
-            case 'multiplier': return `נקודות x${effect.value}`;
-            case 'extra_life': return `+${effect.value} לבבות`;
-            case 'hint_boost': return 'רמזים מפורטים יותר';
-            case 'streak_protection': return 'הגנה על רצף';
-            case 'xp_multiplier': return `התקדמות x${effect.value}`;
-            case 'theme': return 'ערכת צבעים חדשה';
-            case 'heal': return `משחזר ${effect.value} לבבות`;
-            case 'hint': return 'רמז נוסף';
-            case 'skip': return 'דילוג על מילה';
-            case 'freeze': return `${effect.duration} שניות חשיבה`;
-            case 'luck': return 'סיכוי לבונוס';
-            case 'mystery': return 'הפתעה אקראית!';
-            default: return effect.type;
-        }
     };
 
     return (

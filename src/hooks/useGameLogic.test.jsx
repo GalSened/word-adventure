@@ -212,6 +212,35 @@ describe('hint during play', () => {
         act(() => result.current.useHint());
         expect(useGameStore.getState().userInput).toBe('');
     });
+
+    it('reveals two letters per hint when hint_master is equipped', () => {
+        const word = initialWordData.find(w => w.type !== 'sentence' && w.word.length >= 4);
+        resetStore({
+            gameState: 'playing', activeWords: [word], currentWordIndex: 0,
+            hintsAvailable: 1, userInput: '',
+            inventory: ['hint_master'],
+            equipped: { booster_hint_master: 'hint_master' },
+        });
+        const { result } = renderLogic();
+        act(() => result.current.useHint());
+        const s = useGameStore.getState();
+        expect(s.userInput).toBe(word.word.toUpperCase().slice(0, 2));
+        expect(s.hintsAvailable).toBe(0); // still costs one hint
+    });
+
+    it('hint_master never reveals past the end of the word', () => {
+        const word = initialWordData.find(w => w.type !== 'sentence' && w.word.length >= 3);
+        const almostDone = word.word.toUpperCase().slice(0, word.word.length - 1);
+        resetStore({
+            gameState: 'playing', activeWords: [word], currentWordIndex: 0,
+            hintsAvailable: 1, userInput: almostDone,
+            inventory: ['hint_master'],
+            equipped: { booster_hint_master: 'hint_master' },
+        });
+        const { result } = renderLogic();
+        act(() => result.current.useHint());
+        expect(useGameStore.getState().userInput).toBe(word.word.toUpperCase());
+    });
 });
 
 describe('leaderboard records per-level scores', () => {
@@ -295,6 +324,22 @@ describe('feedback lifecycle — no stuck overlays', () => {
         expect(s.feedback).toBeNull(); // overlay MUST release — this is the soft-lock
         expect(s.gameState).toBe('playing');
         expect(s.lives).toBe(1);
+    });
+
+    it('losing the last life shows no stray toast over the game-over screen', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word, word], currentWordIndex: 0,
+            lives: 1, userInput: 'ZZZ',
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // wrong → gameOver
+        const s = useGameStore.getState();
+        expect(s.gameState).toBe('gameOver');
+        // The ResultScreen already tells the story — a 'try again' toast over
+        // it is noise (gameState flips BEFORE the feedback is set here)
+        expect(s.feedback).toBeNull();
     });
 
     it('the delayed streak message never pops after leaving the level', () => {

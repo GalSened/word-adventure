@@ -273,6 +273,16 @@ export function computeWalkRewards({ correctCount, total, bonusCoins = 0 }) {
     };
 }
 
+/**
+ * Coin multiplier for the whole walk payout. The store's "בוסט התקדמות"
+ * (xp_boost) is equipped into the booster_xp_boost slot and doubles what a
+ * walk pays out — the summary screen must show the boost so the player sees
+ * the item working.
+ */
+export function walkRewardMultiplier(equipped) {
+    return equipped?.booster_xp_boost === 'xp_boost' ? 2 : 1;
+}
+
 /** Below this satiety the pet is hungry: slower walk + a food thought bubble. */
 export const HUNGRY_THRESHOLD = 30;
 /** At or above this happiness the pet sniffs out bonus coins on the path. */

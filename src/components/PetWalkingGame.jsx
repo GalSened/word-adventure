@@ -15,6 +15,7 @@ import {
     buildWalkPool,
     milestoneDue,
     computeWalkRewards,
+    walkRewardMultiplier,
     skyPhaseFor,
     moodModifiers,
     buildBonusCoinSpots,
@@ -73,6 +74,8 @@ export default function PetWalkingGame({
     // --- STORE WIRING (fresh reads via getState inside handlers) ---
     const petCare = useGameStore((s) => s.petCare);
     const inventory = useGameStore((s) => s.inventory);
+    const equipped = useGameStore((s) => s.equipped);
+    const rewardMult = walkRewardMultiplier(equipped);
 
     const ownedTreats = useMemo(
         () => inventory.filter((id) => STORE_ITEMS[id]?.treat),
@@ -459,7 +462,8 @@ export default function PetWalkingGame({
                 ...Array(rewards.treats).fill('treat_bone'),
             ]);
         }
-        onComplete(rewards.coins);
+        // Read equipped fresh: the payout must match what the summary showed
+        onComplete(rewards.coins * walkRewardMultiplier(store.equipped));
     }, [walkPool.length, onComplete]);
 
     // --- VISUAL HELPERS ---
@@ -1077,7 +1081,7 @@ export default function PetWalkingGame({
                                 </div>
                                 <div className="bg-amber-50 rounded-2xl p-3">
                                     <div className="text-3xl">🪙</div>
-                                    <div className="text-xl font-black text-amber-700">{summaryRewards.coins}</div>
+                                    <div className="text-xl font-black text-amber-700">{summaryRewards.coins * rewardMult}</div>
                                     <div className="text-xs font-bold text-slate-500">מטבעות</div>
                                 </div>
                                 <div className="bg-pink-50 rounded-2xl p-3">
@@ -1090,6 +1094,11 @@ export default function PetWalkingGame({
                             {summaryRewards.perfect && (
                                 <p className="text-lg font-bold text-purple-600 mb-2">
                                     ✨ טיול מושלם! בונוס +100 🪙
+                                </p>
+                            )}
+                            {rewardMult > 1 && (
+                                <p className="text-lg font-bold text-indigo-600 mb-2">
+                                    🚀 בוסט התקדמות פעיל — כפול מטבעות!
                                 </p>
                             )}
                             {summaryRewards.treats > 0 && (

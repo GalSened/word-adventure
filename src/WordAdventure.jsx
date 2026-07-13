@@ -6,6 +6,9 @@ import StoryDialogue from './components/StoryDialogue';
 import StoryPathChoice from './components/StoryPathChoice';
 import PetEvolution from './components/PetEvolution';
 import ScreenRouter from './components/screens/ScreenRouter';
+import AvatarWithGear from './components/AvatarWithGear';
+import FeedbackToast from './components/FeedbackToast';
+import { getThemeStyle } from './utils/themes';
 import { useGameStore } from './store/gameStore';
 import { useStoryProgress } from './hooks/useStoryProgress';
 import { useItemEffects } from './hooks/useItemEffects';
@@ -68,11 +71,13 @@ export default function WordAdventure() {
         hintsAvailable, skipsAvailable, closeOverlay,
     };
 
+    const theme = getThemeStyle(itemEffects.equipped?.theme);
+
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-800 relative" dir="rtl">
+        <div className={`min-h-screen ${theme.page} font-sans text-slate-800 relative`} dir="rtl">
             <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity }} className="absolute -top-20 -right-20 w-96 h-96 bg-purple-300 rounded-full blur-3xl" />
-                <motion.div animate={{ rotate: -360 }} transition={{ duration: 120, repeat: Infinity }} className="absolute bottom-0 left-0 w-80 h-80 bg-blue-300 rounded-full blur-3xl" />
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 100, repeat: Infinity }} className={`absolute -top-20 -right-20 w-96 h-96 ${theme.blobA} rounded-full blur-3xl`} />
+                <motion.div animate={{ rotate: -360 }} transition={{ duration: 120, repeat: Infinity }} className={`absolute bottom-0 left-0 w-80 h-80 ${theme.blobB} rounded-full blur-3xl`} />
             </div>
             <div className="relative z-10 max-w-4xl mx-auto p-4">
                 <div className="flex justify-between items-center mb-6 bg-white/80 backdrop-blur rounded-2xl p-3 shadow-md">
@@ -81,13 +86,14 @@ export default function WordAdventure() {
                         <button onClick={openStore} aria-label="חנות ההפתעות" className="p-2.5 rounded-xl text-yellow-600 hover:bg-yellow-50 active:scale-90 transition-transform"><ShoppingBag /></button>
                         <button onClick={openInventory} aria-label="התיק שלי" className="p-2.5 rounded-xl text-blue-600 hover:bg-blue-50 active:scale-90 transition-transform"><Backpack /></button>
                     </div>
-                    <div className="flex gap-4 font-bold text-lg">
+                    <div className="flex gap-4 items-center font-bold text-lg">
                         <span className="flex items-center gap-1 text-yellow-600"><Trophy size={18} /> {score}</span>
-                        <span className="flex items-center gap-1 text-purple-600 text-2xl">{avatar}</span>
+                        <AvatarWithGear avatar={avatar} equipped={itemEffects.equipped} className="text-2xl" />
                     </div>
                 </div>
                 <ScreenRouter gameState={gameState} {...screenProps} />
             </div>
+            {gameState !== 'playing' && <FeedbackToast feedback={feedback} />}
             {!story.progress.storyPath && hasCompletedOnboarding && userProfile && <StoryPathChoice options={story.getStoryPathOptions()} onChoose={story.chooseStoryPath} playerName={userProfile.name} gender={userProfile.gender} />}
             <StoryDialogue dialogue={story.currentDialogue} onDismiss={story.dismissDialogue} />
             <PetEvolution evolution={story.evolutionNotification} onDismiss={story.dismissEvolution} />
