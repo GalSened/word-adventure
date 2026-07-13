@@ -1,3 +1,65 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* --- Pet-walk character rig animations (SVG limbs, no glyph swapping) --- */
+@keyframes walk-leg-a {
+    0%, 100% { transform: rotate(20deg); }
+    50% { transform: rotate(-20deg); }
+}
+@keyframes walk-leg-b {
+    0%, 100% { transform: rotate(-20deg); }
+    50% { transform: rotate(20deg); }
+}
+@keyframes walk-arm {
+    0%, 100% { transform: rotate(12deg); }
+    50% { transform: rotate(-12deg); }
+}
+@keyframes walk-tail {
+    0%, 100% { transform: rotate(16deg); }
+    50% { transform: rotate(-12deg); }
+}
+@keyframes walk-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+@keyframes walk-ear {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(7deg); }
+}
+@keyframes leash-sway {
+    0%, 100% { transform: rotate(1.4deg); }
+    50% { transform: rotate(-1.4deg); }
+}
+@keyframes sun-pulse {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+}
+
+.walk-leg-a, .walk-leg-b, .walk-arm, .walk-tail, .walk-ear {
+    transform-box: fill-box;
+}
+.walk-leg-a { animation: walk-leg-a 0.5s ease-in-out infinite; transform-origin: 50% 10%; }
+.walk-leg-b { animation: walk-leg-b 0.5s ease-in-out infinite; transform-origin: 50% 10%; }
+.walk-arm { animation: walk-arm 0.5s ease-in-out infinite; transform-origin: 50% 12%; }
+.walk-tail { animation: walk-tail 0.4s ease-in-out infinite; transform-origin: 90% 80%; }
+.walk-tail-fast { animation-duration: 0.18s; }
+.walk-ear { animation: walk-ear 0.5s ease-in-out infinite; transform-origin: 20% 15%; }
+.walk-bob { animation: walk-bob 0.5s ease-in-out infinite; }
+.leash-sway { animation: leash-sway 1.6s ease-in-out infinite; transform-origin: 10% 0%; }
+.sun-pulse { animation: sun-pulse 4s ease-in-out infinite; }
+
+/* Freeze the gait when the walk pauses (question, feeding, summary) */
+.walk-paused .walk-leg-a,
+.walk-paused .walk-leg-b,
+.walk-paused .walk-arm,
+.walk-paused .walk-bob {
+    animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .walk-leg-a, .walk-leg-b, .walk-arm, .walk-tail, .walk-ear,
+    .walk-bob, .leash-sway, .sun-pulse {
+        animation: none !important;
+    }
+}

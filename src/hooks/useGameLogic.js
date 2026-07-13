@@ -450,7 +450,9 @@ export function useGameLogic({ story, itemEffects, setTranscript }) {
         store.updateDailyStats({
             dailyScore: store.dailyStats.dailyScore + earnedScore,
         });
-        store.setGameState('map');
+        // The walk is a home-base mode: coming back from it lands on the
+        // start menu (where the walk hero card and pet mood live), like exit.
+        store.setGameState('start');
     };
 
     // Memory game complete handler
