@@ -8,7 +8,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 function resetStore() {
     useGameStore.setState({
-        userProfile: { name: 'Soak', gender: 'boy' }, score: 0, stars: 0,
+        userProfile: { name: 'Soak', gender: 'boy' }, score: 0,
         userProgress: {}, highScores: [], inventory: [], completedLevels: [],
         hintsAvailable: 0, skipsAvailable: 0,
         gameState: 'start', currentWordIndex: 0, activeWords: [],

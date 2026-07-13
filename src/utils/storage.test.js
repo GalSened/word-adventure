@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { safeGetJSON, safeSetJSON, safeGetNumber, STORAGE_KEYS } from './storage'
+import { safeGetJSON, safeSetJSON } from './storage'
 
 describe('safeGetJSON', () => {
   beforeEach(() => {
@@ -66,67 +66,3 @@ describe('safeSetJSON', () => {
   })
 })
 
-describe('safeGetNumber', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks()
-    localStorage.clear()
-  })
-
-  it('returns 0 (default) when key does not exist', () => {
-    expect(safeGetNumber('nonexistent')).toBe(0)
-  })
-
-  it('returns custom defaultValue when key does not exist', () => {
-    expect(safeGetNumber('nonexistent', 99)).toBe(99)
-  })
-
-  it('returns parsed integer from string', () => {
-    localStorage.setItem('num', '42')
-    expect(safeGetNumber('num')).toBe(42)
-  })
-
-  it('returns defaultValue for non-numeric string', () => {
-    localStorage.setItem('str', 'abc')
-    expect(safeGetNumber('str', 5)).toBe(5)
-  })
-
-  it('returns defaultValue for NaN-producing values', () => {
-    localStorage.setItem('nan', 'NaN')
-    expect(safeGetNumber('nan', 10)).toBe(10)
-  })
-
-  it('returns defaultValue when localStorage.getItem throws', () => {
-    const spy = vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
-      throw new Error('Storage access denied')
-    })
-    expect(safeGetNumber('anyKey', 7)).toBe(7)
-    spy.mockRestore()
-  })
-})
-
-describe('STORAGE_KEYS', () => {
-  it('exports the expected keys', () => {
-    const expectedKeys = [
-      'USER_PROFILE',
-      'SCORE',
-      'STARS',
-      'USER_PROGRESS',
-      'HIGH_SCORES',
-      'INVENTORY',
-      'DAILY_STATS',
-      'AVATAR',
-    ]
-    expect(Object.keys(STORAGE_KEYS).sort()).toEqual(expectedKeys.sort())
-  })
-
-  it('has correct string values', () => {
-    expect(STORAGE_KEYS.USER_PROFILE).toBe('userProfile')
-    expect(STORAGE_KEYS.SCORE).toBe('score')
-    expect(STORAGE_KEYS.STARS).toBe('stars')
-    expect(STORAGE_KEYS.USER_PROGRESS).toBe('userProgress')
-    expect(STORAGE_KEYS.HIGH_SCORES).toBe('highScores')
-    expect(STORAGE_KEYS.INVENTORY).toBe('inventory')
-    expect(STORAGE_KEYS.DAILY_STATS).toBe('dailyStats')
-    expect(STORAGE_KEYS.AVATAR).toBe('avatar')
-  })
-})

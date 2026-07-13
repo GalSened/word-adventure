@@ -5,7 +5,7 @@ const STORE_KEY = 'word-adventure';
 
 function resetStore() {
     useGameStore.setState({
-        userProfile: null, score: 0, stars: 0, userProgress: {},
+        userProfile: null, score: 0, userProgress: {},
         highScores: [], inventory: [], completedLevels: [],
         hintsAvailable: 0, skipsAvailable: 0,
         gameState: 'start', currentWordIndex: 0, activeWords: [],

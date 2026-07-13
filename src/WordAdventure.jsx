@@ -7,7 +7,6 @@ import StoryPathChoice from './components/StoryPathChoice';
 import PetEvolution from './components/PetEvolution';
 import ScreenRouter from './components/screens/ScreenRouter';
 import { useGameStore } from './store/gameStore';
-import { useVoiceRecognition } from './utils/voice';
 import { useStoryProgress } from './hooks/useStoryProgress';
 import { useItemEffects } from './hooks/useItemEffects';
 import { useGameLogic } from './hooks/useGameLogic';
@@ -15,13 +14,12 @@ import { initialWordData } from './data/words';
 import { getMemoryGameWords } from './utils/memoryGameWords';
 
 export default function WordAdventure() {
-    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, stars, completedLevels, userProgress, hintsAvailable, skipsAvailable } = useGameStore();
-    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, gameMode, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding, openStore, openInventory, closeOverlay } = useGameStore();
+    const { userProfile, setUserProfile, score, avatar, inventory, dailyStats, completedLevels, userProgress, hintsAvailable, skipsAvailable } = useGameStore();
+    const { gameState, setGameState, currentStreak, activePet, lives, feedback, userInput, setUserInput, hasSeenStoryIntro, setHasSeenStoryIntro, hasCompletedOnboarding, openStore, openInventory, closeOverlay } = useGameStore();
 
-    const voice = useVoiceRecognition();
     const story = useStoryProgress(userProfile);
     const itemEffects = useItemEffects(inventory);
-    const logic = useGameLogic({ story, itemEffects, setTranscript: voice.setTranscript });
+    const logic = useGameLogic({ story, itemEffects });
 
     useEffect(() => {
         if (dailyStats.date !== new Date().toDateString()) {
@@ -29,10 +27,6 @@ export default function WordAdventure() {
             useGameStore.getState().setCurrentStreak(0);
         }
     }, [dailyStats.date]);
-
-    useEffect(() => {
-        if (voice.transcript) setUserInput(voice.transcript.toUpperCase().replace(/[.?]/g, '').trim());
-    }, [voice.transcript, setUserInput]);
 
     // Guided first lesson: auto-start level 1 for new players (replaces StoryIntro overlay).
     // gameState must be a dependency: without it, a new player who taps Home
@@ -59,15 +53,14 @@ export default function WordAdventure() {
     if (!userProfile) return <WelcomeScreen onComplete={(profile) => setUserProfile(profile)} />;
 
     const screenProps = {
-        userProfile, score, stars, avatar, inventory, dailyStats, gameState, currentWord: logic.currentWord,
+        userProfile, score, avatar, inventory, dailyStats, gameState, currentWord: logic.currentWord,
         lives, feedback, userInput, scrambledContent: logic.scrambledContent, currentStreak, story, itemEffects,
-        activePet, gameMode, challengeType: logic.challengeType, onAnswer: logic.onAnswer,
-        isSupported: voice.isSupported, isListening: voice.isListening,
-        startListening: voice.startListening, stopListening: voice.stopListening, setGameState, setUserInput,
+        activePet, challengeType: logic.challengeType, onAnswer: logic.onAnswer,
+        setGameState, setUserInput,
         startLevel: logic.startLevel, handleCheck: logic.handleCheck, handleBuy: logic.handleBuy,
         handleInventoryClose: logic.handleInventoryClose, handleUse: logic.handleUse, handleWalkPet: logic.handleWalkPet,
         handlePetWalkComplete: logic.handlePetWalkComplete, handleMemoryComplete: logic.handleMemoryComplete,
-        handleAvatarSelect: logic.handleAvatarSelect, handleAdventureComplete: logic.handleAdventureComplete, t: logic.t,
+        handleAvatarSelect: logic.handleAvatarSelect, t: logic.t,
         equipped: itemEffects.equipped, equipItem: itemEffects.equipItem, unequipItem: itemEffects.unequipItem,
         completedLevels: completedLevels || [],
         gender: userProfile.gender, memoryWords,

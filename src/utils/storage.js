@@ -36,34 +36,3 @@ export const safeSetJSON = (key, value) => {
   }
 };
 
-/**
- * Safely retrieve a number from localStorage
- * @param {string} key - The localStorage key
- * @param {number} defaultValue - Default value if key doesn't exist or is invalid
- * @returns {number} Parsed number or defaultValue
- */
-export const safeGetNumber = (key, defaultValue = 0) => {
-  try {
-    const item = localStorage.getItem(key);
-    if (item === null) return defaultValue;
-    const parsed = parseInt(item, 10);
-    return isNaN(parsed) ? defaultValue : parsed;
-  } catch (error) {
-    console.error(`[Storage] Failed to parse number "${key}":`, error);
-    return defaultValue;
-  }
-};
-
-/**
- * Storage keys used throughout the app
- */
-export const STORAGE_KEYS = {
-  USER_PROFILE: 'userProfile',
-  SCORE: 'score',
-  STARS: 'stars',
-  USER_PROGRESS: 'userProgress',
-  HIGH_SCORES: 'highScores',
-  INVENTORY: 'inventory',
-  DAILY_STATS: 'dailyStats',
-  AVATAR: 'avatar',
-};

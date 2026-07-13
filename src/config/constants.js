@@ -7,7 +7,6 @@
 export const GAME_CONFIG = {
     INITIAL_LIVES: 3,
     SCORE_PER_CORRECT: 150,
-    STARS_PER_CORRECT: 2,
 
     // Delays (milliseconds)
     FEEDBACK_DURATION: 1500,
