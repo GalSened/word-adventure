@@ -1,6 +1,6 @@
 /**
  * Level definitions for Word Adventure
- * 12 progressive levels with themed visuals, category mappings, and word counts.
+ * 16 progressive levels with themed visuals, category mappings, and word counts.
  * Each level draws words from specific categories and difficulty bands.
  */
 
@@ -21,7 +21,7 @@ const DIFFICULTY_FALLBACK = {
 };
 
 /**
- * 12 levels mapping categories, themes, difficulty bands, and word counts.
+ * 16 levels mapping categories, themes, difficulty bands, and word counts.
  * Grammar is enabled only in levels whose categories overlap with
  * NOUN_CATEGORIES (animals, family, professions) per decision [03-04].
  */
@@ -217,6 +217,70 @@ export const LEVELS = [
         },
         storyChapter: 'level_12',
         unlockRequirement: 11,
+    },
+    {
+        id: 13,
+        name: 'בית הספר הקסום',
+        subtitle: 'The Magic School',
+        categories: ['school'],
+        difficulty: 'easy',
+        wordCount: 12,
+        grammarEnabled: false,
+        theme: {
+            bgGradient: 'from-sky-400 to-blue-600',
+            emoji: '🏫',
+            decorEmojis: ['📚', '✏️', '🎒'],
+        },
+        storyChapter: 'level_13',
+        unlockRequirement: 12,
+    },
+    {
+        id: 14,
+        name: 'מסע הדרכים',
+        subtitle: 'The Great Journey',
+        categories: ['transport'],
+        difficulty: 'medium',
+        wordCount: 12,
+        grammarEnabled: false,
+        theme: {
+            bgGradient: 'from-slate-400 to-zinc-600',
+            emoji: '🚂',
+            decorEmojis: ['🚗', '✈️', '🚢'],
+        },
+        storyChapter: 'level_14',
+        unlockRequirement: 13,
+    },
+    {
+        id: 15,
+        name: 'אתגר האלופים',
+        subtitle: 'Champions Challenge',
+        categories: ['school', 'transport', 'actions', 'emotions'],
+        difficulty: 'hard',
+        wordCount: 14,
+        grammarEnabled: false,
+        theme: {
+            bgGradient: 'from-fuchsia-500 to-purple-700',
+            emoji: '🎯',
+            decorEmojis: ['🏅', '⚡', '🔥'],
+        },
+        storyChapter: 'level_15',
+        unlockRequirement: 14,
+    },
+    {
+        id: 16,
+        name: 'כתר האגדות',
+        subtitle: 'The Legendary Crown',
+        categories: ['animals', 'food', 'family', 'colors', 'nature', 'body', 'actions', 'home', 'emotions', 'professions', 'school', 'transport'],
+        difficulty: 'expert',
+        wordCount: 18,
+        grammarEnabled: true,
+        theme: {
+            bgGradient: 'from-yellow-400 to-amber-700',
+            emoji: '👑',
+            decorEmojis: ['🌟', '🏆', '💎'],
+        },
+        storyChapter: 'level_16',
+        unlockRequirement: 15,
     },
 ];
 
