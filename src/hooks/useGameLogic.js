@@ -354,9 +354,13 @@ export function useGameLogic({ story, itemEffects }) {
             // behind a feedback overlay that nothing ever removed.
             const lowLivesDialogue = newLives === 1 ? story.getDialogue('low_lives') : null;
             const wrongDialogue = lowLivesDialogue || story.getDialogue('wrong');
+            // onlyWhilePlaying: on the final life the state is already
+            // 'gameOver' here — a 'try again' toast over the ResultScreen
+            // would be noise, so the message only shows during play
             showTransientFeedback(
                 { type: 'error', message: wrongDialogue?.text || `${t('לא נורא, נסה שוב!', 'לא נורא, נסי שוב!')} 💪` },
-                lowLivesDialogue ? GAME_CONFIG.FEEDBACK_DURATION : GAME_CONFIG.ERROR_FEEDBACK_DURATION
+                lowLivesDialogue ? GAME_CONFIG.FEEDBACK_DURATION : GAME_CONFIG.ERROR_FEEDBACK_DURATION,
+                { onlyWhilePlaying: true }
             );
             hapticFeedback('error');
         }

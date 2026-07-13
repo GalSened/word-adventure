@@ -326,6 +326,22 @@ describe('feedback lifecycle — no stuck overlays', () => {
         expect(s.lives).toBe(1);
     });
 
+    it('losing the last life shows no stray toast over the game-over screen', () => {
+        vi.useFakeTimers();
+        const word = initialWordData.find(w => w.type !== 'sentence');
+        resetStore({
+            gameState: 'playing', activeWords: [word, word], currentWordIndex: 0,
+            lives: 1, userInput: 'ZZZ',
+        });
+        const { result } = renderLogic();
+        act(() => result.current.handleCheck()); // wrong → gameOver
+        const s = useGameStore.getState();
+        expect(s.gameState).toBe('gameOver');
+        // The ResultScreen already tells the story — a 'try again' toast over
+        // it is noise (gameState flips BEFORE the feedback is set here)
+        expect(s.feedback).toBeNull();
+    });
+
     it('the delayed streak message never pops after leaving the level', () => {
         vi.useFakeTimers();
         const word = initialWordData.find(w => w.type !== 'sentence');
