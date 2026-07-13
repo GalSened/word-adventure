@@ -177,6 +177,45 @@ export const createUserSlice = (set) => ({
       return { completedLevels: [...state.completedLevels, levelId] };
     }),
 
+  // Pet care (persisted): the walk mode feeds, plays and record-keeps here.
+  // satiety/happiness are 0-100 meters shown as bones/hearts in the HUD.
+  petCare: { satiety: 70, happiness: 70, walksCompleted: 0 },
+
+  feedPet: (satietyGain) =>
+    set((state) => ({
+      petCare: {
+        ...state.petCare,
+        satiety: Math.min(100, state.petCare.satiety + satietyGain),
+        happiness: Math.min(100, state.petCare.happiness + 10),
+      },
+    })),
+
+  boostPetHappiness: (delta) =>
+    set((state) => ({
+      petCare: {
+        ...state.petCare,
+        happiness: Math.max(0, Math.min(100, state.petCare.happiness + delta)),
+      },
+    })),
+
+  // Walking is hungry work — called once when a walk starts
+  decayPetCare: () =>
+    set((state) => ({
+      petCare: {
+        ...state.petCare,
+        satiety: Math.max(0, state.petCare.satiety - 15),
+        happiness: Math.max(0, state.petCare.happiness - 5),
+      },
+    })),
+
+  recordWalkCompleted: () =>
+    set((state) => ({
+      petCare: {
+        ...state.petCare,
+        walksCompleted: state.petCare.walksCompleted + 1,
+      },
+    })),
+
   // Purchased consumable charges, usable during play (persisted)
   hintsAvailable: 0,
   skipsAvailable: 0,
@@ -422,6 +461,7 @@ export const useGameStore = create(
         completedLevels: state.completedLevels,
         hintsAvailable: state.hintsAvailable,
         skipsAvailable: state.skipsAvailable,
+        petCare: state.petCare,
         hasSeenStoryIntro: state.hasSeenStoryIntro,
         storyPath: state.storyPath,
         hasCompletedOnboarding: state.hasCompletedOnboarding,

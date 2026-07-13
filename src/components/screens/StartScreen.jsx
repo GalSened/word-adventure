@@ -4,6 +4,7 @@ import DailyQuests from '../DailyQuests';
 import Leaderboard from '../Leaderboard';
 import { useGameStore } from '../../store/gameStore';
 import { initialWordData } from '../../data/words';
+import { STORE_ITEMS } from '../../data/storeItems';
 
 /**
  * StartScreen component - Main menu with game mode selection
@@ -13,10 +14,28 @@ export default function StartScreen({
     dailyStats,
     onStartLevel,
     onNavigate,
+    onWalkPet,
     t
 }) {
     const userProgress = useGameStore((s) => s.userProgress);
     const highScores = useGameStore((s) => s.highScores);
+    const inventory = useGameStore((s) => s.inventory);
+    const petCare = useGameStore((s) => s.petCare);
+
+    const ownedPetId = inventory.find((id) => STORE_ITEMS[id]?.walkable);
+    const walkPet = ownedPetId ? STORE_ITEMS[ownedPetId] : null;
+    const petMood = petCare.happiness >= 75 ? '😍' : petCare.happiness >= 40 ? '🙂' : '🥺';
+
+    // The big walk is the heart of the game: a fresh player adopts a free
+    // starter dog on first tap and goes straight out the door
+    const handleWalkClick = () => {
+        if (walkPet) {
+            onWalkPet(ownedPetId);
+        } else {
+            useGameStore.getState().addToInventory('dog');
+            onWalkPet('dog');
+        }
+    };
     const masteredCount = Object.values(userProgress).filter(
         (srs) => srs.repetition >= 6
     ).length;
@@ -58,6 +77,32 @@ export default function StartScreen({
                 <div className="md:col-span-2">
                     <DailyQuests progress={dailyStats} gender={userProfile.gender} />
                 </div>
+
+                {/* Hero mode: the big walk */}
+                <button
+                    onClick={handleWalkClick}
+                    className="md:col-span-2 relative overflow-hidden bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400 text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all text-right"
+                    aria-label={walkPet ? `הטיול הגדול עם ${walkPet.name}` : 'אמץ כלבלב וצא לטיול'}
+                >
+                    <div className="absolute -left-4 -bottom-6 text-[7rem] opacity-30 rotate-12" aria-hidden="true">🐾</div>
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <div className="text-3xl md:text-4xl font-black mb-1">
+                                🐕 הטיול הגדול {walkPet && petMood}
+                            </div>
+                            <div className="text-lg opacity-95 font-bold">
+                                {walkPet
+                                    ? t(`צא לטיול עם ${walkPet.name} — מצאו מילים והרוויחו מטבעות!`,
+                                        `צאי לטיול עם ${walkPet.name} — מצאו מילים והרוויחו מטבעות!`)
+                                    : t('אמץ כלבלב חינם וצא להרפתקה הראשונה שלכם!',
+                                        'אמצי כלבלב חינם וצאי להרפתקה הראשונה שלכן!')}
+                            </div>
+                        </div>
+                        <div className="text-6xl md:text-7xl" aria-hidden="true">
+                            {walkPet ? walkPet.icon : '🐕'}
+                        </div>
+                    </div>
+                </button>
 
                 <button
                     onClick={() => onStartLevel('review')}

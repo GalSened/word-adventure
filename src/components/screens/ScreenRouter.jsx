@@ -27,6 +27,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         dailyStats={props.dailyStats}
                         onStartLevel={props.startLevel}
                         onNavigate={props.setGameState}
+                        onWalkPet={props.handleWalkPet}
                         t={props.t}
                     />
                 );
@@ -131,7 +132,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         pet={props.activePet}
                         avatar={props.avatar}
                         userProfile={props.userProfile}
-                        onExit={() => props.setGameState('map')}
+                        onExit={() => props.setGameState('start')}
                         onComplete={props.handlePetWalkComplete}
                     />
                 );

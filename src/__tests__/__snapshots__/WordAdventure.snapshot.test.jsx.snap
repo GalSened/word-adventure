@@ -2016,6 +2016,39 @@ exports[`WordAdventure Snapshot Tests > renders start state (main menu) when use
             </div>
           </div>
           <button
+            aria-label="אמץ כלבלב וצא לטיול"
+            class="md:col-span-2 relative overflow-hidden bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400 text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] transition-all text-right"
+          >
+            <div
+              aria-hidden="true"
+              class="absolute -left-4 -bottom-6 text-[7rem] opacity-30 rotate-12"
+            >
+              🐾
+            </div>
+            <div
+              class="flex items-center justify-between gap-4"
+            >
+              <div>
+                <div
+                  class="text-3xl md:text-4xl font-black mb-1"
+                >
+                  🐕 הטיול הגדול 
+                </div>
+                <div
+                  class="text-lg opacity-95 font-bold"
+                >
+                  אמץ כלבלב חינם וצא להרפתקה הראשונה שלכם!
+                </div>
+              </div>
+              <div
+                aria-hidden="true"
+                class="text-6xl md:text-7xl"
+              >
+                🐕
+              </div>
+            </div>
+          </button>
+          <button
             class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-all"
           >
             <div
