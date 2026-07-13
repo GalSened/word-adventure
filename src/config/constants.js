@@ -111,4 +111,5 @@ export const CHALLENGE_TYPES = {
     LISTENING: 'listening',
     SENTENCE_BUILD: 'sentenceBuild',
     GRAMMAR: 'grammar',
+    CLOZE: 'cloze',
 };

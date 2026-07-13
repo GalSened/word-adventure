@@ -11,6 +11,7 @@ import ListeningChallenge from './ListeningChallenge';
 import SpellingChallenge from './SpellingChallenge';
 import SentenceBuildChallenge from './SentenceBuildChallenge';
 import GrammarChallenge from './GrammarChallenge';
+import ClozeChallenge from './ClozeChallenge';
 
 export default function ChallengeDispatcher({ challengeType, ...challengeProps }) {
     // Key by word id: challenge components hold per-word state (reorder tiles,
@@ -30,6 +31,8 @@ export default function ChallengeDispatcher({ challengeType, ...challengeProps }
             return <SentenceBuildChallenge key={key} {...challengeProps} />;
         case 'grammar':
             return <GrammarChallenge key={key} {...challengeProps} />;
+        case 'cloze':
+            return <ClozeChallenge key={key} {...challengeProps} />;
         default:
             // Safe fallback to spelling -- preserves existing behavior
             return <SpellingChallenge key={key} {...challengeProps} />;
