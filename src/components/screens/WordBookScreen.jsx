@@ -20,6 +20,10 @@ const CATEGORY_LABELS = {
     professions: { emoji: '\uD83D\uDC69\u200D\u2695\uFE0F', name: '\u05DE\u05E7\u05E6\u05D5\u05E2\u05D5\u05EA' },
     school: { emoji: '\uD83C\uDFEB', name: '\u05D1\u05D9\u05EA \u05E1\u05E4\u05E8' },
     transport: { emoji: '\uD83D\uDE97', name: '\u05EA\u05D7\u05D1\u05D5\u05E8\u05D4' },
+    clothes: { emoji: '\uD83D\uDC55', name: '\u05D1\u05D2\u05D3\u05D9\u05DD' },
+    weather: { emoji: '\u26C5', name: '\u05DE\u05D6\u05D2 \u05D0\u05D5\u05D5\u05D9\u05E8' },
+    sports: { emoji: '\u26BD', name: '\u05E1\u05E4\u05D5\u05E8\u05D8' },
+    toys: { emoji: '\uD83E\uDDF8', name: '\u05E6\u05E2\u05E6\u05D5\u05E2\u05D9\u05DD' },
 };
 
 // A category added to the word data without a label here must never crash
