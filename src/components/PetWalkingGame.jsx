@@ -401,7 +401,9 @@ export default function PetWalkingGame({
 
             if (isCorrect) {
                 setGameState('correct');
-                setCoinsEarned((c) => c + 40);
+                // The owl's wisdom raises the per-word value — the live HUD
+                // must count what the summary will actually pay
+                setCoinsEarned((c) => c + (ability?.wordCoinValue ?? 40));
                 correctCountRef.current += 1;
                 setCorrectCount(correctCountRef.current);
                 hapticFeedback('success');
@@ -961,7 +963,7 @@ export default function PetWalkingGame({
 
                                 {gameState === 'correct' && (
                                     <motion.p initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-4 text-2xl font-black text-emerald-600">
-                                        +40 🪙 {pet.name} גאה בך!
+                                        +{ability?.wordCoinValue ?? 40} 🪙 {pet.name} גאה בך!
                                     </motion.p>
                                 )}
                                 {gameState === 'wrong' && (
