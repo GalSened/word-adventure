@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 /**
- * The 12 themed word categories for the word bank.
+ * The 16 themed word categories for the word bank.
+ * Aligned with the Cambridge Pre-A1 Starters / A1 Movers topic lists.
  * Used by the schema enum and exported for use by other modules.
  */
 export const WORD_CATEGORIES = [
@@ -17,6 +18,10 @@ export const WORD_CATEGORIES = [
   'professions',
   'school',
   'transport',
+  'clothes',
+  'weather',
+  'sports',
+  'toys',
 ];
 
 export const WordSchema = z.object({

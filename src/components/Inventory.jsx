@@ -114,7 +114,7 @@ export default function Inventory({
                 {/* Equipped badge */}
                 {equipped && (
                     <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                        <Check size={12} /> מצויד
+                        <Check size={12} /> פעיל
                     </div>
                 )}
 
@@ -165,7 +165,7 @@ export default function Inventory({
                                         : 'bg-blue-500 text-white hover:bg-blue-600'
                                 }`}
                             >
-                                {equipped ? 'הסר' : 'לבש'}
+                                {equipped ? t('הסר', 'הסירי') : t('לבש', 'לבשי')}
                             </button>
                         )}
                         {item.consumable && (
@@ -176,7 +176,7 @@ export default function Inventory({
                                 }}
                                 className="bg-purple-500 text-white text-xs px-3 py-1.5 rounded-xl font-bold hover:bg-purple-600 transition-colors"
                             >
-                                השתמש
+                                {t('השתמש', 'השתמשי')}
                             </button>
                         )}
                     </div>
@@ -272,7 +272,7 @@ export default function Inventory({
                                     {equipped ? (
                                         <>
                                             <X size={20} />
-                                            הסר פריט
+                                            {t('הסר', 'הסירי')} פריט
                                         </>
                                     ) : (
                                         <>
@@ -289,7 +289,7 @@ export default function Inventory({
                                     className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:shadow-lg transition-shadow"
                                 >
                                     <Zap size={20} />
-                                    השתמש עכשיו
+                                    {t('השתמש עכשיו', 'השתמשי עכשיו')}
                                 </button>
                             )}
                         </div>
@@ -319,7 +319,7 @@ export default function Inventory({
                 {/* Equipped items bar */}
                 {equippedItems.length > 0 && (
                     <div className="mt-4 bg-white/10 rounded-2xl p-3">
-                        <p className="text-sm text-blue-100 mb-2">פריטים מצוידים:</p>
+                        <p className="text-sm text-blue-100 mb-2">פריטים פעילים:</p>
                         <div className="flex flex-wrap gap-2">
                             {equippedItems.map(item => (
                                 <div

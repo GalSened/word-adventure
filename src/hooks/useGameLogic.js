@@ -52,7 +52,7 @@ export function useGameLogic({ story, itemEffects }) {
         const store = useGameStore.getState();
 
         if (!item.stackable && store.inventory.includes(item.id)) {
-            showTransientFeedback({ type: 'warning', message: `${item.name} כבר ברשותך!` }, GAME_CONFIG.FEEDBACK_DURATION);
+            showTransientFeedback({ type: 'warning', message: `יש לך כבר ${item.name}!` }, GAME_CONFIG.FEEDBACK_DURATION);
             return;
         }
 
@@ -63,7 +63,8 @@ export function useGameLogic({ story, itemEffects }) {
 
         store.subtractScore(item.price);
         store.setInventory([...store.inventory, item.id]);
-        showTransientFeedback({ type: 'success', message: `רכשת ${item.name}! 🎉` }, GAME_CONFIG.FEEDBACK_DURATION);
+        // קנית reads the same for boys and girls — no gender fork needed
+        showTransientFeedback({ type: 'success', message: `קנית ${item.name}! 🎉` }, GAME_CONFIG.FEEDBACK_DURATION);
     };
 
     const startLevel = (levelId) => {
@@ -405,7 +406,8 @@ export function useGameLogic({ story, itemEffects }) {
         // Retired items (e.g. freeze_time — the game has no timer) refund their price
         if (item.retired) {
             store.addScore(item.price);
-            showFeedback('success', `${item.name} יצא משימוש — קיבלת ${item.price} מטבעות בחזרה! 💰`);
+            // "הפריט הזה" keeps the verb agreement safe for any item-name gender
+            showFeedback('success', `הפריט הזה יצא משימוש — קיבלת ${item.price} מטבעות בחזרה! 💰`);
             return;
         }
 
@@ -413,7 +415,7 @@ export function useGameLogic({ story, itemEffects }) {
             case 'heal': {
                 const result = itemEffects.applyConsumableEffect(effect, { lives: store.lives });
                 store.setLives(result.lives);
-                showFeedback('success', 'לב אחד חזר! ❤️');
+                showFeedback('success', 'קיבלת לב בחזרה! ❤️');
                 break;
             }
             case 'hint':
@@ -430,7 +432,7 @@ export function useGameLogic({ story, itemEffects }) {
                     store.addScore(bonus);
                     showFeedback('success', `מזל גדול! קיבלת ${bonus} מטבעות! 🍀`);
                 } else {
-                    showFeedback('warning', 'לא הפעם... נסה שוב מחר! 🍀');
+                    showFeedback('warning', 'לא הפעם... אולי מחר יהיה מזל! 🍀');
                 }
                 break;
             }
@@ -443,7 +445,8 @@ export function useGameLogic({ story, itemEffects }) {
                     const prizes = ['potion_health', 'potion_hint', 'skip_word'];
                     const prizeId = prizes[Math.floor(Math.random() * prizes.length)];
                     store.setInventory([...useGameStore.getState().inventory, prizeId]);
-                    showFeedback('success', `בקופסה היה ${STORE_ITEMS[prizeId].name}! 🎁`);
+                    // מצאת reads the same for both genders; avoids היה/הייתה agreement
+                    showFeedback('success', `מצאת בקופסה ${STORE_ITEMS[prizeId].name}! 🎁`);
                 }
                 break;
             }

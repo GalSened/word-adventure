@@ -62,10 +62,10 @@ export default function StartScreen({
             {/* Progress tracker */}
             <div className="bg-white/80 rounded-2xl p-4 text-center shadow-sm mb-4 max-w-4xl mx-auto">
                 <div className="text-2xl font-bold text-purple-600">
-                    {masteredCount}/{totalWords} {'\u05DE\u05D9\u05DC\u05D9\u05DD \u05E0\u05E9\u05DC\u05D8\u05D5'}
+                    {masteredCount}/{totalWords} {t('\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05D0\u05E0\u05D9 \u05DB\u05D1\u05E8 \u05D9\u05D5\u05D3\u05E2', '\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05D0\u05E0\u05D9 \u05DB\u05D1\u05E8 \u05D9\u05D5\u05D3\u05E2\u05EA')}
                 </div>
                 <div className="text-sm text-slate-500">
-                    {Object.keys(userProgress).length} {'\u05DE\u05D9\u05DC\u05D9\u05DD \u05D1\u05EA\u05D4\u05DC\u05D9\u05DA'}
+                    {Object.keys(userProgress).length} {t('\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05D0\u05E0\u05D9 \u05E2\u05D5\u05D3 \u05DC\u05D5\u05DE\u05D3', '\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05D0\u05E0\u05D9 \u05E2\u05D5\u05D3 \u05DC\u05D5\u05DE\u05D3\u05EA')}
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
                     <div
@@ -97,7 +97,7 @@ export default function StartScreen({
                                     ? t(`צא לטיול עם ${walkPet.name} — מצאו מילים והרוויחו מטבעות!`,
                                         `צאי לטיול עם ${walkPet.name} — מצאו מילים והרוויחו מטבעות!`)
                                     : t('אמץ כלבלב חינם וצא להרפתקה הראשונה שלכם!',
-                                        'אמצי כלבלב חינם וצאי להרפתקה הראשונה שלכן!')}
+                                        'אמצי כלבלב חינם וצאי להרפתקה הראשונה שלכם!')}
                             </div>
                             {walkPet && (
                                 <div
@@ -158,7 +158,7 @@ export default function StartScreen({
                 >
                     <div className="text-4xl mb-2">{'\uD83D\uDCD6'}</div>
                     <div className="text-2xl font-bold">{'\u05DE\u05D9\u05DC\u05D5\u05DF'}</div>
-                    <div className="text-sm opacity-90">{'\u05E2\u05D9\u05D9\u05DF \u05D1\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05DC\u05DE\u05D3\u05EA'}</div>
+                    <div className="text-sm opacity-90">{'\u05DB\u05DC \u05D4\u05DE\u05D9\u05DC\u05D9\u05DD \u05E9\u05DC\u05DE\u05D3\u05EA'}</div>
                 </button>
 
                 <button

@@ -96,6 +96,7 @@ export default function ScreenRouter({ gameState, ...props }) {
                         inventory={props.inventory}
                         onBuy={props.handleBuy}
                         onClose={() => props.closeOverlay('start')}
+                        gender={props.gender}
                     />
                 );
 

@@ -4,8 +4,8 @@ import FeedbackToast from './FeedbackToast';
 
 describe('FeedbackToast — store/inventory feedback is finally visible', () => {
     it('shows the message when feedback is set', () => {
-        render(<FeedbackToast feedback={{ type: 'success', message: 'רכשת כתר מלכותי! 🎉' }} />);
-        expect(screen.getByRole('status').textContent).toContain('רכשת כתר מלכותי');
+        render(<FeedbackToast feedback={{ type: 'success', message: 'קנית כתר מלכותי! 🎉' }} />);
+        expect(screen.getByRole('status').textContent).toContain('קנית כתר מלכותי');
     });
 
     it('renders nothing without feedback', () => {

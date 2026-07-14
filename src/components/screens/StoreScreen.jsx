@@ -6,14 +6,14 @@ import Store from '../Store';
  * StoreScreen component - Store screen wrapper for purchasing items
  * Displays the Store component within an animated container
  */
-export default function StoreScreen({ coins, inventory, onBuy, onClose }) {
+export default function StoreScreen({ coins, inventory, onBuy, onClose, gender }) {
     return (
         <motion.div
             key="store"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
         >
-            <Store coins={coins} inventory={inventory} onBuy={onBuy} onClose={onClose} />
+            <Store coins={coins} inventory={inventory} onBuy={onBuy} onClose={onClose} gender={gender} />
         </motion.div>
     );
 }

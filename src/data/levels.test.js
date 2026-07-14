@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { LEVELS, getLevelById, getLevelWords } from './levels';
+import { WORD_CATEGORIES } from './wordSchema';
 
 describe('level word pools', () => {
     it('every level can serve exactly its configured wordCount', () => {
@@ -35,11 +36,16 @@ describe('level word pools', () => {
 });
 
 describe('level map shape', () => {
-    it('defines 16 sequential levels', () => {
-        expect(LEVELS).toHaveLength(16);
+    it('defines 21 sequential levels', () => {
+        expect(LEVELS).toHaveLength(21);
         expect(LEVELS.map(l => l.id)).toEqual(
-            Array.from({ length: 16 }, (_, i) => i + 1)
+            Array.from({ length: 21 }, (_, i) => i + 1)
         );
+    });
+
+    it('the capstone level draws from every category in the bank', () => {
+        const capstone = LEVELS[LEVELS.length - 1];
+        expect(new Set(capstone.categories)).toEqual(new Set(WORD_CATEGORIES));
     });
 
     it('unlock chain is contiguous — each level unlocks by completing the previous one', () => {

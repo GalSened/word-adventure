@@ -93,7 +93,7 @@ export default function LetterPicker({
                                 animate={{ opacity: 0.4 }}
                                 className="text-slate-400 text-lg"
                             >
-                                {isWord ? 'לחץ על האותיות...' : 'לחץ על המילים...'}
+                                {isWord ? 'לוחצים על האותיות...' : 'לוחצים על המילים...'}
                             </motion.span>
                         ) : (
                             (isWord ? currentInput.split('') : currentInput.split(' ')).map((item, idx) => (
